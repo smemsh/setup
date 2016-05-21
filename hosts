@@ -1,3 +1,3 @@
 #
 
-localhost
+omnius ansible_connection=local
