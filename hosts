@@ -2,3 +2,13 @@
 
 omnius ansible_connection=local
 meklar
+
+[jumpees]
+merimnos
+kalop
+cole2
+
+[jumpees:vars]
+ansible_ssh_common_args='-o ProxyCommand="ssh -W %h:%p -q vpngate"'
+ansible_port=22022
+ansible_user=root
