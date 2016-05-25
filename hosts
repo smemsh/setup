@@ -2,6 +2,7 @@
 
 omnius ansible_connection=local
 meklar
+plex
 
 [jumpees]
 merimnos
