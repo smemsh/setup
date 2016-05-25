@@ -1,5 +1,6 @@
 #
 
+local ansible_connection=local
 omnius ansible_connection=local
 meklar
 plex
