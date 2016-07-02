@@ -1,0 +1,90 @@
+#!/usr/bin/env bash
+#
+# ansible-modules-changes
+#   displays new, removed, and renamed modules between two ansible tags
+#
+# desc:
+#   - determines core, extras submodule pegs for given start and end tags
+#   - queries git within the submodules for changes between start and end
+#   - displays summary on stdout
+#   - $1, $2 -> start, end commitish for master ansible project
+#
+# stat:
+#   - used by author
+#   - please notify if using
+#
+# todo:
+#   - could be made generically useful for any git project with submodules
+#
+# scott@smemsh.net
+# http://spdx.org/licenses/GPL-2.0
+# http://smemsh.net/src/.ansible
+#
+##############################################################################
+
+modbase=lib/ansible/modules
+origdir=$PWD
+
+restore_cwd_atexit () { cd $origdir || exiterr origwd; }
+
+exiterr ()
+{
+	case $1 in
+
+	(origwd)        msg="failed to restore original working directory" ;;
+	(badarg)        msg="provide start and end commitish for diffing" ;;
+	(chgdir)        msg="could not chdir to modules subdir" ;;
+	(badtag)        msg="start or end tag could not be found" ;;
+	(*)             msg="exiterr: unknown error string" ;;
+
+	esac
+
+	false; exit
+}
+
+main ()
+{
+	start=$1 end=$2
+	declare -A commits
+
+	(($# == 2)) || exiterr badarg
+	trap restore_cwd_atexit EXIT
+
+	for tag in start end; do
+		[[ $(git tag -l ${!tag}) ]] ||
+			exiterr badtag; done
+
+	for modules in core extras
+	do
+		dirbase=$modbase/$modules
+		for which in start end
+		do
+			commits[$which]=$(
+				git ls-tree \
+					-r \
+					--full-tree \
+					${!which} \
+					$dirbase \
+				| awk '{print $3}'
+			)
+		done
+
+		cd $dirbase ||
+			exiterr chdir
+
+		echo "$modules:"
+		git --no-pager \
+			diff \
+			--name-status \
+			--find-copies \
+			--find-renames \
+			--diff-filter=ACDRT \
+			${commits['start']} \
+			${commits['end']} \
+		;
+
+		cd $OLDPWD
+	done
+}
+
+main "$@"
