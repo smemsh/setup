@@ -7,6 +7,10 @@ omnius ansible_connection=local
 meklar
 plex
 
+[virt]
+omniplex
+ubuplex
+
 [jumpees]
 merimnos
 #kalop
