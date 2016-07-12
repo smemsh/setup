@@ -16,6 +16,12 @@ merimnos
 #kalop
 #cole2
 
+[smemsh:children]
+ctl
+cloud
+virt
+jumpees
+
 [jumpees:vars]
 ansible_ssh_common_args='-o ProxyCommand="ssh -W %h:%p -q vpngate"'
 ansible_port=22022
