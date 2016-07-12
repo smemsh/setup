@@ -1,6 +1,9 @@
 #
 
+[ctl]
 omnius ansible_connection=local
+
+[cloud]
 meklar
 plex
 
