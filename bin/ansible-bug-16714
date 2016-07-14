@@ -1,0 +1,50 @@
+#!/usr/bin/env bash
+
+playtmp=`mktemp -d`
+playhost="testhost"
+cd $playtmp
+mkdir files group_vars host_vars templates out
+
+ssh-keygen -t rsa -b 2014 -N '' -q -f test
+keymd5=$(
+	ssh-keygen -l -E md5 -f test \
+	| awk '{print $2}' \
+	| sed -e s,:,,g -e s,^MD5,, \
+)
+mv test files/$keymd5.key
+mv test.pub files/$keymd5.pub
+
+echo "keymd5: $keymd5" > host_vars/$playhost
+
+cat << % >> group_vars/all
+ssh_pubstr: "{{lookup('file', (keymd5 + '.pub'))}}"
+ssh_pubstrs: "{'{{keymd5}}': '{{ssh_pubstr}}'}"
+ssh_keystr: "{{lookup('file', (keymd5 + '.key'))}}"
+ssh_keystrs: "{'{{keymd5}}': '{{ssh_keystr}}'}"
+%
+
+cat << % > templates/works.txt.j2
+{{ssh_pubstrs[keymd5]}}
+%
+
+cat << % > templates/fails.txt.j2
+{{ssh_keystrs[keymd5]}}
+%
+
+cat << % > hosts
+$playhost ansible_connection=local
+%
+
+cat << % > play.yml
+- hosts: $playhost
+  gather_facts: no
+  tasks:
+    - name: works_using_pubkey
+      template: src=works.txt.j2 dest=$playtmp/out/works.txt
+    - name: fails_using_privkey
+      template: src=fails.txt.j2 dest=$playtmp/out/fails.txt
+%
+
+ansible-playbook -i hosts play.yml
+read -n 1 -p "any key to rm -rf '$playtmp': "
+rm -rf "${playtmp:?}"
