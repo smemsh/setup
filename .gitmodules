@@ -1,0 +1,3 @@
+[submodule "roles/vmiterate"]
+	path = roles/vmiterate
+	url = https://github.com/smemsh/ansible-role-vmiterate

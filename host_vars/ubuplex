@@ -1,0 +1,8 @@
+#
+# ubuplex.smemsh.net
+#
+---
+
+ip_offset:          3
+lvbase:             ubuntu14
+hostkey_md5:        'fae89dca6845625d724b47b1d8d17554'
