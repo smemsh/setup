@@ -1,0 +1,12 @@
+#
+# play to operate ansible role from:
+#   http://smemsh.net/src/ansible-role-vmiterate/
+#
+# need to supply 'host' as extra arg (see role for values)
+#
+---
+
+- hosts: omnius
+  become: true
+  roles:
+    - vmiterate
