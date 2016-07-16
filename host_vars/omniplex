@@ -1,0 +1,8 @@
+#
+# omniplex.smemsh.net
+#
+---
+
+ip_offset:          2
+lvbase:             centos6
+hostkey_md5:        '72b94d31cf2f6a6bc6895a1536135016'
