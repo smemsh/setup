@@ -1,15 +1,6 @@
 #
 ---
 
-# todo: once #16714 fixed:
-#   - export ssh_host_md5
-#   - export ssh_auth_md5
-#   - underscore ssh_host_keystr
-#   - underscore ssh_host_pubstr
-#   - underscore ssh_auth_pubstr
-#   - change user-data j2
-#
-
 domain:             smemsh.net
 _ctlhost:           omnius
 _ctladm:            scott
@@ -20,23 +11,26 @@ _ctladm:            scott
 # files/, reads into keystring variable, injected later into
 # cloud-init template
 #
-_ssh_auth_md5:      '7a687b4d1d2d8dda026c3e4c3829b9a4'
+ssh_auth_md5:       '7a687b4d1d2d8dda026c3e4c3829b9a4'
 _ssh_auth_ident:    '{{_ctladm}}@{{_ctlhost}}.{{domain}}'
-_ssh_auth_pubfile:  '{{_ssh_auth_ident}}-{{_ssh_auth_md5}}.pub'
-ssh_auth_pubstr:    "{{lookup('file', _ssh_auth_pubfile)}}"
+_ssh_auth_pubfile:  '{{_ssh_auth_ident}}-{{ssh_auth_md5}}.pub'
+_ssh_auth_pubstr:   "{{lookup('file', _ssh_auth_pubfile)}}"
 
 ### /etc/ssh/ssh_host_rsa_key{,.pub} #########################################
 
 # $hostkey_md5 come from host_vars
 # $host comes from extra args provided to play
 
-_ssh_host_md5:      '{{hostvars[host].hostkey_md5}}'
+ssh_host_md5:       '{{hostvars[host].hostkey_md5}}'
 _ssh_host_ident:    'host@{{host}}.{{domain}}'
-_ssh_host_keybase:  '{{_ssh_host_ident}}-{{_ssh_host_md5}}'
-_ssh_host_keyfile:  '{{_ssh_host_keybase}}.key'
+_ssh_host_keybase:  '{{_ssh_host_ident}}-{{ssh_host_md5}}'
+
 _ssh_host_pubfile:  '{{_ssh_host_keybase}}.pub'
-ssh_host_keystr:    "{{lookup('file', _ssh_host_keyfile)}}"
-ssh_host_pubstr:    "{{lookup('file', _ssh_host_pubfile)}}"
+_ssh_host_pubstr:   "{{lookup('file', _ssh_host_pubfile)}}"
+
+_ssh_host_keyfile:  '{{_ssh_host_keybase}}.key'
+_ssh_host_keystr:   "{{lookup('file', _ssh_host_keyfile) |
+                         replace('\n', '\\n')}}" # see #16714 for why escape
 
 ### auth, host, and secret key arrays indexed by md5 fingerprint #############
 
@@ -45,8 +39,6 @@ ssh_host_pubstr:    "{{lookup('file', _ssh_host_pubfile)}}"
 #   http://stackoverflow.com/users/496289/kashyap in
 #   http://stackoverflow.com/questions/27805976
 #
-# todo: these are unused until #16714
-#
-ssh_auth_pubstrs:   "{'{{_ssh_auth_md5}}': '{{ssh_auth_pubstr}}'}"
-ssh_host_keystrs:   "{'{{_ssh_host_md5}}': '{{ssh_host_keystr}}'}"
-ssh_host_pubstrs:   "{'{{_ssh_host_md5}}': '{{ssh_host_pubstr}}'}"
+ssh_auth_pubstrs:   "{'{{ssh_auth_md5}}': '{{_ssh_auth_pubstr}}'}"
+ssh_host_keystrs:   "{'{{ssh_host_md5}}': '{{_ssh_host_keystr}}'}"
+ssh_host_pubstrs:   "{'{{ssh_host_md5}}': '{{_ssh_host_pubstr}}'}"
