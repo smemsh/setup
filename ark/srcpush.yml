@@ -1,0 +1,78 @@
+#
+# srcpush
+#   pushes all specially marked git repos residing in basedir
+#
+# desc:
+#   - finds all {{basepath}} children with their own .git/ entry
+#   - filters by which repos have {{gitcfpublic}} cfattr set
+#   - git push in each of the resulting repolist
+#
+# status:
+#   until #12086, this runs very very slow; ansible is
+#   exeedingly poor with anything that needs to get run multiple
+#   times on a single host.  it takes over a second per
+#   repository to run this play!  setting 'forks' rcvar did not
+#   solve the problem.  a single 'command echo' takes over a
+#   second, and it seems that 'with_items' loops have serial
+#   execution so until #12086 implements parallelization in
+#   'loop_control' we'll have to use our own external script and
+#   call it from ansible in order for this to complete in
+#   reasonable time
+#
+# superseded:
+#   - ~/bin/srcdirs
+#   - ~/bin/srcpush
+#
+# scott@smemsh.net
+# http://smemsh.net/src/rc.ansible/
+# http://spdx.org/licenses/GPL-2.0
+#
+---
+
+- hosts: localhost
+  gather_facts: false
+
+  vars:
+    basepath: /home/scott/src
+    gitcfpublic: smemsh.ispublic
+
+  tasks:
+
+    - name: enumerate_source_dirs
+      find:
+        paths: '{{basepath}}'
+        file_type: directory
+        hidden: true
+      register: dirs
+    - set_fact:
+        srcpaths: '{{dirs.files | map(attribute="path") | list()}}'
+
+    - name: filter_git_repos
+      find:
+        paths: '{{srcpaths}}'
+        patterns: '.git'
+        file_type: directory
+        hidden: true
+      register: repos
+    - set_fact:
+        gitpaths: '{{repos.files | map(attribute="path") | list()}}'
+
+    - name: enumerate_public_repos
+      command: >
+        git --git-dir {{item}}
+          config --local --get {{gitcfpublic}}
+      failed_when: false
+      changed_when: false
+      with_items: '{{gitpaths}}'
+      register: ispublics
+
+    - name: push_public_repos
+      command: git --git-dir={{item}} push
+      changed_when: (pushes.stderr != 'Everything up-to-date')
+      with_items: '{{
+        ispublics.results |
+          selectattr("stdout") |
+          map(attribute="item") |
+          list()
+      }}'
+      register: pushes
