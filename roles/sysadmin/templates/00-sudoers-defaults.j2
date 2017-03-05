@@ -1,0 +1,29 @@
+#
+# {{ansible_managed}}
+#
+
+Defaults                                                \
+        ignore_dot,                                     \
+        shell_noargs,                                   \
+        mail_no_host,                                   \
+        mail_no_perms,                                  \
+        tty_tickets,                                    \
+        !lecture,                                       \
+        !authenticate,                                  \
+        !insults,                                       \
+        !secure_path,                                   \
+        !env_editor,                                    \
+        !env_reset,                                     \
+        !env_delete,                                    \
+        !always_set_home,                               \
+        setenv,                                         \
+        umask=0022,                                     \
+        mailsub="[sudo][%h]",                           \
+        passprompt="password: ",                        \
+        verifypw=always,                                \
+        listpw=never,                                   \
+        logfile=/dev/null,                              \
+        root_sudo,                                      \
+        !stay_setuid                                    \
+
+root ALL = (ALL:ALL) NOPASSWD: ALL

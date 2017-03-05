@@ -1,0 +1,9 @@
+#
+---
+
+# default gecos values for our sysadmin group
+# (these must not exist unless it's for sysadmin group already)
+#
+sysadmin_name: sysadmin
+sysadmin_gid: 666
+sudoers_dir: /etc/sudoers.d

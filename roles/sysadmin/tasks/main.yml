@@ -1,0 +1,27 @@
+#
+---
+
+- name: create_sysadmin_group
+  group:
+    gid: '{{sysadmin_gid}}'
+    name: '{{sysadmin_name}}'
+    state: present
+  when: false
+
+- name: verify_sudoers_dir_include
+  command: "grep -q 'includedir.*{{sudoers_dir}}' /etc/sudoers"
+  changed_when: false
+
+- name: verify_sudoers_dir_exists
+  command: "test -d {{sudoers_dir}}"
+  changed_when: false
+
+- name: add_sudoers_files
+  template:
+    src: '{{item}}'
+    dest: '{{sudoers_dir}}/{{item | basename() | splitext() | first()}}'
+    owner: root
+    group: root
+    mode: 0400
+  with_fileglob:
+    - 'templates/??-sudoers-*.j2'
