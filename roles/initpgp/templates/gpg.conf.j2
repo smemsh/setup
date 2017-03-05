@@ -1,0 +1,14 @@
+#
+# {{ansible_managed}}
+#
+
+expert
+require-cross-certification
+
+no-greeting
+no-emit-version
+
+keyserver       {{initpgp_keyserver}}
+charset         utf-8
+keyid-format    long
+list-options    no-show-keyring show-unusable-subkeys

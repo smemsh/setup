@@ -1,0 +1,58 @@
+#
+# initpgp.yml
+#   initialize pgp pubkey+trust bootstrap
+#
+# desc:
+#   - copy over templatized gpg.conf
+#   - import pubkey to root the trust chain (for git tag -v)
+#   - set trust as ultimate for imported key
+#
+---
+
+- name: make_gpg_dir
+  file:
+    state: directory
+    mode: 0700
+    path: '{{initpgp_dir}}'
+
+- name: templatize_config
+  template:
+    src: 'templates/gpg.conf.j2'
+    dest: '{{initpgp_dir}}/gpg.conf'
+
+- name: copy_pubkey
+  copy:
+    src: 'files/{{initpgp_keyid}}.asc'
+    dest: '{{initpgp_dir}}/'
+
+- name: import_pubkey
+  shell: 'gpg -q --import < {{initpgp_dir}}/{{initpgp_keyid}}.asc'
+  changed_when: false
+
+- name: determine_fingerprint
+  shell: |
+    gpg --with-fingerprint --with-colons \
+      < {{initpgp_dir}}/{{initpgp_keyid}}.asc \
+    | grep ^fpr \
+    | awk -F : '{print $(NF-1)}' \
+    | tr '[:upper:]' '[:lower:]' \
+    | cat
+  changed_when: false
+  register: shell_output_fingerprint
+
+- name: set_fingerprint_fact
+  set_fact:
+    initpgp_fprint: '{{shell_output_fingerprint.stdout}}'
+
+- name: trust_fingerprint_absolutely
+  shell: 'gpg -q --import-ownertrust <<< {{initpgp_fprint}}:{{initpgp_trust}}:'
+  args:
+    executable: /bin/bash
+  changed_when: false
+
+# the agent is leftover from import, not sign; see freenode #gnupg log starting
+# 20170302122451
+#
+- name: kill_extraneous_agent
+  shell: pkill gpg-agent || true
+  changed_when: false

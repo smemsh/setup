@@ -1,0 +1,6 @@
+#
+---
+
+initpgp_dir:        ~/.gnupg # looks for <keyid>.asc here
+initpgp_trust:      6 # value for --import-ownertrust, 6=ultimate
+initpgp_keyserver:  pgp.mit.edu # for refresh only
