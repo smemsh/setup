@@ -1,0 +1,22 @@
+#
+# initssh.yml
+#   copy authorized key to the system for the user
+#
+# desc:
+#   - create ssh dir with right perms if dne
+#   - ensure ssh key in authorized_keys (leave others alone)
+#   - uses contents of "files/<email>-id_rsa.pub"
+#
+---
+
+- name: verify_user_param
+  fail: ~
+  when: mkuser_user is not defined
+
+- name: do_ssh_authkey
+  authorized_key:
+    user: '{{mkuser_user}}'
+    key: '{{item}}'
+    manage_dir: true
+  with_file:
+    - 'files/{{initssh_keyid}}-id_rsa.pub'
