@@ -1,0 +1,68 @@
+#
+# ansible-role-mkuser
+#   makes a user, group, homedir
+#
+# desc:
+#   - always puts the user in eponymous group
+#   - primary group can be specified by mkuser_group
+#   - primary and eponymous groups will be created if dne
+#
+---
+
+# todo: we should do more here eg check if user exists
+# already, require additional invocation arg if it does
+# (although, this role should already be idempotent for
+# setting up the actual desired user)
+#
+- name: sanity_check_username
+  fail: ~
+  when: mkuser_user is undefined
+
+# hack to pull in sysadmin group name when we're running from
+# skel role with skel_sysadmin=true.  this requires that
+# sysadmin role has been run already (to have its variables),
+# which would be an undeclared dependency, except that this
+# case is only ever requested by skel role which already knows
+# the right dependency ordering and should be setting that in
+# meta/main.yml
+#
+- name: maybe_override_group
+  set_fact:
+    mkuser_group: '{{sysadmin_name}}'
+  when: skel_sysadmin | default() | bool()
+
+# this will already have been done if invoker set
+# skel_sysadmin, otherwise we create a group with the user's
+# name
+# (todo: if we set mkuser_group to null)
+#
+- name: specified_group
+  group:
+    name: '{{mkuser_group}}'
+    state: present
+
+- name: eponymous_group
+  group:
+    name: '{{mkuser_user}}'
+    state: present
+
+- name: user
+  user:
+    state: present
+    createhome: false
+    name: '{{mkuser_user}}'
+    home: '{{mkuser_home}}'
+    shell: '{{mkuser_shell}}'
+    group: '{{mkuser_group}}'
+    groups: '{{mkuser_groups}}'
+
+# we do this ourselves and that way don't need to
+# provide a correct skeleton directory, just make it
+#
+- name: homedir
+  file:
+    state: directory
+    path: '{{mkuser_home}}'
+    owner: '{{mkuser_user}}'
+    group: '{{mkuser_group}}'
+    mode: '{{mkuser_hmode}}'

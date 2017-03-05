@@ -1,0 +1,10 @@
+#
+---
+
+mkuser_hmode:       0751
+mkuser_shell:       /bin/bash
+mkuser_homedirs:    /home
+
+mkuser_group:       '{{mkuser_user}}'
+mkuser_groups:      '{{mkuser_group}},{{mkuser_user}}'
+mkuser_home:        '{{mkuser_homedirs}}/{{mkuser_user}}'
