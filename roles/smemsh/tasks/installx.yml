@@ -1,0 +1,25 @@
+#
+# installx.yml
+#   runs installx, installrc from http://github.com/smemsh/utilsh
+#
+# desc:
+#   - runs installrc on those from skel_repos_rcfiles
+#   - runs installx on those from skel_repos_exes
+#
+# todo:
+#   - this depends on their path, but they could be installed in bin
+#   - installx.sh functionality should be reimplemented in ansible
+#
+---
+
+- name: do_installx
+  shell: '{{skel_srcx_dir}}/utilsh/installx -qf'
+  args:
+    chdir: '{{skel_srcx_dir}}/{{item.key}}'
+  with_dict: '{{skel_repos_exes}}'
+
+- name: do_installrc
+  shell: '{{skel_srcx_dir}}/utilsh/installrc -qf'
+  args:
+    chdir: '{{skel_rcfiles_dir}}/{{item.key}}'
+  with_dict: '{{skel_repos_rcfiles}}'

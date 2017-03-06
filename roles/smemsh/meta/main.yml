@@ -1,0 +1,19 @@
+#
+---
+
+dependencies:
+
+  - role: sysadmin
+    when: skel_sysadmin | default() | bool()
+
+  - role: mkuser
+
+  - role: initpgp
+    become: true
+    become_user: '{{mkuser_user}}'
+    when: initpgp_keyid is defined
+
+  - role: initssh
+    become: true
+    become_user: '{{mkuser_user}}'
+    when: initssh_keyid is defined

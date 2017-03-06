@@ -1,0 +1,32 @@
+#
+# ansible-role-skel
+#   setup home skeleton from git repositories following rcfile+exe convention
+#
+# desc:
+#   - for applying to newly provisioned machines
+#   - checks out repos from github at specified tag (todo: where?)
+#   - verifies tag signatures
+#   - each repository gets installx/installrc run (todo: where are vars files?)
+#
+# what:
+#   - symlinks for rcfiles: ~/.foorc -> ~/.foo/rc (see installrc)
+#   - copies for exes: cp ~/srcx/sometool/exe ~/bin/sometool (see installx)
+#   - (todo: choose paths according to what variables?)
+#
+# vars:
+#   skel_sysadmin: whether we require ansible-role-sysadmin
+#
+# todo:
+#   - skel_sysadmin still being used downstream?
+#   - other stuff
+#
+---
+
+- assert:
+    that: mkuser_user is defined
+
+- block:
+  - include: gits.yml
+  - include: installx.yml
+  become: true
+  become_user: '{{mkuser_user}}'

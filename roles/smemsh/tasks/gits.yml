@@ -1,0 +1,31 @@
+#
+# gits.yml
+#    git check out and verify signature on tags
+#
+# scott@smemsh.net
+# http://smemsh.net/src/utilsh/ (installx.sh)
+# http://spdx.org/licenses/GPL-2.0
+#
+---
+
+# installrc will put symlinks in ~/
+#
+- name: rcfile_checkouts
+  git:
+    repo: '{{skel_repobase}}/{{item.key}}'
+    dest: '{{skel_rcfiles_dir}}/{{item.key}}'
+    version: '{{item.value}}'
+    recursive: false
+    verify_commit: true
+  with_dict: '{{skel_repos_rcfiles}}'
+
+# copies the exes from each repo to ~/bin/
+#
+- name: exe_checkouts
+  git:
+    repo: '{{skel_repobase}}/{{item.key}}'
+    dest: '{{skel_srcx_dir}}/{{item.key}}'
+    version: '{{item.value}}'
+    recursive: false
+    verify_commit: true
+  with_dict: '{{skel_repos_exes}}'

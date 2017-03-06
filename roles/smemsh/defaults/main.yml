@@ -1,0 +1,23 @@
+#
+---
+
+#
+skel_repobase: 'https://github.com/{{skel_github}}'
+
+# todo: don't use '~', not sure if this always expands to the right user
+# (there's local, remote, become user, not sure it works in all cases)
+#
+skel_srcx_dir: '~/srcx'
+skel_rcfiles_dir: '~'
+
+# these need to be supplied in vars
+#
+skel_repos_exes: []
+skel_repos_rcfiles: []
+
+# so far unused
+#
+skel_repos_all: '{{
+  skel_repos_rcfiles +
+  skel_repos_exes
+}}'
