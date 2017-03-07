@@ -18,7 +18,8 @@
 #
 # todo:
 #   - skel_sysadmin still being used downstream?
-#   - other stuff
+#   - we should replace installx with ansible so it's not a dependency
+#   - (maybe by converting it to a plugin / module)
 #
 ---
 
