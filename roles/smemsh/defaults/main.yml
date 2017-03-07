@@ -12,8 +12,8 @@ skel_rcfiles_dir: '~'
 
 # these need to be supplied in vars
 #
-skel_repos_exes: []
-skel_repos_rcfiles: []
+skel_repos_exes: {}
+skel_repos_rcfiles: {}
 
 # so far unused
 #
