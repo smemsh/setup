@@ -9,9 +9,7 @@
 #
 ---
 
-- name: verify_user_param
-  fail: ~
-  when: mkuser_user is not defined
+- assert: { that: 'mkuser_user is defined' }
 
 - name: do_ssh_authkey
   authorized_key:
