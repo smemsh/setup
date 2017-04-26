@@ -1,0 +1,3 @@
+- set_fact:
+    baz: '{{foobar}}'
+- debug: var=baz

@@ -1,0 +1,39 @@
+#
+---
+
+- hosts: all
+  gather_facts: false
+
+  vars:
+    accounts:
+      - group: sysadmin
+        users:
+          - scott
+          - bruce
+      - group: dev
+        users:
+          - ashley
+          - jonas
+
+  tasks:
+    - command: 'echo group:{{item.0.group}} user:{{item.1}}'
+      with_subelements:
+        - '{{accounts}}'
+        - users
+
+    - command: 'echo item:{{item}}'
+      with_items: "{{accounts | map(attribute='users') | list()}}"
+
+#- hosts: all
+#  gather_facts: false
+#  vars:
+#    testlist:
+#      - testrole1
+#      - testrole2
+#  roles: '{{testlist}}'
+
+#- hosts: all
+#  gather_facts: false
+#  roles:
+#    - role1
+#    - role2
