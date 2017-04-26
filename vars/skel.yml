@@ -1,0 +1,16 @@
+#
+---
+
+skel_github: smemsh
+
+skel_repos_exes:
+  utilsh: master-0.5.0
+  utilpy: master-0.0.0
+  git-reltag: master-1.5.3
+
+skel_repos_rcfiles:
+  .bash: master-2.1.0
+  .vim: master-0.9.0
+  .tmux: master-0.0.0
+  .gitcli: master-1.4.3
+  .terminfo: master-0.0.0
