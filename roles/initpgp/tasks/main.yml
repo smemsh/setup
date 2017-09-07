@@ -54,5 +54,5 @@
 # 20170302122451
 #
 - name: kill_extraneous_agent
-  shell: pkill gpg-agent || true
+  shell: 'pkill -u ${EUID:?} gpg-agent'
   changed_when: false
