@@ -55,4 +55,6 @@
 #
 - name: kill_extraneous_agent
   shell: 'pkill -u ${EUID:?} gpg-agent'
+  register: r
+  failed_when: r.rc > 1 # 0 -> killed stuff, 1 -> killed nothing, 2+ -> error
   changed_when: false
