@@ -22,9 +22,10 @@
 # (not present in u12 coreutils)
 #
 - name: warn_ubuntu14_too_old
-  assert: ansible_distribution_major_version > 12
   when: ansible_distribution == ('ubuntu' | lower())
-  msg: "ubuntu < 14 'ln' does not have '--relative', needed by 'installrc'"
+  assert:
+    that: ansible_distribution_major_version > 12
+    msg: "ubuntu < 14 'ln' does not have '--relative', needed by 'installrc'"
 
 - name: do_installrc
   shell: '{{skel_srcx_dir}}/utilsh/installrc -qf'
