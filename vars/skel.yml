@@ -14,4 +14,4 @@ skel_repos_rcfiles:
   .tmux: master-0.0.1
   .terminfo: master-0.0.0
    # note: override with private branch on personal
-  .gitcli: master-1.5.2
+  .gitcli: master-1.6.0
