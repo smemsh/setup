@@ -21,7 +21,7 @@
 # installrc requires 'ln --relative'
 # (not present in u12 coreutils)
 #
-- name: warn_ubuntu14_too_old
+- name: ensure_atleast_ubuntu14
   when: ansible_distribution == ('ubuntu' | lower())
   assert:
     that: ansible_distribution_major_version > 12
