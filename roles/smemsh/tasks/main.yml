@@ -42,6 +42,24 @@
       https://docs.ansible.com/ansible/latest/user_guide/become.html#becoming-an-unprivileged-user
   when: r.rc | bool
 
+- include_role:
+    name: sysadmin
+  when: skel_sysadmin | default() | bool()
+
+- import_role:
+    name: mkuser
+
+- include_role:
+    name: initpgp
+  become: true
+  become_user: '{{mkuser_user}}'
+  when: initpgp_keyid is defined
+
+- include_role: initssh
+  become: true
+  become_user: '{{mkuser_user}}'
+  when: initssh_keyid is defined
+
 - block:
   - import_tasks: gits.yml
   - import_tasks: installx.yml
