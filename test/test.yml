@@ -1,27 +1,225 @@
 #
 ---
 
-- hosts: all
+- hosts: localhost
+  connection: local
   gather_facts: false
 
   vars:
-    accounts:
-      - group: sysadmin
-        users:
-          - scott
-          - bruce
-      - group: dev
-        users:
-          - ashley
-          - jonas
+    baz: '{{foo}}'
+    foo: bar
 
   tasks:
-    - command: 'echo group:{{item.0.group}} user:{{item.1}}'
+
+    - debug:
+        var: baz
+
+    - meta: end_play
+
+    - set_fact:
+        foo: bar
+    - debug:
+        var: "{{lkjasdf | d('foo')}}"
+
+    - meta: end_play
+
+    - set_fact:
+        foo: "{{bar | default(lookup('file', '/path/to/file'))}}"
+
+    - set_fact: bar="{{lookup('file', '/path/to/file')}}"
+    - meta: end_play
+
+    - set_fact:
+        accounts:
+
+          - group: sysadmin
+            users:
+              - scott
+              - bruce
+            display: true
+
+          - group: dev
+            users:
+              - ashley
+              - jonas
+            display: false
+
+        testvar: false
+
+        testzero: 0
+        testone: 1
+        testzerostr: '0'
+        testonestr: '1'
+
+        do_it: 1
+
+        truestr: 'true'
+        truebool: true
+        falsebool: false
+        emptystr: ''
+        somestr: 'something'
+
+        username: ''
+        userlen: '{{username | length}}'
+        userbool: '{{userlen | bool}}'
+        userbool2: '{{username | length | bool}}'
+
+        testbool: '{{yes | bool}}'
+
+        testmode: 02775
+
+        skel: /path/to/file
+
+        thisuser: dnednednedne
+
+        foo: bar
+        baz: '{{foo}}'
+
+    - meta: end_play
+
+    - git:
+        accept_hostkey: false
+        bare: true
+        clone: true
+        depth: 0
+        dest: /tmp/testing123
+        executable: null
+        force: false
+        key_file: keys/etlctl-id_rsa
+        recursive: true
+        reference: null
+        refspec: null
+        remote: origin
+        repo: git@github.com:zimbio/dfpetl.git
+        ssh_opts: null
+        track_submodules: false
+        umask: true
+        update: true
+        verify_commit: false
+        version: master
+
+    #
+    - debug: var=baz
+    - meta: end_play
+
+    #
+    - stat:
+        path: /lkjlkjlkj
+      register: r
+    - debug: var=r
+    - meta: end_play
+
+    #
+    - command: echo yes
+      when: username or false
+    - meta: end_play
+
+    #
+    - getent:
+        key: scott
+        database: passwd
+        fail_key: false
+    - set_fact:
+        foo: '{{(getent_passwd[thisuser] | default | bool) and
+                (getent_passwd[thisuser].4))}}'
+    - debug: var=foo
+    - meta: end_play
+
+    #
+    - testmodule:
+        user: scott
+        group: scott
+        dir: /tmp/this/path/to/file
+    - meta: end_play
+
+    #
+    - command: echo ran
+      when: skel
+    - meta: end_play
+
+    #
+    - command: echo yes
+      when: falsebool | length
+    - meta: end_play
+
+    #
+    - command: echo yes
+      when: emptystr | length
+    - meta: end_play
+
+    #
+    - command: echo truestr
+      when: truestr | bool
+    - command: echo truebool
+      when: truebool | bool
+    - command: echo emptystr
+      when: emptystr | bool
+    - command: echo somestr
+      when: somestr | bool
+    - meta: end_play
+
+    #
+    - file:
+        state: directory
+        path: /tmp/testdir
+        mode: '{{testmode}}'
+    - meta: end_play
+
+    #
+    - debug: var=username
+    - debug: var=userlen
+    - debug: var=userbool
+    - debug: var=userbool2
+    - assert:
+        that: username | length
+    - meta: end_play
+
+    #
+    - command: echo "{{emptystr | default('foobar'))}}"
+    - meta: end_play
+
+    #
+    - command: echo aha, now it is clear
+      when: do_it | bool()
+    - meta: end_play
+
+    #
+    - set_fact:
+        testzero: '{{testzero | bool()}}'
+        testone: '{{testone | bool()}}'
+        testzerostr: '{{testzerostr | bool()}}'
+        testonestr: '{{testonestr | bool()}}'
+        ttestzero: '{{testzero}}'
+        ttestone: '{{testone}}'
+        ttestzerostr: '{{testzerostr}}'
+        ttestonestr: '{{testonestr}}'
+    - meta: end_play
+
+    #
+    - set_fact:
+        testbool: '{{bool(testvar)}}'
+    - { file: name=/tmp/thistestfoobar state=directory owner=scott, register: r }
+    - debug: var=r
+    - set_fact: { made_homedir: "{{r.changed and r.diff.before.state == 'absent'}}" }
+    - debug: var=made_homedir
+    - meta: end_play
+
+    #
+    - set_fact: this="{{testvar | default('/this/foo')}}"
+    - debug: var=this
+    - command: echo foobaz
+      when: testvar | bool()
+    - meta: end_play
+
+    #
+    - command: echo foobar
+    - command: 'echo 1 group:{{item.0.group}} user:{{item.1}}'
       with_subelements:
         - '{{accounts}}'
         - users
+      when: item.0.display | default() | bool()
 
-    - command: 'echo item:{{item}}'
+    - command: 'echo 2 item:{{item}}'
       with_items: "{{accounts | map(attribute='users') | list()}}"
 
 #- hosts: all
