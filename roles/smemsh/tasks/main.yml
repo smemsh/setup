@@ -56,7 +56,8 @@
       become_user: '{{mkuser_user}}'
   when: initpgp_keyid is defined
 
-- include_role: initssh
+- include_role:
+    name: initssh
     apply:
       become: true
       become_user: '{{mkuser_user}}'
