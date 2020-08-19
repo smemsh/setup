@@ -26,6 +26,22 @@
 - assert:
     that: mkuser_user is defined
 
+- command: which setfacl
+  register: r
+
+- name: check_acl_package_installed
+  fail:
+    msg: >
+      needs 'setfacl' command available ('acl' package) on the target for
+      'copy' or 'template' module to work when all three conditions met (1)
+      become is used; (2) remote_user is not root; (3) become_user is not
+      root.  in this case ansible uses 'setfacl' to allow the bundle to be
+      deposited by one user and read by another
+      ('allow_world_readable_tmpfiles' would also work, but we don't want to
+      do that); see
+      https://docs.ansible.com/ansible/latest/user_guide/become.html#becoming-an-unprivileged-user
+  when: r.rc | bool
+
 - block:
   - include: gits.yml
   - include: installx.yml
