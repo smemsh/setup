@@ -51,13 +51,15 @@
 
 - include_role:
     name: initpgp
-  become: true
-  become_user: '{{mkuser_user}}'
+    apply:
+      become: true
+      become_user: '{{mkuser_user}}'
   when: initpgp_keyid is defined
 
 - include_role: initssh
-  become: true
-  become_user: '{{mkuser_user}}'
+    apply:
+      become: true
+      become_user: '{{mkuser_user}}'
   when: initssh_keyid is defined
 
 - block:
