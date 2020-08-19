@@ -43,7 +43,7 @@
   when: r.rc | bool
 
 - block:
-  - include: gits.yml
-  - include: installx.yml
+  - import_tasks: gits.yml
+  - import_tasks: installx.yml
   become: true
   become_user: '{{mkuser_user}}'
