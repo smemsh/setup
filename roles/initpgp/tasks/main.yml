@@ -31,8 +31,9 @@
 
 - name: determine_fingerprint
   shell: |
-    gpg --with-fingerprint --with-colons \
+    gpg --show-keys --with-fingerprint --with-colons \
     < {{initpgp_dir}}/{{initpgp_keyid}}.asc \
+    | awk '/^pub/ {getline; print}' \
     | grep ^fpr \
     | awk -F : '{print $(NF-1)}' \
     | tr '[:upper:]' '[:lower:]' \
