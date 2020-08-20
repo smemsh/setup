@@ -10,7 +10,7 @@
 - name: test_existing_group_matches_gid
   assert:
     that:
-      - getent_group[sysadmin_name][1] == sysadmin_gid
+      - getent_group[sysadmin_name][1] == (sysadmin_gid | string)
     fail_msg: "group exists and does not match requested gid, aborting..."
     success_msg: "group exists and matches requested gid, skipping..."
   when: getent_group[sysadmin_name]
