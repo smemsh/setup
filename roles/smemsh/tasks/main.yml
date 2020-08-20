@@ -45,9 +45,10 @@
 
 - include_role:
     name: sysadmin
+    public: true
   when: skel_sysadmin | default() | bool()
 
-- import_role:
+- include_role:
     name: mkuser
 
 - include_role:
