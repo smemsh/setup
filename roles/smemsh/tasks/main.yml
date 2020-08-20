@@ -43,6 +43,15 @@
       https://docs.ansible.com/ansible/latest/user_guide/become.html#becoming-an-unprivileged-user
   when: r.rc | bool
 
+- command: which git
+  register: r
+  ignore_errors: true
+
+- name: check_git_package_installed
+  fail:
+    msg: requires that 'git' is installed already on the remote system
+  when: r.rc | bool
+
 - include_role:
     name: sysadmin
     public: true
