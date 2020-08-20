@@ -29,6 +29,7 @@
 - command: which setfacl
   register: r
   ignore_errors: true # we check it ourselves, and want to get that far
+  changed_when: false
 
 - name: check_acl_package_installed
   fail:
@@ -46,6 +47,7 @@
 - command: which git
   register: r
   ignore_errors: true
+  changed_when: false
 
 - name: check_git_package_installed
   fail:
