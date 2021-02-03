@@ -4,7 +4,7 @@
 skel_github: smemsh
 
 skel_repos_exes:
-  utilsh: master-1.1.7
+  utilsh: master-1.1.9
   utilpy: master-0.0.3
   git-reltag: master-1.5.5
 
