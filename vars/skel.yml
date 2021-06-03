@@ -9,7 +9,7 @@ skel_repos_exes:
   git-reltag: master-1.5.6
 
 skel_repos_rcfiles:
-  .bash: master-2.2.25
+  .bash: master-2.2.26
   .vim: master-1.1.0
   .tmux: master-0.3.2
   .terminfo: master-0.0.0
