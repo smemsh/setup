@@ -10,7 +10,7 @@ skel_repos_exes:
 
 skel_repos_rcfiles:
   .bash: master-2.2.25
-  .vim: master-1.0.2
+  .vim: master-1.1.0
   .tmux: master-0.3.2
   .terminfo: master-0.0.0
    # note: override with private branch on personal
