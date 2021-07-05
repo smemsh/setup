@@ -1,0 +1,44 @@
+#
+---
+
+domain:             smemsh.net
+_ctlhost:           omnius
+_ctladm:            scott
+
+### ~cfmgmt_user/.ssh/authorized_keys ########################################
+
+# sysadmin user key uid and md5, used as index to pubfile in
+# files/, reads into keystring variable, injected later into
+# cloud-init template
+#
+ssh_auth_md5:       '7a687b4d1d2d8dda026c3e4c3829b9a4'
+_ssh_auth_ident:    '{{_ctladm}}@{{_ctlhost}}.{{domain}}'
+_ssh_auth_pubfile:  '{{_ssh_auth_ident}}-{{ssh_auth_md5}}.pub'
+_ssh_auth_pubstr:   "{{lookup('file', _ssh_auth_pubfile)}}"
+
+### /etc/ssh/ssh_host_rsa_key{,.pub} #########################################
+
+# $hostkey_md5 come from host_vars
+# $host comes from extra args provided to play
+
+ssh_host_md5:       '{{hostvars[host].hostkey_md5}}'
+_ssh_host_ident:    'host@{{host}}.{{domain}}'
+_ssh_host_keybase:  '{{_ssh_host_ident}}-{{ssh_host_md5}}'
+
+_ssh_host_pubfile:  '{{_ssh_host_keybase}}.pub'
+_ssh_host_pubstr:   "{{lookup('file', _ssh_host_pubfile)}}"
+
+_ssh_host_keyfile:  '{{_ssh_host_keybase}}.key'
+_ssh_host_keystr:   "{{lookup('file', _ssh_host_keyfile) |
+                         replace('\n', '\\n')}}" # see #16714 for why escape
+
+### auth, host, and secret key arrays indexed by md5 fingerprint #############
+
+# hack to set keystrs[md5] = keystr
+# credit: (for indirect dict keyname syntax)
+#   http://stackoverflow.com/users/496289/kashyap in
+#   http://stackoverflow.com/questions/27805976
+#
+ssh_auth_pubstrs:   "{'{{ssh_auth_md5}}': '{{_ssh_auth_pubstr}}'}"
+ssh_host_keystrs:   "{'{{ssh_host_md5}}': '{{_ssh_host_keystr}}'}"
+ssh_host_pubstrs:   "{'{{ssh_host_md5}}': '{{_ssh_host_pubstr}}'}"
