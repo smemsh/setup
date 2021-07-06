@@ -1,0 +1,18 @@
+#
+
+# ansible
+PyYAML          == 5.4.1
+cryptography    == 3.3.2 # later versions require rustlang
+packaging       == 20.8
+jinja2          == 2.11.2
+netaddr         == 0.8.0
+lxml            == 4.6.3
+ansible         == 3.4.0
+ansible-base    == 2.10.9
+#ansible-runner  == 1.4.7
+
+# google
+crcmod          == 1.7
+google-auth     == 1.24.0
+requests        == 2.25.1
+apache-libcloud == 3.3.1 # gce_*
