@@ -1,0 +1,81 @@
+#
+---
+
+- name: rsync_check_readonly
+  when: not skelfiles_install_rsync
+  block:
+
+    - name: check_rsync_command_presence
+      command: which rsync
+      register: r
+      ignore_errors: true
+      changed_when: false
+
+    - name: verify_rsync_command
+      fail:
+        msg: requires 'rsync' command present on remote
+      when: r.rc | bool
+
+- name: ensure_rsync_installed
+  package:
+    name: rsync
+    state: present
+  when: skelfiles_install_rsync
+
+- name: determine_account_entry
+  getent:
+    key: '{{skelfiles_user}}'
+    database: passwd
+    fail_key: false
+
+- name: determine_home_directory
+  set_fact:
+    homedir: '{{getent_passwd[skelfiles_user].4}}'
+
+- name: copy_skel_files
+  synchronize:
+
+    # we always add the trailing slashes, because we want to sync the
+    # contents; multiple trailing slashes work ok (collapsed into one),
+    # tested this with manual rsync invocation, and ansible seems to
+    # pass it unchanged, at modules/core/files/synchronize.py:440:
+    #   cmd = ' '.join([cmd, source, dest])
+    #   (rc, out, err) = module.run_command(cmd)
+    #
+    src: files/
+    dest: '{{homedir}}/'
+
+    # we can't really copy file metadata, because the source files are
+    # in this repository, and git doesn't track mode bits, so it'll just
+    # copy them over with the default umask 022 -- not settable from
+    # ansible that's known, only on a per-module basis and we can't do
+    # that here -- so we have to fix perms after copying (see later tasks)
+    #
+    archive: false # defaults owner, group, links, perms, recursive, times
+
+    # during provisioning we often run this role manually with extra cli
+    # args to reach the target
+    #
+    use_ssh_args: true
+
+    # work around upstream bug ansible-collections/ansible.posix #186, this
+    # should be become_user.  todo: remove once #187 merged
+    #
+    rsync_path: /usr/bin/sudo -u {{ansible_user_id}} rsync
+
+    #
+    recursive: true
+    checksum: true
+    links: true
+
+    #
+    ssh_connection_multiplexing: true
+
+# TODO should we do a backup? but then we'd have to back up the profile
+# scripts we're replacing too... this is really only intended for bootstrap
+# role, should be fine for now...
+#
+- name: remove_vendor_profile
+  file:
+    path: '{{homedir}}/.profile'
+    state: absent
