@@ -1,0 +1,17 @@
+#
+---
+
+# test validity of rcfile first (so we don't lock ourselves out), this should
+# break out and never run the notify if the task fails, while always sending
+# the notify
+#
+- name: test_ssh_config
+  command: sshd -t
+  register: r
+  failed_when: r.rc != 0
+  changed_when: false
+
+- name: reload_ssh_daemon
+  service:
+    name: "{{'ssh' if ((ansible_os_family | lower) == 'debian') else 'sshd'}}"
+    state: reloaded
