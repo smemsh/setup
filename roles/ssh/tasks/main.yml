@@ -1,0 +1,190 @@
+#
+# ansible-role-ssh
+#   setup system as an ssh server and client
+#
+# desc:
+#   - removes sshguard if present
+#   - applies our other settings, the list has grown numerous
+#   - first config wins, so we disable any yes if we want a no at the end
+#
+# todo
+#   - needs to take arg for what port (22022 external, 22 internal)
+#   - split this into separate files for sshd/ssh/system and use include
+#   - or, make an ssh and an sshd role...
+#   - use dnssec/sshfp for host keys
+#
+---
+
+- name: remove_sshguard_package
+  package:
+    name: sshguard
+    state: absent
+
+### SSHD #####################################################################
+
+- name: declare_sshd_config_managed
+  lineinfile:
+    insertbefore: BOF
+    line: '{{ansible_managed_managed}}'
+    dest: '{{ssh_daemon_rcfile}}'
+
+#
+# later distro revs changed the default and commented out,
+# rather than explicitly setting a non-compiled-in default in
+# the config file, so we have to do positive override of this
+# stuff in addition to changing it if not commented out (and has
+# wrong setting), former happens on eg u18, latter on eg u14.
+# probably there's a better way to do this without using two
+# separate tasks, ie 'lineinfile' has a regexp option we might
+# use, but that only works for first occurrence, or we could use
+# 'replace' module.  in the meantime below should work, on both
+# variants (commented out, or explicit override)
+#
+
+- name: disable_sshd_last_at_login
+  block:
+
+    - replace:
+        regexp: '^\s*PrintLastLog\s+yes.*$'
+        dest: '{{ssh_daemon_rcfile}}'
+      notify: ssh_handler_server_reload
+
+    - lineinfile:
+        line: 'PrintLastLog no'
+        dest: '{{ssh_daemon_rcfile}}'
+      notify: ssh_handler_server_reload
+
+- name: disable_sshd_strict_permissions
+  block:
+
+    - replace:
+        regexp: '^\s*StrictModes\s+yes.*$'
+        dest: '{{ssh_daemon_rcfile}}'
+      notify: ssh_handler_server_reload
+
+    - lineinfile:
+        line: 'StrictModes no'
+        dest: '{{ssh_daemon_rcfile}}'
+      notify: ssh_handler_server_reload
+
+# why would anyone want to have four different possible hostkeys? pick
+# the good algorithm and use it.  we use rsa2k, since everyone has it;
+# rsa4k only has a theoretical linear difficulty increase against
+# quantum crypto, rsa2k is seen as good enough for non-quantum.  rsa
+# remains more difficult than elliptic curves for quantum and is as
+# difficult for non-quantum. it's slower than curves, but that's why
+# persistent connections were invented...
+# (be nice if loops supported blocks but still no: #13262 and #46203)
+#
+- name: delete_non_rsa_hostkeys
+  file:
+    path: /etc/ssh/ssh_host_{{item}}_key
+    state: absent
+  with_items: [dsa, ecdsa, ed25519]
+#
+- name: disable_non_rsa_hostkeys
+  notify: ssh_handler_server_reload
+  replace:
+    regexp: '^(HostKey./etc/ssh/ssh_host_{{item}}_key)'
+    replace: '#\1'
+    dest: '{{ssh_daemon_rcfile}}'
+  with_items: [dsa, ecdsa, ed25519]
+
+- name: disable_dns_pointer_lookups
+  block:
+
+    - replace:
+        regexp: '^\s*UseDNS\s+yes.*$'
+        dest: '{{ssh_daemon_rcfile}}'
+      notify: ssh_handler_server_reload
+
+    - lineinfile:
+        line: 'UseDNS no'
+        dest: '{{ssh_daemon_rcfile}}'
+      notify: ssh_handler_server_reload
+
+- name: disable_debian_banner
+  when: (ansible_os_family | lower) == 'debian'
+  block:
+
+    - replace:
+        regexp: '^\s*DebianBanner\s+yes.*$'
+        dest: '{{ssh_daemon_rcfile}}'
+      notify: ssh_handler_server_reload
+
+    - lineinfile:
+        line: 'DebianBanner no'
+        dest: '{{ssh_daemon_rcfile}}'
+      notify: ssh_handler_server_reload
+
+- name: disable_passwords
+  block:
+
+    - block:
+
+      - replace:
+          regexp: '^\s*PasswordAuthentication\s+yes.*$'
+          dest: '{{ssh_daemon_rcfile}}'
+        notify: ssh_handler_server_reload
+
+      - lineinfile:
+          line: 'PasswordAuthentication no'
+          dest: '{{ssh_daemon_rcfile}}'
+        notify: ssh_handler_server_reload
+
+    - block:
+
+      - replace:
+          regexp: '^\s*ChallegeResponseAuthentication\s+yes.*$'
+          dest: '{{ssh_daemon_rcfile}}'
+        notify: ssh_handler_server_reload
+
+      - lineinfile:
+          line: 'ChallengeResponseAuthentication no'
+          dest: '{{ssh_daemon_rcfile}}'
+        notify: ssh_handler_server_reload
+
+### SSH ######################################################################
+
+# we only care about the key, not pinning it to an address; there's
+# really no point to caring about that, because we'll notice the key
+# change.  it also causes irritating issues in cloud, don't see any
+# security benefit, someone can control our dns anyways, we aren't
+# using dnssec and really, don't see why it matters if the address
+# changes, we use host key pinning, address check seems worthless
+#
+- name: disable_ssh_hostip_check
+  block:
+
+    - replace:
+        regexp: '^\s*CheckHostIP\s+yes.*$'
+        dest: '{{ssh_client_rcfile}}'
+
+    - lineinfile:
+        line: 'CheckHostIP no'
+        dest: '{{ssh_client_rcfile}}'
+
+# this thing is idiotic, it has no purpose except to make life hard.
+# simple precomputed ip4 hashes make it totally trivial to reverse.
+# it's hardly even obscuring anything, making this a totally useless
+# invention.  (with ip6, maybe it would make more sense...)
+#
+- name: disable_hashed_known_hosts
+  replace:
+    regexp: '^\s*HashKnownHosts\s+yes.*$'
+    replace: 'HashKnownHosts no'
+    dest: '{{ssh_client_rcfile}}'
+
+# this simplifies key management, we just use rsa2k everywhere
+# on all our servers and clients
+#
+- name: only_allow_rsa_kex
+  block:
+
+    - replace:
+        regexp: '^\s*HostKeyAlgorithms(?!.ssh-rsa$).*$'
+        dest: '{{ssh_client_rcfile}}'
+
+    - lineinfile:
+        line: 'HostKeyAlgorithms ssh-rsa'
+        dest: '{{ssh_client_rcfile}}'

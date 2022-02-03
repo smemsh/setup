@@ -1,0 +1,6 @@
+#
+---
+
+#
+ssh_daemon_rcfile:    /etc/ssh/sshd_config
+ssh_client_rcfile:    /etc/ssh/ssh_config
