@@ -16,3 +16,6 @@
 [submodule "roles/skel"]
 	path = roles/skel
 	url = ../ansible-role-skel
+[submodule "roles/skelfiles"]
+	path = roles/skelfiles
+	url = ../ansible-role-skelfiles
