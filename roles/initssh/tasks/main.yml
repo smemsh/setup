@@ -17,5 +17,5 @@
     key: '{{item}}'
     manage_dir: true
   with_file:
-    - 'files/{{initssh_keyid}}-id_rsa.pub'
+    - 'keys/ssh/{{initssh_keyid}}-id_rsa.pub'
   when: initssh_keyid is defined
