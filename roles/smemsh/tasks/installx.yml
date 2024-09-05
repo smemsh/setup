@@ -1,6 +1,6 @@
 #
 # installx.yml
-#   runs installx, installrc from http://github.com/smemsh/utilsh
+#   runs installx, installrc from https://github.com/smemsh/utilsh
 #
 # desc:
 #   - runs installrc on those from skel_repos_rcfiles
