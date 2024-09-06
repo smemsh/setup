@@ -1,21 +1,21 @@
 [submodule "roles/vmiterate"]
 	path = roles/vmiterate
-	url = ../ansible-role-vmiterate
+	url = https://github.com/smemsh/ansible-role-vmiterate
 [submodule "roles/initpgp"]
 	path = roles/initpgp
-	url = ../ansible-role-initpgp
+	url = https://github.com/smemsh/ansible-role-initpgp
 [submodule "roles/initssh"]
 	path = roles/initssh
-	url = ../ansible-role-initssh
+	url = https://github.com/smemsh/ansible-role-initssh
 [submodule "roles/mkuser"]
 	path = roles/mkuser
-	url = ../ansible-role-mkuser
+	url = https://github.com/smemsh/ansible-role-mkuser
 [submodule "roles/sysadmin"]
 	path = roles/sysadmin
-	url = ../ansible-role-sysadmin
+	url = https://github.com/smemsh/ansible-role-sysadmin
 [submodule "roles/skel"]
 	path = roles/skel
-	url = ../ansible-role-skel
+	url = https://github.com/smemsh/ansible-role-skel
 [submodule "roles/ssh"]
 	path = roles/ssh
-	url = ../ansible-role-ssh
+	url = https://github.com/smemsh/ansible-role-ssh
