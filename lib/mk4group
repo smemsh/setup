@@ -1,0 +1,138 @@
+#!/usr/bin/env bash
+#
+# mk4group
+#   adaptation of https://github.com/smemsh/utilsh/ mk4group for ansible
+#
+# args:
+#   - dir: string, path to root of directory tree to setup as such
+#   - user: string, username to do a chown -R user:group
+#   - group: string, username to do a chown -R user:group
+#   - (must supply both user and group, or neither not to chown)
+#
+# replaces:
+#   - name: set_skel_ownerships_recusively
+#     command: >
+#       chown -R {{user}}:{{group}} {{homedir}}/
+#   - name: setgid_recursively_dirs
+#     shell: >
+#       find {{homedir}}/ -type d -print0 |
+#       xargs -r0 chmod +02000
+#   - name: user2group_recursively
+#     shell: |
+#       for permbit in 4 2 1
+#       do find {{homedir}}/    \
+#         -not -type l          \
+#         -perm -0${permbit}00  \
+#         -print0               \
+#       | xargs -r0             \
+#         chmod +00${permbit}0
+#       done
+#
+##############################################################################
+
+unset changed failed
+
+bool () { (($1)) && printf true || printf false; }
+bomb () { let failed++; ansible_emit_json_results "$*"; false; exit 1; }
+
+###
+
+ansible_emit_json_results ()
+{
+	local message="$1"
+	printf '{"changed": %s, "failed": %s, "msg": "%s"}' \
+		`bool $changed` `bool $failed` "$message"
+}
+
+ansible_process_result ()
+{
+	if (($1))
+	then false
+	else let changed++; true; fi
+}
+
+###
+
+dirtree_setgid_on_dirs ()
+{
+	local dir=$1
+
+	(find "$dir" -type d -print0 \
+         | xargs -r0 chmod g+s) &>/dev/null
+
+	ansible_process_result $?
+}
+
+dirtree_change_ownerships ()
+{
+	local user=$1
+	local group=$2
+	local dir="$3"
+
+	chown -R $user:$group "$dir" &>/dev/null
+
+	ansible_process_result $?
+}
+
+dirtree_user2group_permcopy ()
+{
+	local dir="$1"
+	local permbit
+
+	for permbit in 4 2 1; do (
+		find "$dir" -not -type l -perm -0${permbit}00 -print0 \
+		| xargs -r0 chmod +00${permbit}0
+	) &>/dev/null
+	done
+
+	ansible_process_result $?
+}
+
+##############################################################################
+
+main ()
+{
+	local dir="$1" user=$2 group=$3
+	local path
+
+	###
+
+	path="$(readlink -e "$dir")"
+	if ! [[ $path ]]
+	then
+		if ! mkdir -p "$dir" &>/dev/null
+		then bomb "dir dne, could not mkdir"
+		else let changed++; path="$dir"
+		fi
+	fi
+
+	test -d "$path" || bomb "path '$path' dne or not directory"
+	test -w "$path" || bomb "path '$path' not writable"
+
+	if [[ $user || $group ]]
+	then
+		[[ $user && $group ]] ||
+			bomb "must provide both user and group"
+
+		(getent group $group && getent passwd $user) &>/dev/null ||
+			bomb "user and group must already exist"
+
+		dirtree_change_ownerships $user $group "$dir" ||
+			bomb "recursive ownership change failed"
+	fi
+
+	dirtree_setgid_on_dirs "$path" ||
+		bomb "setgid failed"
+	dirtree_user2group_permcopy "$path" ||
+		bomb "perms copy failed"
+
+	ansible_emit_json_results success
+}
+
+# ansible gives single arg: a file containing var=value pairs. we
+# convert those to args following script convention embodied in main()
+#
+test -e $1 &&
+test -r $1 &&
+source $1 &&
+main "$dir" $user $group
