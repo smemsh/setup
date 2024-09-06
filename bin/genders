@@ -1,0 +1,75 @@
+#!/usr/bin/env bash
+#
+# genders
+#   ansible inventory script, outputs genders database as json
+#
+# desc:
+#   - uses controller's own genders to generate
+#   - outputs _meta json as per ansible inventory spec
+#   - does not output libgenders key=val attributes, use ansible inventory
+#
+# todo:
+#   - make python inventory plugin using libgenders interface via cpython
+#   - rather, generate /etc/genders from ansible inventory instead of parsing
+#
+# also:
+#   - http://docs.ansible.com/ansible/dev_guide/developing_inventory.html
+#   - libgenders(3)
+#
+###
+
+set -e
+
+check_invocation () { which nodeattr &>/dev/null && [[ $1 == '--list' ]]; }
+
+main ()
+{
+	if ! check_invocation "$@"; then
+		printf '{%s,"_meta":{"hostvars":{%s}}}' \
+			'"localhost":["localhost"]' \
+			'"localhost":{"ansible_connection":"local"}'
+		exit
+	fi
+
+	printf '{'
+
+	groups=(`$nodeattr -l`)
+	groupn=${#groups[@]}
+
+	for ((g = 0; g < groupn;))
+	do
+		group=${groups[g]}
+		printf '"%s":{"hosts":[' $group
+
+		members=(`$nodeattr -s $group`)
+		membcnt=${#members[@]}
+
+		for ((m = 0; m < membcnt;)); do
+			member=${members[m]}
+			printf '"%s"' $member
+			((++m == membcnt)) || printf ,
+		done
+
+		printf ']}'
+		((++g == groupn)) || printf ,
+	done
+
+	###
+
+	printf ',"_meta":{"hostvars":{'
+
+	nodes=(`$nodeattr -s '~pdsh_all_skip'`) # see pdsh man page for -a
+	noden=${#nodes[@]}
+
+	for ((n = 0; n < noden;)); do
+		node=${nodes[n]}
+		printf '"%s":{}' $node
+		((++n == noden)) || printf ,
+	done
+
+	printf '}}'
+
+	printf '}'
+}
+
+main "$@"
