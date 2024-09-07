@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+
+# we have a setgid directory usage paradigm
+command -p gpg --no-permission-warning "$@"
