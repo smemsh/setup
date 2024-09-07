@@ -15,7 +15,7 @@
 #
 ###
 
-PYBASE := /usr/local/bin/python3
+PYBASE := /usr/local/bin/python3.9
 
 venv: bin/python3 bin/pip-compile bin/ansible
 
