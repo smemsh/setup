@@ -1,6 +1,6 @@
 #
 # play to operate ansible role from:
-#   http://smemsh.net/src/ansible-role-vmiterate/
+#   https://github.com/smemsh/ansible-role-vmiterate/
 #
 # need to supply 'host' as extra arg (see role for values)
 #
