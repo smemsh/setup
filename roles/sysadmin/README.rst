@@ -12,5 +12,5 @@ description
 - adds sysadmin group members with unrestricted sudo privs
 
 | scott@smemsh.net
-| http://github.com/smemsh/ansible-role-sysadmin
+| https://github.com/smemsh/ansible-role-sysadmin
 | http://spdx.org/licenses/GPL-2.0
