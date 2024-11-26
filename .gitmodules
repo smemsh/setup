@@ -16,3 +16,6 @@
 [submodule "roles/skel"]
 	path = roles/skel
 	url = https://github.com/smemsh/ansible-role-skel
+[submodule ".vim"]
+	path = .vim
+	url = https://github.com/smemsh/.vim
