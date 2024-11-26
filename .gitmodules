@@ -19,3 +19,6 @@
 [submodule ".vim"]
 	path = .vim
 	url = https://github.com/smemsh/.vim
+[submodule ".gitcli"]
+	path = .gitcli
+	url = https://github.com/smemsh/.gitcli
