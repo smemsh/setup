@@ -22,3 +22,6 @@
 [submodule ".gitcli"]
 	path = .gitcli
 	url = https://github.com/smemsh/.gitcli
+[submodule "srcx/git-reltag"]
+	path = srcx/git-reltag
+	url = https://github.com/smemsh/git-reltag
