@@ -4,6 +4,8 @@
 *.swp
 *.swo
 .vim*
+!.vim
+!.vimrc
 
 .config
 .cache
