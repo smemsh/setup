@@ -1,0 +1,158 @@
+#!/usr/bin/env bash
+#
+# ansrole
+#   executes a role against hosts or inventory groups, passing varval args
+#
+# usage:
+#   ansrole [-n | --nofacts] [--ansible-playbook-opt] [...] \
+#           [<invspec>:]<apply-onto-host-pattern>:<role-to-apply> \
+#           [ <varname=value> | <json> ] [...]
+#           # adjust in usagex() also ## fixme
+# desc:
+#   - includes the role in roles/<name>.yml passing params in extra args,
+#   - applies the role onto specified host (or inventory pattern if given)
+#   - creates symlinks to plays in a `mktemp -d`
+#   - runs in the tmpdir after overlaying temporary playbook to include_role
+#   - (ansible can only do playbook-relative, not cwd-relative paths)
+#
+# todo:
+#   - once 22983 is implemented, tmpdir won't be needed anymore
+#   - also see 21890 because include_role won't expose vars until then
+#   - and 19305 will allow roles to be incl dynamically with include_role:
+#   - and 22985 with roles: itself instead of needing a task
+#   - after adjusting usage in comment header, usagex() also needs update
+#
+##############################################################################
+
+anscfg=.ansible.cfg
+allnodes="all:!pdsh_all_skip" # hostpattern actually used when 'all' requested
+
+tmpdir=`mktemp -d /tmp/ansrole-XXXXXXXX` || exit 121
+#trap "rm -rf ${tmpdir:?}" EXIT
+
+init_cfbase ()
+{
+	local cfbase
+
+	if test -f $anscfg
+	then cfbase="$PWD"
+	else echo "cwd must be a playbase" >&2; false; exit; fi
+
+	#export ANSIBLE_CONFIG="$cfbase/.ansible.cfg"
+	#export ANSIBLE_INVENTORY="$cfbase/.ansible.hosts"
+	export ANSIBLE_CONFIG="$cfbase/.ansible.cfg"
+	export ANSIBLE_INVENTORY=/dev/null
+
+	cd $cfbase
+}
+
+# note: adjust this in comment header too
+# todo: maybe reformat directly from $BASH_SOURCE
+#
+usagex ()
+{
+	cat <<- %
+	ansrole [--ansible-playbook-opt] [...] \
+	    [<invspec>:]<apply-onto>:<role-to-apply> \
+	    [ <varname=value> | <json> ] [...]
+	%
+}
+
+process_args ()
+{
+	local match nmatches onto role inv
+
+	# temporary hack to skip fact gathering for raw role
+	# todo: we should make a play for this, really it's only
+	# for setting up u16+ which need python2 installed raw
+	# so we can't run facts, but we define this in a role.
+	# the solution is to make a play for this 
+	#
+	if [[ $1 == '--nofacts' || $1 == '-n' ]]; then
+		dofacts='false'; shift; fi
+
+	# leading -o or --options we'll pass to ansible intact
+	while [[ $1 == -* ]]
+	do opts+=("$1"); shift; done
+
+	# - format is invspec:onto:role, or host[,host[,...]]:role
+	# - invspec is x that makes sense to ansible '--inventory=x'
+	# - if 'onto' given, used as host pattern for --limit='onto' of 'all'
+	# - else list of one or more hostnames (uses dns, not inventory)
+	# - hostname is implemented with '--inventory=onto,'
+	#
+	if [[ $1 =~ ^([^:]+):(.+):([^:]+)$ ]]
+	then
+		onto="${BASH_REMATCH[2]}" role=${BASH_REMATCH[3]}
+		[[ "$onto" == all ]] && onto="$allnodes"
+		invarg=(--inventory="${BASH_REMATCH[1]}" --limit="$onto")
+
+	elif [[ $1 =~ ^([^:]+):([^:]+)$ ]]
+	then
+		onto=${BASH_REMATCH[1]} role=${BASH_REMATCH[2]}
+		invarg=(--inventory=$onto, --limit=$onto)
+	else
+		echo "no valid pattern match for first arg" >&2
+		false
+		return
+	fi
+
+	[[ $onto && $role ]] && rolename=$role || usagex
+
+	# var=val or json strings to pass in ansible-playbook -e
+	#
+	shift; for arg; do extras+=(-e); extras+=("$arg"); done
+}
+
+generate_tmp_playbook ()
+{
+	cat <<- % >$tmpplay
+	- hosts: all
+	  # some roles require lockstep tasks or disaster will
+	  # ensue, like mysql master update phase.  change it
+	  # only very carefully.  TODO: script args to control
+	  strategy: linear
+	  serial: 100%
+	  become: true
+	  gather_facts: ${dofacts:-'true'}
+	  vars_files: [$(
+	    ls vars/*.yml \
+	    | awk '{printf("\"%s\", ", $0)}'
+	  )]
+	  roles: ['$rolename']
+	%
+}
+
+# workaround ansible requiring everything to be relative to
+# the play base, by making a temporary one of our own,
+# populated by symlinks to the real one.  this is truly a
+# hack, to work around ansible not having a cwd or
+# specific-dir -relative mode
+#
+init_tmp_playbase ()
+{
+	local d; for d in */; do
+		d=${d%/}; ln -s $(readlink -f $d) $tmpdir/; done
+
+	tmpplay=$tmpdir/ansrole-${rolename:?}.yml
+
+	# todo: might have to copy *.yml files from the
+	# playbase too at some point if we ever become more
+	# than just a role executor
+}
+
+main ()
+{
+	init_cfbase &&
+	process_args "$@" &&
+	init_tmp_playbase &&
+	generate_tmp_playbook &&
+	ansible-playbook \
+		"${opts[@]}" \
+		"${invarg[@]}" \
+		$tmpplay \
+		"${extras[@]}" \
+	;
+}
+
+main "$@"
