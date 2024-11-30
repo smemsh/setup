@@ -21,6 +21,7 @@ export GPG_TTY=`tty`
 export PDSH_RCMD_TYPE=ssh
 export EDITOR=vim
 export LESS="-iSQRF#3"
+export QUOTING_STYLE=literal
 
 PATH=~/bin
 PATH=$PATH:~/venv/bin
