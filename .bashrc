@@ -6,6 +6,7 @@ complete -r
 unset -f $(compgen -A function)
 unset $(compgen -A variable _)
 shopt -s cmdhist lithist extglob globstar histappend
+set -o noclobber
 
 export PS1='\n \$ '
 export LANG=en_US.UTF-8
