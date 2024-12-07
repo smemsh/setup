@@ -8,6 +8,7 @@ unset $(compgen -A variable _)
 shopt -s cmdhist lithist extglob globstar histappend
 
 export PS1='\n \$ '
+export LANG=en_US.UTF-8
 export MAILCHECK=
 export HISTTIMEFORMAT='%Y%m%d%H%M%S '
 export HISTFILE=~/.bash_history
