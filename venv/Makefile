@@ -27,7 +27,7 @@ bin/ansible: requirements.txt
 	touch bin/ansible
 
 requirements.txt compile: requirements.in
-	bin/pip-compile -q requirements.in
+	bin/pip-compile -q --strip-extras requirements.in
 
 bin/pip-compile pkgup:
 	bin/pip3 install -q -U pip wheel setuptools pip-tools
