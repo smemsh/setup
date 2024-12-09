@@ -66,12 +66,7 @@ process_args ()
 {
 	local match nmatches onto role inv
 
-	# temporary hack to skip fact gathering for raw role
-	# todo: we should make a play for this, really it's only
-	# for setting up u16+ which need python2 installed raw
-	# so we can't run facts, but we define this in a role.
-	# the solution is to make a play for this 
-	#
+	# temporary hack to skip fact gathering for raw roles
 	if [[ $1 == '--nofacts' || $1 == '-n' ]]; then
 		dofacts='false'; shift; fi
 
@@ -104,7 +99,6 @@ process_args ()
 	[[ $onto && $role ]] && rolename=$role || usagex
 
 	# var=val or json strings to pass in ansible-playbook -e
-	#
 	shift; for arg; do extras+=(-e); extras+=("$arg"); done
 }
 
