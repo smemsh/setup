@@ -22,6 +22,10 @@
 #   - and 22985 with roles: itself instead of needing a task
 #   - after adjusting usage in comment header, usagex() also needs update
 #
+# scott@smemsh.net
+# https://github.com/smemsh/setup/
+# https://spdx.org/licenses/GPL-2.0
+#
 ##############################################################################
 
 anscfg=.ansible.cfg
