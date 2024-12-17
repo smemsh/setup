@@ -38,6 +38,8 @@ alias f='fg'
 alias m='fg -'
 alias h=hostname
 
+complete -C /usr/bin/tofu tofu
+
 r       () { sudo -iu root bash -c "$*"; }
 lsa     () { ls -lAF "$@" | less -XEr; }
 procs   () { ps -N --ppid=2 -o comm= | sort -u | column; }
