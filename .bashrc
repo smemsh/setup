@@ -19,6 +19,9 @@ export HISTSIZE=
 export ANSIBLE_VAULT_PASSWORD_FILE=~/bin/ansvault
 export ANSVAULT_PGPFILE=~/keys/vault/master.asc
 
+export TF_CLI_ARGS_plan="-compact-warnings"
+export TF_CLI_ARGS_apply="-compact-warnings"
+
 export GPG_TTY=`tty`
 export PDSH_RCMD_TYPE=ssh
 export EDITOR=vim
