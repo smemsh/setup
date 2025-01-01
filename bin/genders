@@ -28,6 +28,8 @@
 
 set -e
 
+nodeattr="nodeattr"
+
 check_invocation () { which nodeattr &>/dev/null && [[ $1 == '--list' ]]; }
 
 main ()
