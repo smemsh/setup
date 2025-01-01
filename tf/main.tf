@@ -174,6 +174,7 @@ resource "incus_profile" "default" {
   description = "host-bridged-br0"
 
   config = {
+    "security.secureboot"     = "false"
     "security.idmap.isolated" = "true"
     "security.idmap.size"     = local.uidspace_unpriv
   }
