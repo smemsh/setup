@@ -4,13 +4,17 @@
 #   ansible inventory script, outputs genders database as json
 #
 # desc:
-#   - uses controller's own genders to generate
-#   - outputs _meta json as per ansible inventory spec
-#   - does not output libgenders key=val attributes, use ansible inventory
+#   - queries genders file in script's dirname using nodeattr(1)
+#   - outputs json ansible will read to generate inventory
+#   - give to ansible with '-i', via $ANSIBLE_INVENTORY, or in '-i' dir/
+#   - both ansible (ad-hoc mode) and ansible-playbook can use it
+#   - outputs just localhost as inventory on any kind of error
+#   - we define _meta, so no need to handle --host except as bad-invoke
 #
 # todo:
 #   - make python inventory plugin using libgenders interface via cpython
 #   - rather, generate /etc/genders from ansible inventory instead of parsing
+#   - maybe all this should go into terraform first, then to ansible by plugin
 #
 # also:
 #   - http://docs.ansible.com/ansible/dev_guide/developing_inventory.html
