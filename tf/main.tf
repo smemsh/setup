@@ -3,6 +3,8 @@
 locals {
   home = data.external.env.result.HOME
 
+  masklen = 22
+
   plexhosts  = toset(["omnius", "vernius"])
   plexgates  = [for h in local.plexhosts : replace(h, "/us$/", "plex")]
   plexbyhost = zipmap(local.plexhosts, local.plexgates)
@@ -94,7 +96,7 @@ resource "incus_network" "br0" {
     "dns.mode"     = "none" # dnsmasq still starts, see upstream bug 1537
     "ipv6.address" = "none"
     "ipv4.address" = format(
-      "%s/22", local.hostdb[local.plexbyhost[each.value]]
+      "%s/${local.masklen}", local.hostdb[local.plexbyhost[each.value]]
     )
     "ipv6.nat"      = "false"
     "ipv4.nat"      = "false"
