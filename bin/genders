@@ -20,7 +20,11 @@
 #   - http://docs.ansible.com/ansible/dev_guide/developing_inventory.html
 #   - libgenders(3)
 #
-###
+# scott@smemsh.net
+# https://github.com/smemsh/setup/
+# https://spdx.org/licenses/GPL-2.0
+#
+##############################################################################
 
 set -e
 
