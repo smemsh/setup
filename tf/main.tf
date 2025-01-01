@@ -200,11 +200,6 @@ resource "incus_profile" "default" {
       size = local.volsz_plex
     }
   }
-  # TODO tekius has a shared mount?
-  # how to do this with security.idmap.isolated?
-  #   - setting raw.idmap to share should work, but leaves that uid able to be
-  #     controlled on the host from within the container.  also see disk
-  #     device config propagation, recursive, and shift options
 }
 
 # systems that should be privileged and nest, ie k8s/podman/incus hosts
