@@ -19,6 +19,8 @@ locals {
     "images", "profiles",
     "storage.volumes", "storage.buckets"
   ]
+
+  hostdb = data.external.hosts.result
 }
 
 data "external" "env" {
@@ -92,7 +94,7 @@ resource "incus_network" "br0" {
     "dns.mode"     = "none" # dnsmasq still starts, see upstream bug 1537
     "ipv6.address" = "none"
     "ipv4.address" = format(
-      "%s/22", data.external.hosts.result[local.plexbyhost[each.value]]
+      "%s/22", local.hostdb[local.plexbyhost[each.value]]
     )
     "ipv6.nat"      = "false"
     "ipv4.nat"      = "false"
