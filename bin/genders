@@ -29,6 +29,15 @@
 set -e
 
 nodeattr="nodeattr"
+#
+# todo: later once we have the source file in ansible somewhere, in
+# meantime we use the controller's own /etc/genders
+#
+#path=`realpath -s $BASH_SOURCE`
+#nodeattr="nodeattr -f ${path%/*}/roles/dir/files/genders"
+#nodeattr="nodeattr -f ${path%/*}/files/genders"
+#nodeattr="nodeattr -f ${path%/*}/genders"
+#nodeattr="nodeattr -f ${path%/*}/../etc/genders"
 
 check_invocation () { which nodeattr &>/dev/null && [[ $1 == '--list' ]]; }
 
