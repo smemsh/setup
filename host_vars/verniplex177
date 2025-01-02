@@ -1,0 +1,6 @@
+#
+---
+
+ipnet: 10.32.227.177/22
+domain: smemsh.net
+bridge: br0
