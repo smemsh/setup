@@ -4,12 +4,14 @@
 #   ansible inventory script, outputs genders database as json
 #
 # desc:
-#   - queries genders file in script's dirname using nodeattr(1)
-#   - outputs json ansible will read to generate inventory
+#   - queries system genders file using nodeattr(1)
+#   - outputs json ansible can read to describe an inventory
 #   - give to ansible with '-i', via $ANSIBLE_INVENTORY, or in '-i' dir/
 #   - both ansible (ad-hoc mode) and ansible-playbook can use it
 #   - outputs just localhost as inventory on any kind of error
 #   - we define _meta, so no need to handle --host except as bad-invoke
+#   - for host enumeration, will not return hosts in pdsh_all_skip group
+#   - group membership still available for hosts in pdsh_all_skip
 #
 # todo:
 #   - make python inventory plugin using libgenders interface via cpython
