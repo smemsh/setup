@@ -116,7 +116,7 @@ generate_tmp_playbook ()
 	  gather_facts: ${dofacts:-'true'}
 	  vars_files: [$(
 	    ls vars/*.yml \
-	    | awk '{printf("\"%s\", ", $0)}'
+	    | awk -F / '{printf("\"%s\", ", $NF)}'
 	  )]
 	  roles: ['$rolename']
 	%
