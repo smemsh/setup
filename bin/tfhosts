@@ -6,8 +6,8 @@ tfhosts
 desc
   - parses "getent hosts" output
   - outputs toplevel {"$key":"$value",...} json dict
-  - key $1 maps to $2
-  - all keys from $2-$NF map to $1
+  - host record field 1 (as key) maps to its field 2 (as value)
+  - host record fields from 2 (as key) to the end map to field 1 (as value)
 """
 __url__     = 'https://github.com/smemsh/setup/'
 __author__  = 'Scott Mcdermott <scott@smemsh.net>'
