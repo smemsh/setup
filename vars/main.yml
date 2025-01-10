@@ -1,0 +1,20 @@
+#
+---
+
+cfmgmt_username:          config
+cfmgmt_password:          '{{secret_cfmgmt_password}}'
+cfmgmt_homedir:           /home/{{cfmgmt_username}}
+
+setup_username:           setup
+setup_homedir:            /home/{{setup_username}}
+
+locgroup_linode:          lnd
+locgroup_google:          gce
+locgroup_roc:             roc
+
+sysadmin_group:           sysadmin
+sysadmin_gid:             666
+developer_group:          dev
+developer_gid:            777
+
+gcsurl_base:              https://storage.googleapis.com/pvn.files.smemsh.net
