@@ -62,6 +62,7 @@ terraform {
   }
 }
 
+# todo after v1.9.0 refactor with for_each
 provider "incus" {
   remote {
     name    = "local"
