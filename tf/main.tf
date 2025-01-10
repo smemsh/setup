@@ -39,7 +39,7 @@ data "external" "hosts" {
 #}
 
 terraform {
-  required_version = "1.8.7"
+  required_version = "1.8.8"
   required_providers {
     incus = {
       source  = "lxc/incus"
