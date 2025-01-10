@@ -94,8 +94,7 @@ process_args ()
 		invarg=(--inventory=$onto, --limit=$onto)
 	else
 		echo "no valid pattern match for first arg" >&2
-		false
-		return
+		usagex
 	fi
 
 	[[ $onto && $role ]] && rolename=$role || usagex
