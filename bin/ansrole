@@ -60,6 +60,8 @@ usagex ()
 	    [<invspec>:]<apply-onto>:<role-to-apply> \\
 	    [ <varname=value> | <json> ] [...]
 	%
+	false
+	exit
 }
 
 process_args ()
