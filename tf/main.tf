@@ -25,6 +25,8 @@ locals {
   hostdb = data.external.hosts.result
 }
 
+###
+
 data "external" "env" {
   program = ["jq", "-n", "env"]
 }
@@ -73,6 +75,8 @@ provider "incus" {
   }
 }
 
+###
+
 resource "incus_image" "u22v" {
   for_each = local.plexhosts
   remote   = each.value
@@ -84,6 +88,8 @@ resource "incus_image" "u22v" {
     architecture = "x86_64"
   }
 }
+
+###
 
 resource "incus_network" "br0" {
   name        = "br0"
@@ -106,6 +112,8 @@ resource "incus_network" "br0" {
     "ipv4.firewall" = "false"
   }
 }
+
+###
 
 import {
   for_each = local.plexhosts
@@ -144,6 +152,8 @@ resource "incus_project" "plex" {
     [for _ in local.lxdfeatures : "false"]
   )
 }
+
+###
 
 resource "incus_storage_pool" "vpool" {
   for_each = local.plexhosts
@@ -224,6 +234,8 @@ resource "incus_profile" "nestpriv" {
     "security.idmap.size" = local.uidspace_nestpriv
   }
 }
+
+###
 
 resource "incus_instance" "scytus" {
   name        = "scytus"
