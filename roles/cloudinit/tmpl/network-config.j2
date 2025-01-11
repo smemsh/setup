@@ -1,0 +1,21 @@
+#
+---
+
+version: 2
+ethernets:
+  eth0:
+    # this should get the first ethernet interface, might be named
+    # ens2 but then with net.ifnames=1 and biosdevnames=0 kernel
+    # args it should be called eth0.  note that the parent's name is
+    # irrelevant, only used as a reference, and doesn't really mean
+    # eth0; only the 'match' clause matters, if it's supplied
+    # (otherwise, it does use its name as the match value)
+    match:
+      name: e*
+    addresses:
+      - '{{ip_address}}/{{ip_prefix}}'
+    gateway4: '{{ip_gateway}}'
+    nameservers:
+      addresses:
+        - 8.8.8.8
+        - 8.8.4.4
