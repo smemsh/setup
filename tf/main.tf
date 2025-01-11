@@ -23,6 +23,8 @@ locals {
   ]
 
   hostdb = data.external.hosts.result
+
+  cloudinit_id = var.bakenode
 }
 
 ###
@@ -37,6 +39,16 @@ data "external" "hosts" {
 #output "debug_print" {
 #  value = data.external.hosts
 #}
+
+data "external" "cloudinits" {
+  count = var.baketime ? 1 : 0
+  program = ["${local.home}/bin/tfcloudinit"]
+  query = {
+    host = local.cloudinit_id
+  }
+}
+
+###
 
 terraform {
   required_version = "1.9.0"
@@ -265,4 +277,19 @@ resource "incus_instance" "tekius" {
       "source" = "/var/lib/incus/fs/tekius"
     }
   }
+}
+
+###
+
+# set by an ansible play that initiates the bake and makes an image
+variable "baketime" {
+  description = "build-bakehost-yn"
+  type        = bool
+  default     = false
+}
+
+variable "bakenode" {
+  description = "bakehost-nodename"
+  type        = string
+  default     = ""
 }

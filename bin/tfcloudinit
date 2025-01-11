@@ -1,0 +1,138 @@
+#!/usr/bin/env python3
+"""
+tfcloudinit
+  terraform external data source with cloudinit data from ansible role
+
+desc
+  - runs our ansible cloudinit role
+  - takes json dict on stdin with single key 'host'
+  - host parameter is provided to cloudinit role (ie, the "target" node)
+  - output keys are "network-config" and "user-data", json dict on stdout
+"""
+__url__     = 'https://github.com/smemsh/setup/'
+__author__  = 'Scott Mcdermott <scott@smemsh.net>'
+__license__ = 'GPL-2.0'
+
+from sys import exit, hexversion
+if hexversion < 0x030c00f0: exit("minpython: %s" % hexversion)
+
+import json
+
+from sys import argv, stdin, stdout, stderr
+from select import select
+from traceback import print_exc
+from subprocess import check_output
+
+from os.path import basename
+from os import (
+    chdir,
+    isatty, dup,
+    getenv, putenv, unsetenv,
+    close as osclose,
+    EX_OK as EXIT_SUCCESS,
+    EX_SOFTWARE as EXIT_FAILURE,
+)
+
+###
+
+def err(*args, **kwargs):
+    print(*args, file=stderr, **kwargs)
+
+def bomb(*args, **kwargs):
+    err(*args, **kwargs)
+    exit(EXIT_FAILURE)
+
+def exe(cmd):
+    return check_output(cmd.split(), text=True)
+
+###
+
+# ANSIBLE_STDOUT_CALLBACK=json \
+# ansrole -n --connection=local localhost:cloudinit host=omniplex0 \
+# | jq -r '
+#   .plays[].tasks[].hosts.localhost.results[]?
+#   | select(._ansible_item_label == "user-data")
+#   | .ansible_facts.cloudinits_rendered
+# '
+#
+def tfcloudinit():
+
+    hostparam = f"host={json.load(infile)['host']}"
+    ansrole = 'cloudinit'
+    anscmd = f"ansrole -n --connection=local localhost:{ansrole}"
+
+    putenv("ANSIBLE_STDOUT_CALLBACK", "json")
+    cmdout = json.loads(exe(f"{anscmd} {hostparam}"))
+
+    for task in cmdout['plays'][0]['tasks']:
+        try: results = task['hosts']['localhost']['results']
+        except KeyError: continue
+        break
+
+    if len(results) != 2:
+        bomb("could not find render results")
+
+    outputs = {}
+    for r in results:
+        key = r['_ansible_item_label']
+        value = r['ansible_facts']['cloudinits_rendered']
+        outputs.update({key: value})
+
+    json.dump(outputs, stdout)
+
+###
+
+def main():
+
+    if debug == 1:
+        breakpoint()
+
+    try: chdir(getenv('HOME'))
+    except: bomb("cannot chdir $HOME ?!")
+
+    try: subprogram = globals()[invname]
+    except (KeyError, TypeError):
+        from inspect import trace
+        if len(trace()) == 1: bomb("unimplemented")
+        else: raise
+
+    return subprogram()
+
+###
+
+if __name__ == "__main__":
+
+    invname = basename(argv[0])
+    args = argv[1:]
+
+    # move stdin, pdb needs stdio fds itself
+    stdinfd = stdin.fileno()
+    if not isatty(stdinfd) and select([stdin], [], [])[0]:
+        infile = open(dup(stdinfd))
+        osclose(stdinfd) # cpython bug 73582
+        try: stdin = open('/dev/tty')
+        except: pass # no ctty, but then pdb would not be in use
+    else:
+        bomb("must supply json query dict on stdin")
+
+    from bdb import BdbQuit
+    if debug := int(getenv('DEBUG') or 0):
+        import pdb
+        from pprint import pp
+        err('debug: enabled')
+        unsetenv('DEBUG') # otherwise forked children hang
+
+    try: main()
+    except BdbQuit: bomb("debug: stop")
+    except SystemExit: raise
+    except KeyboardInterrupt: bomb("interrupted")
+    except:
+        print_exc(file=stderr)
+        if debug: pdb.post_mortem()
+    finally: # cpython bug 55589
+        try: stdout.flush()
+        finally:
+            try: stdout.close()
+            finally:
+                try: stderr.flush()
+                finally: stderr.close()
