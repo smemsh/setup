@@ -1,0 +1,24 @@
+#
+---
+
+- name: derive_cloudinits_from_file_list
+  set_fact:
+    cloudinits: |
+      {%- set cloudinits = [] %}
+      {%- for path in lookup('fileglob', 'tmpl/*.j2', wantlist=true) %}
+      {%-     do cloudinits.append(path | basename | splitext | first) %}
+      {%- endfor %}
+      {{cloudinits}}
+
+- name: populate_hostvars_for_expansion
+  add_host:
+    name: '{{vm_name}}'
+
+- name: render_cloud_init_configs_to_yaml
+  set_fact:
+    cloudinits_rendered: '{{lookup("template", "tmpl/" + item + ".j2")}}'
+  with_list: '{{cloudinits}}'
+
+#  template:
+#    src: tmpl/{{item}}.j2
+#    dest: '{{cloudinit_destdir}}/{{item}}'

@@ -1,0 +1,16 @@
+#
+---
+
+
+cloudinit_vm_locale:      en_US.UTF-8
+cloudinit_vm_timezone:    US/Pacific
+
+# this.domain is put into /etc/hosts by cloud-init with the
+# incoming addr of ansible connects, to form the gateway entry,
+# saves dns lookup timeout on initial connects
+# NOTE: this is really just temporary until the proper hosts
+#  file is written, doesn't have to be a real name, just has to
+#  look up
+#
+cloudinit_cfmgmt_host:   router
+cloudinit_cfmgmt_fqdn:   '{{cloudinit_cfmgmt_host}}.{{hostvars[host].domain}}'

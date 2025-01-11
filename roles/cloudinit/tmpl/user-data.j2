@@ -1,0 +1,117 @@
+#cloud-config
+#
+# user-data for cloud-init
+#   {{ansible_managed}}
+#
+# - yaml format
+# - cloud-init requires first line comment to identify its metaformat
+# - we do just enough to get instance bootstrapped for 'config' user
+# - thereafter, config layer takes over (in our case, ansible)
+#
+---
+
+disable_ec2_metadata: {{
+  (groups[locgroup_google] is defined and target in groups[locgroup_google])
+  | ternary('false', 'true')
+}}
+
+package_update:           false
+package_upgrade:          false
+resize_rootfs:            true
+disable_root:             false
+preserve_hostname:        false
+ssh_pwauth:               false
+locale:                   '{{cloudinit_vm_locale}}'
+timezone:                 '{{cloudinit_vm_timezone}}'
+
+# we'll remove/replace this later in rsyslog role
+rsyslog:                  {configs: [{content: "*.debug /var/log/messages"}]}
+
+# - manage_resolv_conf does not work at all (module is not even
+#   configured in the image's cloud.cfg, and if we do add it, there's
+#   a python error)
+# - manage_etc_hosts uses $hostname and the /etc/cloud/templates
+#   version is broken if we make that an fqdn (adds .localdomain, also
+#   makes 127.0.0.1 instead of real static ip), which we want it to be
+#
+manage_etc_hosts:         false
+manage_resolv_conf:       false
+hostname:                 '{{ip_fqdn}}'
+fqdn:                     '{{ip_fqdn}}'
+
+# we just inject /etc/hosts and /etc/resolv.conf ourselves since we
+# have all information we need and these are very simple to make.
+# remember also, these are only for bootstrap until ansible takes over
+# (after which we will disable cloud-init entirely)
+#
+bootcmd:
+  - |
+    cat << % >/etc/hosts
+    127.0.0.1 localhost.localdomain localhost
+    {{ip_address}} {{ip_fqdn}} {{vm_name}}
+    {{ip_gateway}} {{cloudinit_cfmgmt_fqdn}} {{cloudinit_cfmgmt_host}}
+{% if groups[locgroup_google] is defined
+   and target in groups[locgroup_google] %}
+    169.254.169.254 metadata.google.internal metadata
+{% endif %}
+    %
+  - |
+    if test -L /etc/resolv.conf
+    then : # true # system uses netplan/networkd, see network-config
+    else : # used to be we only did resolv.conf here, but having problems
+    fi
+  - |
+    cat << % >/etc/resolv.conf
+    nameserver 8.8.8.8
+    nameserver 8.8.4.4
+    %
+
+###
+
+users:
+
+  - name:                 '{{cfmgmt_username}}'
+    shell:                '/bin/bash'
+    homedir:              '{{cfmgmt_homedir}}'
+    plain_text_passwd:    '{{cfmgmt_password}}'
+    lock_passwd:          false
+    sudo:                 'ALL=(ALL) NOPASSWD:ALL'
+    ssh_authorized_keys:
+      - "{{lookup('file', 'keys/ssh/' + cfmgmt_username + '-id_rsa.pub')}}"
+
+runcmd:
+
+  - 'mkdir -p {{cfmgmt_homedir}}'
+  - 'chown -R
+      {{cfmgmt_username}}:{{cfmgmt_username}}
+      {{cfmgmt_homedir}}'
+  - 'chmod 0700 {{cfmgmt_homedir}}'
+
+  # eliminate any dain bramaged vendor shell pollution
+  #
+  - 'rm -f /etc/profile'
+  - 'rm -f /etc/bash.bashrc'
+  - 'rm -f /etc/bashrc'
+  - 'rm -f /etc/bash_profile'
+  - 'find /root/ -mindepth 1 -print0 | xargs -0 rm -rf'
+
+  # for spelunking prior to cfmgmt
+  - 'echo "set editing-mode vi" > /root/.inputrc'
+
+ssh_keys:
+
+  # note: preserve indent offsets, since this is templated yaml
+  #
+  rsa_private: |
+    {{lookup("file", "keys/host/" + ip_fqdn + "-id_rsa") |
+      indent(4, false)}}
+
+  rsa_public: |
+    {{lookup("file", "keys/host/" + ip_fqdn + "-id_rsa.pub") |
+      indent(4, false)}}
+
+  # server will generate dsa and ecdsa hostkeys in init script, which we
+  # don't care about, configured to only use rsa client-side)
+  # TODO: make sure .ssh/config has this!
+
+# EOF
