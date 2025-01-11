@@ -28,3 +28,6 @@
 [submodule "srcx/git-reltag"]
 	path = srcx/git-reltag
 	url = https://github.com/smemsh/git-reltag
+[submodule "srcx/utiladm"]
+	path = srcx/utiladm
+	url = https://github.com/smemsh/utiladm
