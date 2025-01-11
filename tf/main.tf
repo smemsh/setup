@@ -24,6 +24,7 @@ locals {
 
   hostdb = data.external.hosts.result
 
+  cloudinits   = var.baketime ? data.external.cloudinits[0].result : null
   cloudinit_id = var.bakenode
 }
 
@@ -288,8 +289,31 @@ variable "baketime" {
   default     = false
 }
 
+variable "bakehost" {
+  description = "bakehost-remote"
+  type        = string
+  default     = ""
+}
+
 variable "bakenode" {
   description = "bakehost-nodename"
   type        = string
   default     = ""
+}
+
+resource "incus_instance" "imgbake" {
+  name        = var.bakenode
+  for_each    = toset(var.baketime ? [var.bakehost] : [])
+  remote      = each.value
+  description = "imgbake-instance"
+
+  type        = "virtual-machine"
+  image       = incus_image.u22v[each.value].fingerprint
+  running     = true
+  profiles    = ["default"]
+
+  config = {
+    "cloud-init.network-config" = sensitive(local.cloudinits.network-config)
+    "cloud-init.user-data"      = sensitive(local.cloudinits.user-data)
+  }
 }
