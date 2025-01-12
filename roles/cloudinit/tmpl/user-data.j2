@@ -24,6 +24,26 @@ write_files:
     content: |
       port {{cloudinit_ssh_port}}
 
+  # we just inject /etc/hosts and /etc/resolv.conf ourselves since we
+  # have all information we need and these are very simple to make.
+  # remember also, these are only for bootstrap until ansible takes over
+  # (after which we will disable cloud-init entirely)
+
+  - path: /etc/hosts
+    content: |
+      127.0.0.1 localhost.localdomain localhost
+      {{ip_address}} {{ip_fqdn}} {{vm_name}}
+      {{ip_gateway}} {{cloudinit_cfmgmt_fqdn}} {{cloudinit_cfmgmt_host}}
+{% if groups[locgroup_google] is defined
+      and target in groups[locgroup_google] %}
+      169.254.169.254 metadata.google.internal metadata
+{% endif %}
+
+  - path: /etc/resolv.conf
+    content: |
+      nameserver 8.8.8.8
+      nameserver 8.8.4.4
+
 package_update:           true
 package_upgrade:          true
 packages:
@@ -52,32 +72,8 @@ manage_resolv_conf:       false
 hostname:                 '{{ip_fqdn}}'
 fqdn:                     '{{ip_fqdn}}'
 
-# we just inject /etc/hosts and /etc/resolv.conf ourselves since we
-# have all information we need and these are very simple to make.
-# remember also, these are only for bootstrap until ansible takes over
-# (after which we will disable cloud-init entirely)
-#
-bootcmd:
-  - |
-    cat << % >/etc/hosts
-    127.0.0.1 localhost.localdomain localhost
-    {{ip_address}} {{ip_fqdn}} {{vm_name}}
-    {{ip_gateway}} {{cloudinit_cfmgmt_fqdn}} {{cloudinit_cfmgmt_host}}
-{% if groups[locgroup_google] is defined
-   and target in groups[locgroup_google] %}
-    169.254.169.254 metadata.google.internal metadata
-{% endif %}
-    %
-  - |
-    if test -L /etc/resolv.conf
-    then : # true # system uses netplan/networkd, see network-config
-    else : # used to be we only did resolv.conf here, but having problems
-    fi
-  - |
-    cat << % >/etc/resolv.conf
-    nameserver 8.8.8.8
-    nameserver 8.8.4.4
-    %
+# note: these run every boot!
+bootcmd: []
 
 ###
 
