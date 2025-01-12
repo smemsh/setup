@@ -21,7 +21,7 @@ import json
 from sys import argv, stdin, stdout, stderr
 from select import select
 from traceback import print_exc
-from subprocess import check_output
+from subprocess import run
 
 from os.path import basename
 from os import (
@@ -42,9 +42,6 @@ def bomb(*args, **kwargs):
     err(*args, **kwargs)
     exit(EXIT_FAILURE)
 
-def exe(cmd):
-    return check_output(cmd.split(), text=True)
-
 ###
 
 # ANSIBLE_STDOUT_CALLBACK=json \
@@ -59,15 +56,26 @@ def tfcloudinit():
 
     hostparam = f"host={json.load(infile)['host']}"
     ansrole = 'cloudinit'
-    anscmd = f"ansrole -n --connection=local localhost:{ansrole}"
+    anscmd = f"ansrole -n --connection=local localhost:{ansrole} {hostparam}"
 
     putenv("ANSIBLE_STDOUT_CALLBACK", "json")
-    cmdout = json.loads(exe(f"{anscmd} {hostparam}"))
+    r = run(anscmd.split(), capture_output=True, text=True)
+    key_to_get = 'failed' if r.returncode else 'results'
+    json_output = json.loads(r.stdout)
 
-    for task in cmdout['plays'][0]['tasks']:
-        try: results = task['hosts']['localhost']['results']
-        except KeyError: continue
-        break
+    for task in json_output['plays'][0]['tasks']:
+        try:
+            task = task['hosts']['localhost']
+            if (results := task.get(key_to_get)) is None:
+                continue
+            if r.returncode:
+                if (msg := task.get('msg')) is None:
+                    msg = 'failed, but could not find error message'
+                bomb(msg)
+            break
+
+        except KeyError:
+            continue
 
     if len(results) != 2:
         bomb("could not find render results")
@@ -129,6 +137,7 @@ if __name__ == "__main__":
     except:
         print_exc(file=stderr)
         if debug: pdb.post_mortem()
+        else: bomb("aborting...")
     finally: # cpython bug 55589
         try: stdout.flush()
         finally:
