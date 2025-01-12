@@ -90,6 +90,10 @@ users:
 
 runcmd:
 
+  # remove skeleton kruft, too bad no way to disable it
+  - rm -rf {{cfmgmt_homedir}}/.cache/
+  - find {{cfmgmt_homedir}}/ -mindepth 1 -maxdepth 1 -type f -print0 |
+    xargs -0 rm -f
 
   # eliminate any dain bramaged vendor shell pollution
   #
