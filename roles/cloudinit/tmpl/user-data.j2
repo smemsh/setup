@@ -15,6 +15,15 @@ disable_ec2_metadata: {{
   | ternary('false', 'true')
 }}
 
+write_files:
+
+  # temporary to get cfmgmt bootstrapped; once cfmgmt runs, it will
+  # replace the Port in main config file and this file should be removed
+  #
+  - path: /etc/ssh/sshd_config.d/00-smemsh-ssh-port.conf
+    content: |
+      port {{cloudinit_ssh_port}}
+
 package_update:           true
 package_upgrade:          true
 packages:

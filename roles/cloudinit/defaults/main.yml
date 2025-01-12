@@ -15,5 +15,7 @@ cloudinit_vm_timezone:    US/Pacific
 cloudinit_cfmgmt_host:   router
 cloudinit_cfmgmt_fqdn:   '{{cloudinit_cfmgmt_host}}.{{hostvars[host].domain}}'
 
+cloudinit_ssh_port: '{{ssh_port}}'
+
 cloudinit_packages:
   - openssh-server
