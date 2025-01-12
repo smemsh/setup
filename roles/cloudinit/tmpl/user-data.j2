@@ -80,11 +80,11 @@ bootcmd: []
 users:
 
   - name:                 '{{cfmgmt_username}}'
-    shell:                '/bin/bash'
+    shell:                /bin/bash
     homedir:              '{{cfmgmt_homedir}}'
     plain_text_passwd:    '{{cfmgmt_password}}'
     lock_passwd:          false
-    sudo:                 'ALL=(ALL) NOPASSWD:ALL'
+    sudo:                 ALL=(ALL) NOPASSWD:ALL
     ssh_authorized_keys:
       - "{{lookup('file', 'keys/ssh/' + cfmgmt_username + '-id_rsa.pub')}}"
 
@@ -95,16 +95,15 @@ runcmd:
   - find {{cfmgmt_homedir}}/ -mindepth 1 -maxdepth 1 -type f -print0 |
     xargs -0 rm -f
 
-  # eliminate any dain bramaged vendor shell pollution
-  #
-  - 'rm -f /etc/profile'
-  - 'rm -f /etc/bash.bashrc'
-  - 'rm -f /etc/bashrc'
-  - 'rm -f /etc/bash_profile'
-  - 'find /root/ -mindepth 1 -print0 | xargs -0 rm -rf'
+  # eliminate dain bramaged vendor shell pollution
+  - rm -f /etc/profile
+  - rm -f /etc/bash.bashrc
+  - rm -f /etc/bashrc
+  - rm -f /etc/bash_profile
+  - find /root/ -mindepth 1 -print0 | xargs -0 rm -rf
 
   # for spelunking prior to cfmgmt
-  - 'echo "set editing-mode vi" > /root/.inputrc'
+  - echo "set editing-mode vi" > /root/.inputrc
 
 ssh_keys:
 
