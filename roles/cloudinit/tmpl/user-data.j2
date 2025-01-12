@@ -15,12 +15,16 @@ disable_ec2_metadata: {{
   | ternary('false', 'true')
 }}
 
-package_update:           false
-package_upgrade:          false
+package_update:           true
+package_upgrade:          true
+packages:
+{% for pkg in cloudinit_packages %}
+  - {{pkg}}
+{% endfor %}
+
 resize_rootfs:            true
 disable_root:             false
 preserve_hostname:        false
-ssh_pwauth:               false
 locale:                   '{{cloudinit_vm_locale}}'
 timezone:                 '{{cloudinit_vm_timezone}}'
 
