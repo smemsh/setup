@@ -1,0 +1,49 @@
+#
+---
+
+- name: install_cfmgmt_superuser_privs
+  copy:
+    content: '%{{cfgnode_username}} ALL = (ALL:ALL) NOPASSWD: ALL'
+    dest: /etc/sudoers.d/10-sudoers-{{cfgnode_username}}
+
+# normally already done by cloud-init, but harmless to re-run
+# and might be useful impromptu on a non-provisioned node
+#
+- name: create_cfmgmt_user
+  user:
+    name: '{{cfgnode_username}}'
+    state: present
+    createhome: false
+    home: '{{cfgnode_homedir}}'
+    shell: '{{cfgnode_shell}}'
+    comment: '{{cfgnode_comment}}'
+
+- name: ensure_ssh_dir_perms
+  file:
+    path: '{{cfgnode_homedir}}/.ssh'
+    state: directory
+    mode: 0700
+    owner: '{{cfgnode_username}}'
+    group: '{{cfgnode_username}}'
+
+# other users need to be able to use the virtualenv since it's
+# our interpreter_python. this is not a security problem because
+# the only secrets present are ssh authorized_keys, which are
+# fine as public.  if there were private ssh keys for going to
+# another computer, they would be mode 0600 anyways, but those
+# should only reside on the controller, which is not going to
+# have other users on it
+#
+- name: make_cfmgmt_home_public
+  file:
+    path: '{{cfgnode_homedir}}'
+    mode: 0755
+
+# note: this will end up managing directory perms on ~config/.ssh
+#
+- name: run_auth_role
+  include_role:
+    name: auth
+  vars:
+    auth_username: '{{cfgnode_username}}'
+    auth_password: '{{cfgnode_password}}'

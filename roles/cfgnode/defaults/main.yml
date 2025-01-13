@@ -1,0 +1,33 @@
+#
+# initial list of bootstrap packages needed for ansible to be able to run
+# correctly on the remote system
+#
+---
+
+cfgnode_username:   '{{cfmgmt_username}}'
+cfgnode_homedir:    '{{cfmgmt_homedir}}'
+cfgnode_password:   '{{cfmgmt_password}}'
+
+cfgnode_shell:      /bin/bash
+cfgnode_comment:    ansible-{{cfmgmt_username}}-user
+cfgnode_venv_root:  /home/{{cfmgmt_username}}/venv
+
+cfgnode_mode:       update
+
+cfgnode_users:
+  - '{{cfmgmt_username}}'
+  - scott
+
+cfgnode_pkglist:
+
+  # TODO: eventually, scp our own and use raw rather than relying on
+  # remote to create our ~config virtualenv
+  #
+  - python3
+
+  # no pypi for this, yet required for ansible to install via apt, see:
+  #  https://answers.launchpad.net/ubuntu/+source/python-apt/+question/707491
+  #
+  - python3-apt
+
+cfgnode_interpreter_bootstrap: /usr/local/bin/python3
