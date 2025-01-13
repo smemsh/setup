@@ -1,0 +1,60 @@
+#
+---
+
+- name: test_if_already_present
+  stat:
+    path: /opt/{{python3_base}}
+  register: r
+
+- name: install_if_not_already
+  when: not r.stat.exists
+  block:
+
+    # TODO use "local_action: scp" to get the file there and raw or
+    # shell module (which don't use python) to install it, so we do not
+    # need a bootstrap python version on the host (normally, used by
+    # cfgnode role).  ansible core 2.18 supports python 3.11-3.13 for
+    # control node, 3.8-3.13 for managed nodes.  these are typically
+    # available in package repos but requiring the node to have python3
+    # already when we don't even really need it, and just use our own
+    # python version and venv anyways (in ~config/), seems silly and
+    # will make supporting other operating systems more difficult.  at
+    # the moment u20 has py3.8 and u18 is EOL so we're ok at least on
+    # ubuntu as long as python3 is installed (see cfgnode role's
+    # init.yml)
+
+    # TODO hardcode checksums as tamper trip, but it's way more steps
+    - name: install_python3_opt
+      unarchive:
+        src: '{{gcsurl_base}}/tarbin/{{item}}'
+        dest: /
+        remote_src: true
+        extra_opts: ['-p']
+      with_items: '{{python3_install_files}}'
+
+    - name: make_python3_symlinks
+      script:
+        chdir: /
+        cmd: >-
+          {{playbook_dir}}/srcx/utiladm/pylinks
+          {{python3_install_root}}
+          {{python3_symlinks_in}}
+
+    #- name: make_python3_symlinks
+    #  file:
+    #    state: link
+    #    force: true
+    #    src: ../../../opt/{{python3_base}}/bin/{{item}}
+    #    dest: /usr/local/bin/{{item}}
+    #  with_items: '{{python3_install_symlinks}}'
+
+    - debug: {msg: 'caution: only ubuntu supported at the moment!'}
+      when: (ansible_distribution | lower) != 'ubuntu'
+
+    ## openssl installs certificates in different path on rhel than ubuntu
+    #- name: make_openssl_rhel_compatibility_links
+    #  file:
+    #    src: ../pki/tls/cert.pem
+    #    dest: /etc/ssl/cert.pem
+    #    state: link
+    #  when: (ansible_distribution | lower) == 'centos'
