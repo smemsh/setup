@@ -1,0 +1,47 @@
+#
+---
+
+- name: erase_existing_venv
+  file:
+    name: '{{cfgnode_venv_root}}'
+    state: absent
+
+- name: create_new_venv_dir
+  file:
+    name: '{{cfgnode_venv_root}}'
+    state: directory
+
+- name: template_requirements
+  template:
+    src: tmpl/requirements.txt.j2
+    dest: '{{cfgnode_venv_root}}/requirements.txt'
+
+# we cannot do this with pip module because it requires setuptools, so
+# there's a chicken-egg problem, see ansible issue 82444.  it doesn't
+# really make much sense because setuptools is not needed by either pip
+# or virtualenv, see cpython commit ece20dba120a, part of removing
+# distutils in cpython pull request 92584.  TODO should make a new
+# ansible bug with the drift of 82444, it's a valid issue and forces
+# anyone installing their own python to use raw mode installs (as below)
+# 
+#- name: create_virtualenv
+#  pip:
+#    requirements: '{{cfgnode_venv_root}}/requirements.txt'
+#    virtualenv: '{{cfgnode_venv_root}}'
+#    virtualenv_command: |
+#      {{cfgnode_interpreter_bootstrap}} -m venv --symlinks
+#
+- name: create_virtualenv_raw
+  raw: >-
+    {{cfgnode_interpreter_bootstrap}}
+    -m venv
+    --symlinks
+    {{cfgnode_venv_root}}
+
+- name: populate_venv_raw
+  raw: >-
+    {{cfgnode_interpreter_bootstrap}}
+    -m pip
+    -q
+    install --user
+    --requirement {{cfgnode_venv_root}}/requirements.txt

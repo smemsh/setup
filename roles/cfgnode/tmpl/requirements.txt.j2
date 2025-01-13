@@ -1,0 +1,19 @@
+#
+# managed-node python3 venv requirements for ansible
+#
+
+# versions copied 20250111 from controller venv
+wheel           == 0.45.1
+setuptools      == 75.7.0
+
+{#
+
+{% if inventory_hostname in groups['vmh'] %}
+libvirt-python  == 7.1.0
+{% endif %}
+
+{% if inventory_hostname in groups['db'] %}
+PyMySQL         == 1.0.2
+{% endif %}
+
+#}

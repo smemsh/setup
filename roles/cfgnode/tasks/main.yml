@@ -1,0 +1,32 @@
+#
+# call with cfgnode_mode as 'init' the first time to make the user and
+# home dir, subsequently with 'update' (default) to only update a cfmgmt
+# home dir already provisioned (rerun python install role, recreate
+# managed venv)
+#
+---
+
+- name: initial_bootstrap_raw
+  include_tasks: init.yml
+  when: cfgnode_mode == 'init'
+
+- name: install_python3
+  include_tasks: py3inst.yml
+  vars:
+    ansible_python_interpreter: auto_silent
+  when: cfgnode_mode in ['init', 'update']
+
+- name: make_cfmgmt_user
+  include_tasks: mkuser.yml
+  vars:
+    ansible_python_interpreter: '{{cfgnode_interpreter_bootstrap}}'
+  when: cfgnode_mode == 'init'
+
+- name: make_or_update_venv
+  include_tasks:
+    file: venv.yml
+    apply:
+      become: false
+  vars:
+    ansible_python_interpreter: '{{cfgnode_interpreter_bootstrap}}'
+  when: cfgnode_mode in ['init', 'update']
