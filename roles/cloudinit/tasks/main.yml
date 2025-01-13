@@ -10,6 +10,14 @@
       {%- endfor %}
       {{cloudinits}}
 
+# TODO: look at "ansible-doc -t vars host_group_vars", it may be
+# possible to set "stage = all" in rcfile section [vars_host_group_vars]
+# and these will get instantiated without having to add_host? because
+# the default looks to be "demand" (from the source) which presumably is
+# the same as "task" and thus relies on having some task run that uses
+# it, before it's instantiated? just a guess, but worth trying.  will
+# help iptables role as well, possibly others
+#
 - name: populate_hostvars_for_expansion
   add_host:
     name: '{{vm_name}}'
