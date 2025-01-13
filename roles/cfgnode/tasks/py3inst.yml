@@ -1,0 +1,18 @@
+#
+---
+
+# now that prerequisites are installed, ansible modules will
+# work, but we only need a few basic facts to complete the
+# mission and get python3 running for managed node.  we need to
+# let ansible use the discovered python for this since we
+# haven't installed our version yet so we have to override the
+# one we set in ansible.cfg
+
+- name: gather_facts
+  setup:
+    gather_subset: min
+
+- name: install_opt_python3
+  include_role:
+    name: python3
+

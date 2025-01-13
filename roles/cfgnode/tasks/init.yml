@@ -1,0 +1,46 @@
+#
+---
+
+# poor man's redhat test without being able to run fact gathering yet
+- name: test_if_redhat_distro
+  raw: test -e /etc/redhat-release
+  failed_when: false
+  changed_when: false
+  register: r
+
+# TODO we should just copy our python with scp and skip this bootstrap
+# step, see notes in python3 role comments
+#
+- name: debian_specific_prerequisite_installs
+  when: r.rc != 0
+  block:
+
+    # NOTE: this block used to be prefaced by 'test -e /usr/bin/python',
+    # but the package list grew, so that won't be a good gating
+    # condition anymore... it's harmless to just try it, with -qq it
+    # doesn't give any output when the thing is already installed.  main
+    # repercussion is the time spent updating the apt cache, but that is
+    # required anyways if the image we're working with is old, the
+    # package versions apt keeps in metadata will be so old they can no
+    # longer be downloaded
+
+    - debug: {msg: 'package cache will be updated next, please wait...'}
+
+    - name: install_ansible_prerequisites_1
+      raw: apt-get update -qq
+      #
+      # TODO used to need to do it three times to avoid some kind of
+      # race but we'll comment this out and see if it's necessary
+      # any longer
+      #
+      #with_items: [0, 1, 2]
+
+    - name: install_ansible_prerequisites_2
+      raw: >
+        DEBIAN_FRONTEND=noninteractive
+        apt-get install --no-upgrade -qq
+        {{cfgnode_pkglist | join(' ')}}
+      register: r
+      # TODO stdout parse is a hack, but there's no easy way to
+      # distinguish installed from already-installed, same exit code
+      changed_when: true and 'Setting up ' in r.stdout
