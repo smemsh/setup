@@ -1,0 +1,42 @@
+#
+---
+
+python3_major: 3
+python3_minor: 12
+python3_patch: 8
+python3_version: '{{python3_major}}.{{python3_minor}}.{{python3_patch}}'
+
+python3_sslver: 3.0.15
+python3_base: python-{{python3_version}}
+
+python3_dist_map:
+  7:  [u22, static]
+  14: [u22, static]
+  16: [u22, static]
+  18: [u22, static]
+  20: [u22, static]
+  22: [u22, dynamic]
+
+python3_distn: '{{python3_dist_map[ansible_distribution_major_version | int]}}'
+python3_osrel: '{{python3_distn[0]}}'
+python3_linkt: '{{python3_distn[1]}}'
+
+python3_install_files:
+  - "{{python3_base}}\
+     _{{python3_linkt}}\
+     _staticssl-{{python3_sslver}}\
+     _opt_amd64_{{python3_osrel}}\
+    .tar.zst"
+
+python3_install_root: /opt/{{python3_base}}
+python3_symlinks_in: /usr/local
+
+# python3_install_symlinks:
+#   - python3
+#   - python3-config
+#   - pydoc3
+#   - pip3
+#   - python3.{{python3_minor}}
+#   - python3-config.{{python3_minor}}
+#   - pydoc3.{{python3_minor}}
+#   - pip3.{{python3_minor}}
