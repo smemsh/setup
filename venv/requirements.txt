@@ -16,8 +16,10 @@ apache-libcloud==3.8.0
     # via -r requirements.in
 cachetools==4.2.2
     # via google-auth
-certifi==2021.5.30
-    # via requests
+certifi==2024.12.14
+    # via
+    #   -r requirements.in
+    #   requests
 cffi==1.14.5
     # via cryptography
 charset-normalizer==3.4.0
@@ -30,9 +32,11 @@ cryptography==44.0.0
     #   ansible-core
 google-auth==2.36.0
     # via -r requirements.in
-idna==2.10
-    # via requests
-jinja2==3.1.4
+idna==3.10
+    # via
+    #   -r requirements.in
+    #   requests
+jinja2==3.1.5
     # via
     #   -r requirements.in
     #   ansible-core
@@ -76,5 +80,7 @@ resolvelib==1.0.1
     # via ansible-core
 rsa==4.7.2
     # via google-auth
-urllib3==1.26.6
-    # via requests
+urllib3==2.3.0
+    # via
+    #   -r requirements.in
+    #   requests
