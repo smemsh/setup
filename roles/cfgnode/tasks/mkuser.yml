@@ -47,3 +47,10 @@
   vars:
     auth_username: '{{cfgnode_username}}'
     auth_password: '{{cfgnode_password}}'
+
+- name: deposit_skeleton_files
+  include_role:
+    name: skelfiles
+  vars:
+    skelfiles_install_rsync: true
+    skelfiles_user: '{{cfgnode_username}}'
