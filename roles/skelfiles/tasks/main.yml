@@ -21,6 +21,7 @@
     name: rsync
     state: present
   when: skelfiles_install_rsync
+  no_log: true
 
 - name: determine_account_entry
   getent:
@@ -34,6 +35,7 @@
 
 - name: copy_skel_files
   become_user: '{{skelfiles_user}}'
+  no_log: true
   synchronize:
 
     # we always add the trailing slashes, because we want to sync the
