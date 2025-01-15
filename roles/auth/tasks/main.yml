@@ -4,24 +4,6 @@
 #
 ---
 
-# funny for usable mkpasswd to be in whois, maybe there is a better way,
-# this was from an example in ansible docs, could not find any native ansible
-# way besides it to generate the password hash TODO check later ansible
-# versions after 2.3
-#
-- name: test_mkpasswd_command
-  local_action:
-    module: command which mkpasswd
-  register: r
-  changed_when: false
-  become: false
-
-- name: ensure_mkpasswd_available
-  assert:
-    that:
-      - r.rc == 0
-    quiet: true
-
 - name: setup_authkeys
   when: '(auth_username is defined) and (auth_users is defined)'
   authorized_key:
@@ -32,22 +14,7 @@
 
 - name: set_password
   when: auth_password is defined
-  block:
-
-    - name: hash_password
-      local_action:
-        module: shell printf '{{auth_password}}' |
-          mkpasswd --method=sha-512 --stdin
-      register: r
-      changed_when: false
-      become: false
-      no_log: true
-
-    - name: configure_password
-      user:
-        name: '{{auth_username}}'
-        password: '{{r.stdout}}'
-        update_password: always
-      no_log: true
-
-#
+  user:
+    name: '{{auth_username}}'
+    password: '{{auth_password | password_hash}}'
+    update_password: always
