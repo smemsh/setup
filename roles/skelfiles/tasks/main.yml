@@ -33,6 +33,7 @@
     homedir: '{{getent_passwd[skelfiles_user].4}}'
 
 - name: copy_skel_files
+  become_user: '{{skelfiles_user}}'
   synchronize:
 
     # we always add the trailing slashes, because we want to sync the
@@ -57,11 +58,6 @@
     # args to reach the target
     #
     use_ssh_args: true
-
-    # work around upstream bug ansible-collections/ansible.posix #186, this
-    # should be become_user.  todo: remove once #187 merged
-    #
-    rsync_path: /usr/bin/sudo -u {{ansible_user_id}} rsync
 
     #
     recursive: true
