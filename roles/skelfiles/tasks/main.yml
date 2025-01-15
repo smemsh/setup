@@ -68,12 +68,3 @@
 
     #
     ssh_connection_multiplexing: true
-
-# TODO should we do a backup? but then we'd have to back up the profile
-# scripts we're replacing too... this is really only intended for bootstrap
-# role, should be fine for now...
-#
-- name: remove_vendor_profile
-  file:
-    path: '{{homedir}}/.profile'
-    state: absent
