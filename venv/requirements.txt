@@ -53,6 +53,8 @@ packaging==24.2
     #   -r requirements.in
     #   ansible-core
     #   ansible-runner
+passlib==1.7.4
+    # via -r requirements.in
 pexpect==4.9.0
     # via ansible-runner
 ptyprocess==0.7.0
