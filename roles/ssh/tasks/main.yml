@@ -38,12 +38,14 @@
 - name: disable_sshd_last_at_login
   block:
 
-    - replace:
+    - name: lastlog_remove
+      replace:
         regexp: '^\s*PrintLastLog\s+yes.*$'
         dest: '{{ssh_daemon_rcfile}}'
       notify: ssh_handler_server_reload
 
-    - lineinfile:
+    - name: lastlog_disable
+      lineinfile:
         line: 'PrintLastLog no'
         dest: '{{ssh_daemon_rcfile}}'
       notify: ssh_handler_server_reload
@@ -51,12 +53,14 @@
 - name: disable_sshd_strict_permissions
   block:
 
-    - replace:
+    - name: strictmodes_remove
+      replace:
         regexp: '^\s*StrictModes\s+yes.*$'
         dest: '{{ssh_daemon_rcfile}}'
       notify: ssh_handler_server_reload
 
-    - lineinfile:
+    - name: strictmodes_disable
+      lineinfile:
         line: 'StrictModes no'
         dest: '{{ssh_daemon_rcfile}}'
       notify: ssh_handler_server_reload
@@ -87,26 +91,31 @@
 - name: disable_dns_pointer_lookups
   block:
 
-    - replace:
+    - name: usedns_remove
+      replace:
         regexp: '^\s*UseDNS\s+yes.*$'
         dest: '{{ssh_daemon_rcfile}}'
       notify: ssh_handler_server_reload
 
-    - lineinfile:
+    - name: usedns_disable
+      lineinfile:
         line: 'UseDNS no'
         dest: '{{ssh_daemon_rcfile}}'
       notify: ssh_handler_server_reload
 
-- name: disable_debian_banner
+- name: disable_distbanner
   when: (ansible_os_family | lower) == 'debian'
+  no_log: true
   block:
 
-    - replace:
+    - name: debian_banner_remove
+      replace:
         regexp: '^\s*DebianBanner\s+yes.*$'
         dest: '{{ssh_daemon_rcfile}}'
       notify: ssh_handler_server_reload
 
-    - lineinfile:
+    - name: debian_banner_disable
+      lineinfile:
         line: 'DebianBanner no'
         dest: '{{ssh_daemon_rcfile}}'
       notify: ssh_handler_server_reload
@@ -116,24 +125,28 @@
 
     - block:
 
-      - replace:
+      - name: passauth_remove
+        replace:
           regexp: '^\s*PasswordAuthentication\s+yes.*$'
           dest: '{{ssh_daemon_rcfile}}'
         notify: ssh_handler_server_reload
 
-      - lineinfile:
+      - name: passauth_disable
+        lineinfile:
           line: 'PasswordAuthentication no'
           dest: '{{ssh_daemon_rcfile}}'
         notify: ssh_handler_server_reload
 
     - block:
 
-      - replace:
+      - name: chalresp_remove
+        replace:
           regexp: '^\s*ChallegeResponseAuthentication\s+yes.*$'
           dest: '{{ssh_daemon_rcfile}}'
         notify: ssh_handler_server_reload
 
-      - lineinfile:
+      - name: chalresp_disable
+        lineinfile:
           line: 'ChallengeResponseAuthentication no'
           dest: '{{ssh_daemon_rcfile}}'
         notify: ssh_handler_server_reload
@@ -150,11 +163,13 @@
 - name: disable_ssh_hostip_check
   block:
 
-    - replace:
+    - name: checkip_remove
+      replace:
         regexp: '^\s*CheckHostIP\s+yes.*$'
         dest: '{{ssh_client_rcfile}}'
 
-    - lineinfile:
+    - name: checkip_disable
+      lineinfile:
         line: 'CheckHostIP no'
         dest: '{{ssh_client_rcfile}}'
 
@@ -163,7 +178,7 @@
 # it's hardly even obscuring anything, making this a totally useless
 # invention.  (with ip6, maybe it would make more sense...)
 #
-- name: disable_hashed_known_hosts
+- name: hashed_known_hosts_disable
   replace:
     regexp: '^\s*HashKnownHosts\s+yes.*$'
     replace: 'HashKnownHosts no'
@@ -173,12 +188,15 @@
 # on all our servers and clients
 #
 - name: only_allow_rsa_kex
+  no_log: true
   block:
 
-    - replace:
+    - name: hostkey_algs_remove
+      replace:
         regexp: '^\s*HostKeyAlgorithms(?!.ssh-rsa$).*$'
         dest: '{{ssh_client_rcfile}}'
 
-    - lineinfile:
+    - name: hostkey_algs_set
+      lineinfile:
         line: 'HostKeyAlgorithms ssh-rsa'
         dest: '{{ssh_client_rcfile}}'
