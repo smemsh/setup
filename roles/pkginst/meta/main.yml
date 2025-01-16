@@ -1,0 +1,5 @@
+#
+---
+
+# we are often run from multiple other roles with no other explicit parameters
+allow_duplicates: true

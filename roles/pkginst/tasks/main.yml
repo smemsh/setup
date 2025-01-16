@@ -1,0 +1,53 @@
+#
+# ansible-role-pkginst
+#   installs packages from a dict in "pkgname: version" format
+#
+# description:
+#   - prepare dict 'pkginst_packages' before using (eg, role/defaults/main.yml)
+#   - prepare dict 'pkginst_overrides' if needed (eg, role/vars/main.yml)
+#   - packages for installation will be the jinja2 combine()d dictionary
+#   - pin specific versions by supplying specific version string as value
+#   - ask for latest version with null, empty, undefined, or 'latest' string
+#
+---
+
+- assert:
+    that:
+      - pkginst_packages is defined
+    quiet: true
+
+- name: update_apt_package_cache
+  apt:
+    update_cache: true
+  when: pkginst_update
+
+# todo: 2.6 has a dict2items, but could not figure out how to
+# use reject() or rejectattr() to filter on values in a dict.
+# using j2 to template the dict works ok (and is fast), but
+# definitely seems like an unintended-use hack
+# todo: do this in python and make a filter out of it?
+# note: idiom also used in pipinst role
+#
+- name: create_install_list
+  set_fact:
+    installs: |
+      {%- set merged = (
+          pkginst_packages | default({}) |
+          combine(pkginst_overrides | default({})))
+      %}
+      {%- set installs = [] %}
+      {%- for key, val in merged.items() %}
+      {%-     if val is none %}
+      {%-         do installs.append(key) %}
+      {%-     else %}
+      {%-         do installs.append(key + '=' + val) %}
+      {%-     endif %}
+      {%- endfor %}
+      {{installs}}
+
+- name: install_packages
+  apt:
+    update_cache: false
+    install_recommends: false
+    name: '{{installs}}'
+    policy_rc_d: '{{pkginst_onlypkgs | bool | ternary(101, omit)}}'
