@@ -1,0 +1,9 @@
+#
+# {{ansible_managed}}
+#
+
+{% if ubunode_devs_have_root %}
+%dev ALL = (ALL:ALL) NOPASSWD: ALL
+{% else %}
+# ubunode_devs_have_root was false at cfmgmt time
+{% endif %}
