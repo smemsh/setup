@@ -104,8 +104,8 @@
       notify: ssh_handler_server_reload
 
 - name: disable_distbanner
-  when: (ansible_os_family | lower) == 'debian'
   no_log: true
+  when: is_debian | d(false)
   block:
 
     - name: debian_banner_remove
