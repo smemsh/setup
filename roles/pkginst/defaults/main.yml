@@ -1,0 +1,7 @@
+#
+
+# whether to force package installation not to start system services
+pkginst_onlypkgs: '{{pkginst_skip_services | d(false, true) | bool}}'
+
+# whether to update the apt cache
+pkginst_update: true
