@@ -22,12 +22,6 @@
 
 ### SSHD #####################################################################
 
-- name: declare_sshd_config_managed
-  lineinfile:
-    insertbefore: BOF
-    line: '{{ansible_managed_managed}}'
-    dest: '{{ssh_daemon_rcfile}}'
-
 #
 # later distro revs changed the default and commented out,
 # rather than explicitly setting a non-compiled-in default in
