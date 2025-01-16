@@ -1,0 +1,30 @@
+#
+# ansible-role-ubunode
+#   do basics that every ubuntu node gets after provisioning
+#
+# desc:
+#   - timezone, locale, reserved uids/gids, sudoers, pams, umask, noskel
+#
+# may:
+#   - ubunode_timezone
+#   - ubunode_locale
+#   - ubumode_umask
+#   - ubunode_comment_files
+#   - ubunode_comment_substrs
+#
+---
+
+- debug:
+    var: phase
+
+- set_fact:
+    is_debian: (ansible_os_family | lower) == 'debian' | bool
+
+# TODO: we should maybe be a leaf role and not call other roles?
+- include_role:
+    name: ssh
+
+- name: run_by_phase
+  # todo: not sure why we need the full path, it doesn't seem to take
+  # relative, not sure why
+  include_tasks: "{{role_path}}/tasks/{{phase | d('operate')}}.yml"

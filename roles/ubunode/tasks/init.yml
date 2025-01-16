@@ -1,0 +1,178 @@
+#
+---
+
+# TODO should incorporate this, it's not large, basically just disables
+# lvmetad, which is largely unncessary on "ordinary" hosts.  commenting
+# out for now as we won't directly use nodes that are on LVM except ones
+# we're managing manually for the moment (ie plex hosts)
+#
+#- include_role:
+#    name: lvmnode
+
+# note: ubuntu cloud images have graphical default boot target
+# todo: this only works on systemd systems...
+# note: this is duplicated in eg gcenode init, but that's fine
+#
+- name: set_default_runlevel
+  shell: systemctl set-default multi-user
+  when: is_debian
+
+# ubuntu systems do not even come with ifupdown on the standard cloud
+# image -- they use netplan to generate systemd-network configuration
+# files -- but once we're running at the point this task comes up, the
+# system has network already (configured from systemd-networkd via
+# initial cloud-init configuration), so our job will be to disable that
+# and install ifupdown.  this will then rely on the other role method
+# (deploy) and subsequent cloud-init network-config to template out the
+# ifupdown /etc/network/interface and hosts files
+#
+- name: quell_systemd_invasion_post14
+  when: is_debian
+  systemd:
+    name: '{{item}}'
+    state: stopped
+    masked: true
+    enabled: false
+  with_items:
+    - systemd-timesyncd.service # note: this means we need to setup ntpd
+    # UPDATE incus already does use ttyS0 on their qemu boots, commenting
+    # out for now
+    # - serial-getty@hvc0.service # we always use ttyS*
+
+# irritating that so many services ship enabled to start, but maybe it
+# has to be that way for some considerations, better to get it
+# bootstrapped in some places that are hard like iscsi booting, people
+# can always disable services but can't get into the machine if it can't
+# boot at all.  in any case here we are...
+#
+- name: disable_unwanted_timers
+  systemd:
+    name: '{{item}}'
+    state: stopped
+    enabled: false
+    masked: true
+  with_items:
+    - apt-daily-upgrade.timer
+    - apt-daily.timer
+    - motd-news.timer
+  when: is_debian
+
+- name: determine_service_facts
+  service_facts:
+
+- name: disable_unwanted_services
+  service:
+    name: '{{item}}'
+    state: stopped
+    enabled: false
+  with_items:
+    - irqbalance
+    - lxcfs
+    - iscsid
+  when: ansible_facts.services[item] is defined
+
+## TODO resolvconf uninstall and /etc/resolv.conf removal seems
+## to be duplicated in the bake play? commenting out for now
+##
+#- name: remove_resolvconf
+#  block:
+#
+#  # the resolvconf package seems to become dangling very early,
+#  # this stupid package is constantly breaking even in just image
+#  # creation phase, have to remove it, hardcode this inline
+#  # early.
+#  - name: remove_evil_resolvconf_package
+#    apt:
+#      name: resolvconf
+#      state: absent
+#      purge: true
+#      update_cache: false   # dns may not work at this time
+#    when: is_debian
+#
+#  # both systemd-networkd and resolvconf hijack this file, and we have now
+#  # removed them. remove the stale configs / symlinks
+#  #
+#  - name: remove_leftover_resolver_conf
+#    file:
+#      name: /etc/resolv.conf
+#      state: absent
+#
+#  # we'll copy or template resolv.conf in a later role but let's make sure dns
+#  # still works on the machine after we finish running this role
+#  #
+#  - name: make_early_resolver_conf
+#    copy:
+#      content: >
+#        nameserver 8.8.8.8
+#      dest: /etc/resolv.conf
+
+# u18 ships only with netplan-fronted systemd-networkd
+# but fortunately we still have the old method available
+#
+- name: ensure_ifupdown_present
+  apt:
+    name: ifupdown
+    state: present
+  when: is_debian
+  no_log: true
+
+## TODO taking a different approach, we will rely on cloud-init for the
+## deploy phase, it will get a different network-config and user-data.
+## commenting out for now
+## 
+## we could disable cloud-init by touching /etc/cloud-init.disabled,
+## but no reason to leave it installed: we would always rebuild the
+## node anyways, not run cloud-init again.  some people might just to
+## start a bit later in the process when remastering, but we don't
+## care about this because baking process is not time-sensitive
+##
+#- name: remove_cloud_init_package
+#  apt:
+#    name: cloud-init
+#    state: absent
+#    purge: true
+#  when: is_debian
+
+# TODO: we should maybe have a pattern here that's more specific than
+# the whole directory, although can't really think how it might be
+# useful or what might put files here besides cloud-init, and we have
+# our own 'boot' role that configures grub
+#
+- name: remove_cloud_init_bootloader_detritus # TODO other stuff as list?
+  file:
+    name: /etc/default/grub.d
+    state: absent
+
+# can significantly speed up initial installs... by a lot
+- name: ubuntu_apt_mirror_localize
+  replace:
+    path: /etc/apt/sources.list
+    regexp: http://.*\.ubuntu\.com/
+    replace: http://{{aptmirror}}/
+  when: aptmirror is defined and is_debian
+
+# if we don't do this step, it only works if the image is recent,
+# because we haven't done an apt update yet so the package won't be
+# there upstream if it's an old image.  this is kind of a problem
+# because network does not necessarily work at this point, but it does
+# happen to actually work, just not sure what we'll ever do if at this
+# point networking is hosed
+#
+- name: update_apt_cache
+  apt:
+    update_cache: true
+  when: is_debian
+
+# stop the endless stream of errors when doing any manual package
+# installs.  never found an instance where we didn't want the defaults
+# anyways.  ansible is already doing this itself in apt.py setting
+# $DEBIAN_FRONTEND, this is just for us when we're doing mass package
+# installs with pdsh or whatever
+#
+- name: set_non_interactive_debconf_default
+  debconf:
+    name: debconf
+    question: debconf/frontend
+    value: Noninteractive
+    vtype: string
+  when: is_debian

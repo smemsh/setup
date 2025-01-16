@@ -1,0 +1,166 @@
+#
+---
+
+# network needs to be up before this runs, which sometimes requires that
+# init.yml has run.  so, we can't put this in meta.  we could put it in
+# pre_tasks, but then we would have to do it in the playbook.  better to
+# keep these details out of the user's mind, so we'll just do package
+# installs here instead of the usual place in meta/main.yml
+
+# when doing run_package_installations as include_role, it won't be passed
+#- set_fact:
+#    pkginst_packages: '{{ubunode_packages}}'
+
+- name: run_package_installations
+  include_role:
+    name: pkginst
+  vars:
+    pkginst_packages: '{{ubunode_packages}}'
+
+- name: configure_timezone
+  timezone:
+    name: '{{ubunode_timezone}}'
+
+- name: configure_locale
+  locale_gen:
+    name: '{{ubunode_locale}}'
+
+#
+# homedir etc to be done later in other roles if needed
+# just want to reserve important uids/gids here
+#
+
+- name: reserve_operational_groups
+  group:
+    name: '{{item.0}}'
+    gid: '{{item.1}}'
+  with_together:
+    - ['{{sysadmin_group}}', '{{developer_group}}']
+    - ['{{sysadmin_gid}}',   '{{developer_gid}}']
+
+- name: run_site_specific_role
+  include_role: { name: '{{uburole}}' }
+  vars: { ubumode: init }
+  when: uburole is defined and uburole is not none
+
+###
+
+- name: configure_sudoers
+  template:
+    src: '{{item}}'
+    dest: /etc/sudoers.d/{{item | basename | splitext | first}}
+    owner: root
+    group: root
+    mode: '0400'    # warning: keep this a string to avoid bugs
+  with_fileglob:
+    - 'tmpl/??-sudoers-*.j2'
+
+- name: set_default_umask_via_pam
+  pamd:
+    module_path: pam_umask.so
+    module_arguments: 'umask={{ubunode_umask}}'
+    name: common-session
+    type: session
+    control: optional
+    state: updated
+
+# todo: use dynamic include on the same variable name instead
+#
+- name: maybe_do_trusty_specific
+  when: ansible_distribution_release == 'trusty'
+  block:
+
+    - name: remove_extraneous_gettys
+      copy:
+        content: manual
+        dest: '{{item}}'
+      with_sequence: '2-6:/etc/init/tty%u.override'
+
+    - name: use_xenial_kernel
+      apt:
+        install_recommends: yes
+        name: linux-generic-lts-xenial
+
+- name: comment_out_unwanted_pams
+  replace:
+    regexp: '^([^#][^\n]*{{item[1]}}[^\n]*)' # note: is re.MULTILINE
+    replace: '#\1'
+    dest: '{{item[0]}}'
+  with_nested:
+    - '{{ubunode_comment_files}}'
+    - '{{ubunode_comment_substrs}}'
+
+- name: evict_troublesome_packages
+  apt:
+    name: '{{ubunode_remove_packages}}'
+    state: absent
+    purge: true
+
+# it changes to powersave from performance if no ondemand is
+# present, which is stale logic this governor is not present in
+# newer kernels. the issue remains in u16 asof ~201710
+#
+- name: stop_errant_powersave_governor
+  block:
+
+    - name: populate_service_facts
+      service_facts:
+      when: (ansible_distribution | lower) == 'ubuntu'
+
+    - name: disable_ondemand_service
+      service:
+        name: ondemand
+        enabled: false
+      when: ansible_facts.services.ondemand is defined
+
+- name: erase_distro_junk
+  file:
+    path: '{{item}}'
+    state: absent
+  with_items: '{{ubunode_erase_paths}}'
+
+- name: configure_apt_norecommends
+  copy:
+    content: |
+      //
+      apt::install-recommends "0";
+      apt::install-suggests "0";
+    dest: /etc/apt/apt.conf.d/99norecommends
+    owner: root
+    mode: 0644
+
+- name: run_sysctl_role
+  include_role:
+    name: systune
+  vars:
+    systune_now: true
+
+- name: disable_ebpf_user_process
+  copy:
+    content: |
+      # this runs a userspace program as child of kthreadd, but
+      # we use the "old" iptables, so we don't want this cluttering
+      # the process table.  'blacklist' won't work due to dependencies
+      #
+      install bpfilter /bin/true
+    dest: /etc/modprobe.d/livm-blacklist-bpfilter.conf
+  when: "(
+    ((ansible_distribution | lower) == 'ubuntu') and
+    ((ansible_distribution_major_version | int) >= 20)
+  )"
+
+# logrotate waits until there is 1M of acct data, which takes a long time on
+# some machines, in the meantime this thing is running monthly and giving
+# errors.  we don't use it anyways and it doesn't provide anything we want
+#
+- name: disable_acct_reporting
+  register: r
+  shell: |
+    crondir=/etc/cron.monthly
+    cronfile=acct
+    if test -f $crondir/$cronfile
+    then mv -f $crondir/$cronfile $crondir/.$cronfile && exit 1 || exit 2
+    else exit 0
+    fi
+  changed_when: r.rc == 1
+  failed_when: r.rc == 2

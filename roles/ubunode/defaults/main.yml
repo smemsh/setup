@@ -1,0 +1,245 @@
+#
+---
+
+ubunode_locale: en_US.UTF-8
+ubunode_umask: '02' # keep this a string
+
+# todo: timezone module seems to barf on US/Pacific because it ends up setting
+# the latter (probably derefs and gets the canonical file) and then it diffs
+# the names planned/actual, and thinks they're different, even though this is
+# the same time zone.  this might be bug fixed in later version of ansible,
+# want to have it set to US/Pacific; need to test this on a 2.4+ codebase
+#
+#ubunode_timezone: US/Pacific
+ubunode_timezone: America/Los_Angeles
+
+# if sudo should work for anyone in the 'dev' group
+ubunode_devs_have_root: false
+
+# if 'init' we do more stuff, run from provisioning
+ubunode_phase: "{{phase | default('operate')}}"
+
+# comment out lines in these files...
+#
+ubunode_comment_files:
+  - /etc/pam.d/sshd
+  - /etc/pam.d/login
+
+# ...which contain these substrings
+# (note: this is an unquoted naked sub-pattern in a python regex)
+# (note: all the files searched for all the patterns)
+#
+ubunode_comment_substrs:
+  - pam_motd
+  - pam_lastlog
+  - pam_mail
+
+###
+
+# note: these will be removed with --purge
+#
+ubunode_remove_packages:
+  - policykit-1 # causes ssh timeouts
+  - accountsservice
+  - landscape-client
+  - landscape-common
+  - ubuntu-release-upgrader-core
+  - upgrade-notifier-common
+  - plymouth
+  - apparmor
+  - open-iscsi
+  - apport
+  - resolvconf
+  - ureadahead
+  - command-not-found
+  - command-not-found-data
+  - python3-commandnotfound
+  - unattended-upgrades
+  - update-notifier
+  - update-notifier-common
+
+ubunode_erase_paths:
+  - /etc/update-notifier
+  - /var/lib/update-manager
+  - /var/lib/ubuntu-release-upgrader
+  - /etc/update-motd.d
+  - /etc/skel
+  - /etc/bash/bashrc
+  - /etc/bash.bashrc
+  - /etc/bashrc
+  - /etc/profile
+  - /etc/bash.logout
+
+###
+
+# todo: mail role
+# (we do have a postfix role implemented already, but it's for the MTA and
+# probably doesn't include /usr/bin/mail)
+#
+pkgmailx:
+  trusty:   { heirloom-mailx: ~ }
+  xenial:   { heirloom-mailx: ~ }
+  bionic:   { bsd-mailx: ~      }
+  focal:    { bsd-mailx: ~      }
+  stretch:  { bsd-mailx: ~      }
+  jammy:    { bsd-mailx: ~      }
+
+pkgpostfix:
+  postfix:
+
+pkgmail: '{{
+  pkgpostfix | combine(
+  pkgmailx[ansible_distribution_release]
+)}}'
+
+#
+
+# todo: ntp role
+pkgntp:
+  ntp:
+  ntpdate:
+
+#
+
+# todo: editors role (?)
+#
+pkgvim: # todo: we have our own build
+  trusty:   { vim-nox: ~      }
+  xenial:   { vim-nox: ~      }
+  bionic:   { vim-nox: ~      }
+  focal:    { vim-tiny: ~     } # ubuntu bug 1884583, -nox installs sound libraries!!
+  stretch:  { vim-nox: ~      }
+  jammy:    { vim-nox: ~      }
+
+pkgemacs:
+  trusty:   { emacs24-nox: ~  }
+  xenial:   { emacs-nox: ~    }
+  bionic:   { emacs-nox: ~    }
+  focal:    { emacs-nox: ~    }
+  stretch:  { emacs-nox: ~    }
+  jammy:    { emacs-nox: ~    }
+
+pkgedit: '{{
+  pkgvim[ansible_distribution_release] | combine(
+  pkgemacs[ansible_distribution_release]
+)}}'
+
+#
+
+pkgtool:
+
+  # needed for some modules to work properly (like template) on some
+  # systems... without it, ansible says "failed to set permissions on the
+  # temporary files ansible needs to create when becoming an unprivileged
+  # user" but on some systems it seems to work fine without 'acl' installed.
+  # not yet clear why this varies from system to system... bizarre.  but this
+  # is a useful tool anyways and should be in our install list, so leaving
+  # this in for now
+  #
+  acl:
+
+  ack-grep:
+  bc:
+  bzip2:
+  curl:
+  diffstat:
+  elinks:
+  file:
+  gawk:
+  gnupg2:
+  inotify-tools:
+  jq:
+  less:
+  lftp:
+  lynx:
+  libterm-readline-gnu-perl:
+  man:
+  mosh:
+  patchutils:
+  pigz:
+  pinfo:
+  pv:
+  python3:
+  python3-requests:
+  python3-yaml:
+  python3-apt:
+  rsync:
+  screen:
+  smartmontools:
+  sysstat:
+  tmux: # todo: we have our own build
+  unzip:
+  wget:
+  xz-utils:
+  zip:
+
+pkgadmin:
+  acct:
+  apt-file:
+  apt-utils:
+  aptitude:
+  arping:
+  at:
+  attr:
+  debconf-utils:
+  dlocate:
+  dnsutils:
+  dstat:
+  ethtool:
+  fatrace:
+  fping:
+  gdisk:
+  htop:
+  iotop:
+  kpartx:
+  lft:
+  logrotate:
+  lsof:
+  ltrace:
+  lvm2:
+  mlocate:
+  mtr-tiny:
+  net-tools:
+  nscd:
+  ntp:
+  parted:
+  pciutils:
+  pdsh:
+  psmisc:
+  strace:
+  sysfsutils:
+  tcpdump:
+  telnet:
+  time:
+  thin-provisioning-tools:
+  traceroute:
+  uuid:
+  whois:
+
+pkgdev:
+  build-essential:
+  binutils:
+  equivs:
+  git:
+  gcc:
+  automake:
+  pkg-config:
+  manpages-dev:
+
+pkgarch: "{{
+  (ansible_architecture == 'x86_64') |
+  ternary({'latrace': none}, {})
+}}"
+
+#
+
+ubunode_packages: '{{
+  {} | combine(
+    pkgmail,
+    pkgedit,
+    pkgtool,
+    pkgntp,
+    pkgadmin,
+    pkgdev,
+    pkgarch,
+)}}'
