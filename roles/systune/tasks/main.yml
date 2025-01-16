@@ -1,0 +1,55 @@
+#
+# sets sysctls and sysfs tunables
+# (expects that we've already run the package roles)
+#
+
+# TODO see comments in var defaults, this is not the right way to do this...
+# and to add to that, we might want to set a lot of other things besides thp.
+# maybe this should just be a role and use variables depending on host and
+# group membership, but let's see how many use cases actually appear besides
+# this one (most of this is /proc anyways... really this should be too, it
+# fits better in like a /proc/sys/mm/, but alas, it's not)
+#
+- name: configure_sysfs_tunables
+  when: groups[systune_sysfs_exclude_group] is not defined
+        or ansible_host not in groups[systune_sysfs_exclude_group]
+  block:
+
+    - name: set_transparent_hugepage_madvise
+      copy:
+        content: |
+          #
+          kernel/mm/transparent_hugepage/enabled = madvise
+        dest: /etc/sysfs.d/thpmadvise.conf
+
+    - name: load_sysfs_tunables
+      service:
+        name: sysfsutils
+        state: restarted
+      when: systune_now or false
+
+- name: determine_sysctl_group_mapping
+  set_fact:
+    systune_group: "{{
+      lookup('fileglob', 'files/sysctl?*.conf', wantlist=true) |
+      map('regex_replace', '^.*files/sysctl(.*)\\.conf$', '\\1') |
+      select('in', group_names)
+    }}"
+
+- name: sanity_check_sysctl_mapping_uniqueness
+  fail:
+    msg: sysctl group mapping must be unique
+  when: "(systune_group | length) > 1"
+
+- name: construct_sysctl_filename
+  set_fact:
+    systune_sysctl_filename: files/sysctl{{systune_group | join('')}}.conf
+
+- name: copy_designated_sysctl_file
+  copy:
+    src: '{{systune_sysctl_filename}}'
+    dest: /etc/sysctl.conf
+
+- name: maybe_set_sysctls
+  command: sysctl -p
+  when: systune_now or false

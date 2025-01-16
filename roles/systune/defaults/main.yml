@@ -1,0 +1,8 @@
+#
+
+# set the tunables after configuring them
+systune_now: false
+
+# we set some tunables in /sys, except for machines in this group
+#
+systune_sysfs_exclude_group: vmh
