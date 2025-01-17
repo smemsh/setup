@@ -5,7 +5,7 @@
 ---
 
 - name: setup_authkeys
-  when: '(auth_username is defined) and (auth_users is defined)'
+  when: (auth_username is defined) and (auth_users is defined)
   authorized_key:
     user: '{{auth_username}}'
     key: "{{lookup('file', auth_keydir + '/' + item + '-id_rsa.pub')}}"
