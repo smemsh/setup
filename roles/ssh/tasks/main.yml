@@ -104,7 +104,6 @@
       notify: ssh_handler_server_reload
 
 - name: disable_distbanner
-  no_log: true
   when: is_debian | d(false)
   block:
 
@@ -188,7 +187,6 @@
 # on all our servers and clients
 #
 - name: only_allow_rsa_kex
-  no_log: true
   block:
 
     - name: hostkey_algs_remove

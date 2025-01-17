@@ -114,7 +114,6 @@
     name: ifupdown
     state: present
   when: is_debian
-  no_log: true
 
 ## TODO taking a different approach, we will rely on cloud-init for the
 ## deploy phase, it will get a different network-config and user-data.
