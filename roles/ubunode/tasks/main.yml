@@ -14,14 +14,18 @@
 #
 ---
 
-- debug:
+- name: display_phase
+  debug:
     var: phase
 
-- set_fact:
+- name: set_debian_fact
+  set_fact:
     is_debian: (ansible_os_family | lower) == 'debian' | bool
 
 # TODO: we should maybe be a leaf role and not call other roles?
-- include_role:
+
+- name: run_custom_ssh_role
+  include_role:
     name: ssh
 
 - name: run_by_phase
