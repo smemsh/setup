@@ -112,12 +112,12 @@ class CallbackModule(CallbackModule_default):
         name = play.get_name().strip()
         if play.check_mode and self.get_option('check_mode_markers'):
             if name and play.hosts:
-                msg = f"\n- {name} (in check mode) on hosts: {','.join(play.hosts)} -"
+                msg = f"\n>>> {name} (in check mode) on hosts: {','.join(play.hosts)} >>>"
             else:
                 msg = "- check mode -"
         else:
             if name and play.hosts:
-                msg = f"\n- {name} on hosts: {','.join(play.hosts)} -"
+                msg = f"\n>>> {name} on hosts: {','.join(play.hosts)} >>>"
             else:
                 msg = "---"
 
@@ -193,7 +193,7 @@ class CallbackModule(CallbackModule_default):
                 self._display.display(diff)
 
     def v2_playbook_on_stats(self, stats):
-        self._display.display("\n- Play recap -", screen_only=True)
+        self._display.display("\n===", screen_only=True)
 
         hosts = sorted(stats.processed.keys())
         for h in hosts:
