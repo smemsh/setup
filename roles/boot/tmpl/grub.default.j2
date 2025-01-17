@@ -1,0 +1,11 @@
+#
+# /etc/default/grub ansible-managed
+
+GRUB_DEFAULT=0
+GRUB_TIMEOUT={{boot_timeout}}
+GRUB_DISTRIBUTOR="{{boot_distro_name}}"
+GRUB_CMDLINE_LINUX_DEFAULT=""
+GRUB_CMDLINE_LINUX="{{boot_grub_cmdline}}"
+GRUB_SERIAL_COMMAND="{{boot_grub_serial}}"
+GRUB_TERMINAL=serial
+GRUB_DISABLE_RECOVERY=true

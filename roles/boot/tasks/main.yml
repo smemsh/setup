@@ -1,0 +1,54 @@
+#
+# boot
+#   setup machine for a deployment boot, after cloud-init has run
+#
+# desc:
+#   - root label
+#   - initial fstab (only for dev at the moment)
+#   - grub
+#   - initramfs
+#
+---
+
+- name: relabel_rootfs
+  command: e2label /dev/sda1 root
+  when: not (boot_skip_relabel | bool)
+
+# we don't include 'hardware' in our standard set because it's slow, and
+# reboots some hardware (rebooted some embedded boards before on me), but the
+# boot role needs it; it runs only once, typically during image bake, and this
+# role shouldn't be run on these embedded boards anyways, so should be safe
+#
+- name: gather_disk_facts
+  setup:
+    gather_subset: hardware
+    filter: ansible_devices
+
+- name: initialize_fstab
+  copy:
+    # TODO: breaks on nvme
+    content: "#\n\nLABEL=root / ext4 {{
+      'discard' if (ansible_devices.sda.support_discard | bool)
+      else 'defaults'
+    }} 0 0\n\n"
+    dest: /etc/fstab
+    owner: root
+    group: root
+    mode: '0644' # leave it as string to avoid nesting bugs
+  when: >
+    (ip_subdomain == 'dev'
+     or (groups['prodx'] is defined and inventory_hostname in groups['prodx']))
+    and not (boot_skip_fstab | bool)
+
+- name: template_grub_config
+  template:
+    src: tmpl/grub.default.j2
+    dest: /etc/default/grub
+
+- name: activate_grub_config
+  command: update-grub
+
+# this probably isn't necessary, but doesn't hurt either
+#
+- name: update_initial_ramdisk
+  command: update-initramfs -u
