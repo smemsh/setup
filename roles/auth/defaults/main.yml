@@ -1,8 +1,6 @@
 #
 ---
 
-auth_mkpasswd_pkgname: whois  # strangely, this contains mkpasswd
-
 # give the user an override variable to look up keys in a different place, for
 # example when running the role against an standalone/3rdparty node, not using
 # keys in setup repo
