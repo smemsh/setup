@@ -11,7 +11,7 @@ __metaclass__ = type
 DOCUMENTATION = r"""
 name: smemshy
 type: stdout
-author: Al Bowles (@akatch)
+author: Al Bowles (@akatch), modified by Scott Mcdermott (@smemsh)
 short_description: condensed Ansible output
 description:
   - Consolidated Ansible output in the style of LINUX/UNIX startup logs.
@@ -65,26 +65,30 @@ class CallbackModule(CallbackModule_default):
         self._handle_exception(result._result, use_stderr=self.get_option('display_failed_stderr'))
         self._handle_warnings(result._result)
 
-    def _process_result_output(self, result, msg):
+    def _process_result_output(self, result, msg, print_stdio=True):
         task_host = result._host.get_name()
         task_result = f"{task_host} {msg}"
 
+        # note, debug module always has verbose set
         if self._run_is_verbose(result):
             task_result = f"{task_host} {msg}: {self._dump_results(result._result, indent=4)}"
             return task_result
+
+        # this doesn't work, but probably should.  see also ansible bug 18232
+        #try: module_name = result._result['invocation']['module_name']
+        #except: module_name = ''
 
         if self.delegated_vars:
             task_delegate_host = self.delegated_vars['ansible_host']
             task_result = f"{task_host} -> {task_delegate_host} {msg}"
 
-        if result._result.get('msg') and result._result.get('msg') != "All items completed":
-            task_result += f" | msg: {to_text(result._result.get('msg'))}"
-
-        if result._result.get('stdout'):
-            task_result += f" | stdout: {result._result.get('stdout')}"
-
-        if result._result.get('stderr'):
-            task_result += f" | stderr: {result._result.get('stderr')}"
+        if print_stdio:
+            if result._result.get('msg') and result._result.get('msg') != "All items completed":
+                task_result += f" | msg: {to_text(result._result.get('msg'))}"
+            if result._result.get('stdout'):
+                task_result += f" | stdout: {result._result.get('stdout')}"
+            if result._result.get('stderr'):
+                task_result += f" | stderr: {result._result.get('stderr')}"
 
         return task_result
 
@@ -151,9 +155,10 @@ class CallbackModule(CallbackModule_default):
             if item_value:
                 msg += f" | item: {item_value}"
             display_color = C.COLOR_CHANGED
-            task_result = self._process_result_output(result, msg)
+            print_stdio = True if self._run_is_verbose(result) else False
+            task_result = self._process_result_output(result, msg, print_stdio=print_stdio)
             self._display.display(f"  {task_result}", display_color)
-        elif self.get_option('display_ok_hosts'):
+        elif self.get_option('display_ok_hosts') or self._run_is_verbose(result):
             task_result = self._process_result_output(result, msg)
             self._display.display(f"  {task_result}", display_color)
 
