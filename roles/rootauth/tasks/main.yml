@@ -1,0 +1,9 @@
+#
+---
+
+- include_role:
+    name: auth
+  vars:
+    auth_username: '{{rootauth_username}}'
+    auth_password: '{{rootauth_password}}'
+    auth_users: '{{rootauth_users}}'
