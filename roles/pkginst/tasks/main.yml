@@ -11,7 +11,8 @@
 #
 ---
 
-- assert:
+- name: verify_pkginst_set
+  assert:
     that:
       - pkginst_packages is defined
     quiet: true

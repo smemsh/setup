@@ -48,7 +48,9 @@
     #    dest: /usr/local/bin/{{item}}
     #  with_items: '{{python3_install_symlinks}}'
 
-    - debug: {msg: 'caution: only ubuntu supported at the moment!'}
+    - name: warn_unsupported_distro
+      debug:
+        msg: 'caution: only ubuntu supported at the moment!'
       when: (ansible_distribution | lower) != 'ubuntu'
 
     ## openssl installs certificates in different path on rhel than ubuntu

@@ -24,7 +24,9 @@
     # package versions apt keeps in metadata will be so old they can no
     # longer be downloaded
 
-    - debug: {msg: 'package cache will be updated next, please wait...'}
+    - name: inform_user_of_delay
+      debug:
+        msg: package cache will be updated next, please wait...
 
     - name: install_ansible_prerequisites_1
       raw: apt-get update -qq
