@@ -1,0 +1,40 @@
+#
+---
+
+- name: copy_remote_syslog_configs
+  copy:
+    src: '{{rcfile}}'
+    dest: /etc/rsyslog.d/
+  loop_control:
+    loop_var: rcfile
+  with_fileglob: 'files/*'
+
+# we placed this here during cloudinit to make sure /var/log/messages has all
+# messages written to it, but we'll replace that file with one from here that
+# doesn't call fdatasync(2)
+#
+- name: remove_bootstrap_syslogging
+  file:
+    path: /etc/rsyslog.d/20-cloud-config.conf
+    state: absent
+
+# we write this file ourselves, but redhat duplicates it (not inf ull)
+- name: disable_system_messages_writes
+  replace:
+    regexp: '^(\s*[^#].*/var/log/messages\s*)$'
+    replace: '# (ansible-disabled): \1'
+    dest: /etc/rsyslog.conf
+  when: (ansible_distribution | lower) == 'centos'
+
+- name: restart_rsyslog_service
+  service:
+    name: rsyslog
+    state: restarted
+    #
+    # apparently a reload is insufficient, although it should not
+    # be, and contradicts rsyslog documentation, but logging in and
+    # hanging up rsyslogd, it still does not pick up the change, so
+    # a full restart is needed
+    # reconfirmed on rsyslog-v7 u14 20210111
+    #
+    #state: reloaded
