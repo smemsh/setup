@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/bin/bash
 #
 # mk4group
 #   adaptation of https://github.com/smemsh/utilsh/ mk4group for ansible
