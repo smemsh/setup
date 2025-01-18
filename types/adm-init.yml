@@ -1,0 +1,28 @@
+#
+---
+
+- name: display_node_type_init
+  debug:
+    msg: doing init phase for adm node type
+
+# normally done already by imgbake, but ubunode could have been run on
+# a naive standalone node, so allow user to force with a variable
+#
+- include_role:
+    name: cfgnode
+  when: adm_run_cfgnode | d(false)
+
+- include_role:
+    name: host
+  vars:
+    host: '{{instance_name}}'
+    host_init: true
+    host_by_inventory: true
+
+- import_role:
+    name: accounts
+  vars:
+    accts_sysadmin_only: true
+
+- include_role:
+    name: rsyslog
