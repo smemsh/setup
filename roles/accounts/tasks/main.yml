@@ -1,0 +1,78 @@
+#
+# accounts
+#   make account: useradd, groupadd, skel, authkey; most steps optional
+#
+# desc:
+#   - supply 'accounts:' dictionary to specify accounts to create
+#   - default accounts list set in defaults/main.yml
+#   - eponymous groups for all submitted users are always created if absent
+#   - specified primary group is always created if absent
+#   - groupadd for the specified primary group are always done (idempotent)
+#   - if supplied and different from username, will be primary group
+#
+# accounts:
+#   - users: [ <user1>, ...]  # list of users to instantiate
+#     group: <groupname1>     # primary group, use a null for eponymous
+#     runskel: true           # runs skelfiles role or false to skip
+#     base: '/home'           # '/username' appended for full homedir path
+#     mode: '02775'           # octal homedir mode (note: use string!)
+#     addauth: true           # whether to install to .ssh/authorized_keys
+#     authfile: '/path/'      # default keys/ssh/<user>-id_rsa.pub
+#     shell: '/bin/bash'      # user login shell
+#     homedir: <base>/<user>  # default home from given base + username
+#   - group: <groupname2>
+#     users: ...
+#   - ...
+---
+
+# this should be safe because our role description says we always make
+# eponymous groups.  we have already reserved important gids in ubunode
+# todo: maybe we don't want to always do this
+#
+- name: eponymous_groups
+  group:
+    name: '{{groupname}}'
+    state: present
+  loop_control:
+    loop_var: groupname
+  with_items: "{{(
+    accts_sysadmin_only | bool | ternary(
+      (accounts | selectattr('group', 'equalto', sysadmin_group)),
+      accounts
+    )) | map(attribute='users')
+  }}"
+
+- name: make_accounts_idempotently
+  include_tasks: account.yml
+  vars:
+    # role params actually are one lower priority than include params,
+    # (see: http://docs.ansible.com/ansible/playbooks_variables.html) so we
+    # have to implement multi-level defaults ourselves to make sure
+    # the role-specified ones come first, and fall back to the ones
+    # specified in role defaults.
+    #   NOTE: when we tried to just set the include vars to the role
+    # params of the same name, this resulted in infinite recursion loop,
+    # apparently this cannot be done in a variable expansion loop, we
+    # have to use different variables that hold the value each loop,
+    # they can't have the same name apparently.  one more mysterious
+    # inconsistency with ansible variables...
+    #
+    user:     '{{u.1}}'
+    group:    '{{u.0.group    | d("")}}'
+    skel:     '{{u.0.skel     | d(accts_skel)}}'
+    base:     '{{u.0.base     | d(accts_base)}}'
+    mode:     '{{u.0.mode     | d(accts_mode)}}'
+    shell:    '{{u.0.shell    | d(accts_shell)}}'
+    addauth:  '{{u.0.addauth  | d(accts_addauth, true)}}'
+    authfile: "{{u.0.authfile | d('keys/ssh/' + user + '-id_rsa.pub')}}"
+    homedir:  "{{u.0.homedir  | d(accts_base + '/' + u.1)}}"
+    suppls:   "{{u.0.suppls   | d([])}}"
+
+  loop_control:
+    loop_var: u
+  with_subelements:
+    - "{{accts_sysadmin_only | bool | ternary(
+           (accounts | selectattr('group', 'equalto', sysadmin_group)),
+           accounts
+      )}}"
+    - users
