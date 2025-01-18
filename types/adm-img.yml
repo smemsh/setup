@@ -1,0 +1,8 @@
+#
+# see imgbake.yml for why this can't be done with a variable
+#
+---
+
+- name: display_node_type_image
+  debug:
+    msg: building blank adm node, no type roles applied during imaging
