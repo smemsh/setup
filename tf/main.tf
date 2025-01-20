@@ -43,6 +43,7 @@ data "external" "hosts" {
 
 data "external" "cloudinits" {
   count = var.baketime ? 1 : 0
+
   program = ["${local.home}/bin/tfcloudinit"]
   query = {
     host = local.cloudinit_id
@@ -112,7 +113,7 @@ resource "incus_image" "u22v" {
 
 resource "incus_image" "u22v_adm" {
   for_each = toset(["omnius"])
-  remote = each.value
+  remote   = each.value
 
   aliases = ["u22v_adm"]
   source_instance = {
@@ -325,10 +326,10 @@ resource "incus_instance" "imgbake" {
   remote      = each.value
   description = "imgbake-instance"
 
-  type        = "virtual-machine"
-  image       = incus_image.u22v[each.value].fingerprint
-  running     = true
-  profiles    = ["default"]
+  type     = "virtual-machine"
+  image    = incus_image.u22v[each.value].fingerprint
+  running  = true
+  profiles = ["default"]
 
   config = {
     "cloud-init.network-config" = sensitive(local.cloudinits.network-config)
