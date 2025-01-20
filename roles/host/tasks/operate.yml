@@ -1,0 +1,27 @@
+#
+---
+
+- name: known
+  copy:
+    src: files/known_hosts
+    dest: /etc/ssh/ssh_known_hosts
+  when: host_do_known | bool
+
+- name: hosts
+  copy:
+    src: files/hosts
+    dest: /etc/hosts
+  when: host_do_hosts | bool
+  notify: host_handler_nscd_reload
+
+- name: genders
+  copy:
+    src: files/genders
+    dest: /etc/genders
+  when: host_do_genders | bool
+
+- name: resolver
+  copy:
+    src: files/resolv.conf
+    dest: /etc/resolv.conf
+  when: host_do_resolver | bool

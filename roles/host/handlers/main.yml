@@ -1,0 +1,35 @@
+#
+---
+
+# be careful not to restart ssh (i.e. only reload); we might
+# have just changed network config, don't want to kill our
+# connection, probably this is one of the last actions before
+# machine restart, just want it to take any soft config changes
+#
+- name: host_handler_sshd_reload
+  service:
+    name: ssh
+    state: reloaded
+
+- name: determine_service_facts
+  service_facts:
+
+- when: ansible_facts.services['nscd'] is defined
+  block:
+
+  # since we updated information directory data, good to freshen
+  # the libc name service databases.  init script has no 'reload'
+  # method, but we want to use its semantics (if not started
+  # start; if started, reload), so we have to use "started" here
+  # and then invalidate the hosts database (in next task)
+  #
+  - name: host_handler_nscd_reload
+    service:
+      name: nscd
+      state: started
+    notify: host_handler_nscd_invalidate
+
+  - name: host_handler_nscd_invalidate
+    shell: >
+      PATH=/usr/local/bin:/usr/local/sbin:/usr/bin:/usr/sbin:/bin:/sbin
+      nscd -i hosts

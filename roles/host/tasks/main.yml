@@ -1,0 +1,10 @@
+#
+# operate: hosts, resolv.conf, ssh_known_hosts
+# init: hostname, interfaces, hostkey+pub
+#
+---
+
+- include_tasks: init.yml
+  when: host_init | d(false)
+
+- import_tasks: operate.yml

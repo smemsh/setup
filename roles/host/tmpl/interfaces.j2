@@ -1,0 +1,18 @@
+#
+
+auto lo
+iface lo inet loopback
+
+auto eth0
+iface eth0 inet static
+address {{ip_host}}
+{% if groups['lastipgw'] is defined
+   and host in groups['lastipgw'] %}
+gateway {{ip_gateway_last}}
+{% else %}
+gateway {{ip_gateway}}
+{% endif %}
+{% if groups[locgroup_google] is defined
+   and host in groups[locgroup_google] %}
+mtu 1460
+{% endif %}
