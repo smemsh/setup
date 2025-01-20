@@ -107,6 +107,24 @@ resource "incus_image" "u22v" {
     type         = "virtual-machine"
     architecture = "x86_64"
   }
+
+}
+
+resource "incus_image" "u22v_adm" {
+  for_each = toset(["omnius"])
+  remote = each.value
+
+  aliases = ["u22v_adm"]
+  source_instance = {
+    name = incus_instance.imgbake[each.value].name
+  }
+
+  lifecycle {
+    ignore_changes = all
+    # cannot do this because then it changes whether false or true as
+    # long as it's different TODO figure out some way
+    #replace_triggered_by = [terraform_data.imgrefresh["adm"]]
+  }
 }
 
 ###
