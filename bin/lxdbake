@@ -1,0 +1,51 @@
+#!/usr/bin/env bash
+#
+# lxdbake
+#   make a base vm image after applying baketime cloudinit and cfmgmt
+#
+# desc:
+#   - wraps lxdbake.yml
+#   - configure in types/$2.yml
+#   - end image is snapshot as $2-YYMMDDHHMM
+#   - note: no care is taken to prevent image accumulation
+#   \ up to the type definition to determine if vme or container
+#
+# args:
+#   - arg1: bakehost:bakenode (remote_name:bake_instance_name)
+#   - arg2: types/arg2.yml
+#   \ arg3: images:ubuntu/22.04/cloud
+#
+# scott@smemsh.net
+# https://github.com/smemsh/setup/
+# https://spdx.org/licenses/GPL-2.0
+#
+
+while [[ $1 == -* ]]
+do cliopts+=("$1"); shift; done
+
+imgspec=${1:?}
+imgtype=${2:?}
+imgbase=${3:?}
+
+if ! [[ $imgspec =~ ^([^:]+):([^:]+)$ ]]
+then echo "bad bakehost:bakenode syntax" >&2; false; exit; fi
+
+imghost=${BASH_REMATCH[1]}
+imgnode=${BASH_REMATCH[2]}
+if ! [[ $imghost && $imgnode ]]
+then echo "missing plex or node name" >&2; false; exit; fi
+
+varfiles=(vars/*.yml)
+for ((i = 0; i < ${#varfiles[@]}; i++)); do
+	varfiles[i]="-e @${varfiles[i]}"; done
+
+set -o pipefail
+ansible-playbook "${cliopts[@]}" ${0##*/}.yml \
+	--become \
+	${varfiles[@]} \
+	-e lxdbake_name=$imgnode \
+	-e lxdbake_plex=$imghost \
+	-e lxdbake_type=$imgtype \
+	-e lxdbake_base=$imgbase \
+	-e lxdbake_init=true \
+;

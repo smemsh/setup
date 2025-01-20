@@ -1,0 +1,210 @@
+#
+# lxdbake.yml
+#   init stock image, apply roles by node type, cloud-init clean, save image
+#
+# desc:
+#   - provisions a new base lxd node for baking using terraform
+#   - bootstraps bakenode with cloudinit role (via bin/tfcloudinit)
+#   - applies our standard role suite onto the node
+#   - applies type-specific roles onto the node enumerated in types/ yaml
+#   - clears cloud-init so the next boot will get new config/identity
+#   - upload disk to image storage, to be used as base for deployed node
+#
+---
+
+- name: create_lxd_bakenode
+  hosts: '{{lxdbake_plex}}'
+  become_user: '{{setup_username}}'
+  become_flags: '-i'
+  tasks:
+
+    - name: clobbered_create_bakenode
+      terraform:
+        state: '{{item}}'
+        targets: ['incus_instance.imgbake["{{lxdbake_plex}}"]']
+        variables:
+          baketime: "{{false if item == 'absent' else true}}"
+          bakehost: '{{lxdbake_plex}}'
+          bakenode: '{{lxdbake_name}}'
+        binary_path: '{{lxdbake_tfbin}}'
+        project_path: '{{playbook_dir}}/tf'
+        complex_vars: true
+      with_items:
+        - absent
+        - present
+
+    - name: wait_for_ssh_availability
+      wait_for:
+        host: '{{lxdbake_name}}'
+        delay: 0
+        sleep: 3
+        port: '{{ssh_port}}'
+        search_regex: OpenSSH
+        state: started
+        timeout: 90
+
+- name: prep_for_cfmgmt
+  user: '{{cfmgmt_username}}'
+  hosts: '{{lxdbake_name}}'
+  gather_facts: false
+  tasks:
+    - include_role: { name: cfgnode }
+      vars:         { cfgnode_mode: init }
+
+- name: restore_resolvconf_sanity
+  user: '{{cfmgmt_username}}'
+  hosts: '{{lxdbake_name}}'
+  become: true
+  tasks:
+
+    - name: remove_resolvconf_package
+      apt:  { name: resolvconf, state: absent, purge: yes }
+
+    - name: remove_resolvconf_symlink
+      file: { name: /etc/resolv.conf, state: absent }
+
+    - name: add_resolvconf_file_gdns
+      copy:
+        dest: /etc/resolv.conf
+        content: |
+          nameserver 8.8.8.8
+          nameserver 8.8.4.4
+
+- name: apply_mainstay_roles
+  hosts: '{{lxdbake_name}}'
+  user: '{{cfmgmt_username}}'
+  tasks:
+
+    - include_role: { name: skelfiles }
+      vars:         { skelfiles_user: root }
+
+    - include_role: { name: ubunode }
+      vars:         { phase: init }
+
+    - include_role: { name: ubunode }
+      vars:         { phase: operate }
+
+    - include_role: { name: boot }
+    - include_role: { name: rootauth }
+
+    # run the list of roles as per machine type
+    # we use 'include:' rather than 'roles:' or an 'include_role:' loop to
+    # work around inability to either:
+    # (1) pass a list variable to 'roles:' or
+    # (2) use 'with_items:' with 'include_role:' for its
+    #     'name:' parameter (cf #21285)
+    # note: extra vars seem to work in roles but not any others
+    #
+    ###
+    #
+    # tried doing:
+    #
+    #   imgtypes:
+    #     foonode:
+    #       - ubunode:
+    #       - gpubsub:
+    #       - gcloud:
+    #       - auth:
+    #           auth_username: '{{cfmgmt_username}}'
+    #           auth_users: '{{foo_username}}'
+    # ...
+    #
+    ## run the list of roles as per machine type
+    #- name: apply_roles_by_image_type
+    #  include_role: { name: '{{item.key}}' }
+    #  vars: '{{item.value}}'
+    #  with_items: '{{imgtypes[imgbake_type]}}'
+    #
+    # never figured out the right syntax, tried all variations.  plainly, it
+    # doesn't work, see issue #19084 and #48968, with rejected PR#48790.  not
+    # sure why ansible developers can't seem to think straight, this is the
+    # obvious/intuitive way to loop over a list of roles during a play, and it
+    # works fine with other tasks besides include_role, but not with
+    # include_role as of 2.7.7.  even ansible developers (when they're not
+    # talking in bug comments and claiming this is normal/expected behavior)
+    # know it's really a bug:
+    #
+    # ## test/integration/targets/include_import/role/test_include_role.yml:99:
+    # # FIXME Currently failing with
+    # # ERROR! Vars in a IncludeRole must be specified as a dictionary,
+    # # or a list of dictionaries
+    # - name: Pass all variables in a variable to role
+    #   include_role:
+    #     name: role1
+    #     tasks_from: vartest.yml
+    #   vars: "{{ role_vars }}"
+    ###
+    #
+    # UPDATE 20190214
+    # fixed from 2.4 on (via backporting) to take 'name' param in a
+    # loop, but it still doesn't take 'vars' in a loop, which is dumb, you
+    # can't even pass the role args! see comments below...
+    #
+    # UPDATE 20250117
+    # developers say fix too hard, too many side effects, see issue 835327
+    #
+    - include_tasks: types/{{lxdbake_type}}-img.yml
+
+    # sometimes we want a separate deploy phase
+    - include_tasks: types/{{lxdbake_type}}-init.yml
+      vars:
+        instance_name: '{{lxdbake_name}}'
+      when: lxdbake_init | d(false)
+
+
+# shut down bakenode and upload to image storage for use as base image
+# for later provisions (with new cloud-inits).  then destroy bakenode.
+# this will destroy an existing image.
+#
+- name: upload_and_destroy
+  hosts: '{{lxdbake_plex}}'
+  become_user: '{{setup_username}}'
+  become_flags: '-i'
+  tasks:
+
+    - name: shutdown_bakenode
+      command: incus stop --force {{lxdbake_name}}
+      register: r
+      failed_when: r.rc == 1 and 'already' not in r.stderr
+      changed_when: r.rc == 0
+
+    # TODO: getting weird error in incusd logs when trying this:
+    #  time="2025-01-19T23:24:23-08:00" level=error msg="Failed to stop
+    #  device" device=eth0 err="Failed clearing netprio rules for
+    #  instance \"default\" in project \"omniplex0\": device name is
+    #  empty" instance=omniplex0 instanceType=virtual-machine
+    #  project=default
+    #
+    #- name: shutdown_bakenode
+    #  incus_instance:
+    #    name: '{{lxdbake_name}}'
+    #    state: stopped
+
+    - name: determine_terraform_target_address
+      set_fact:
+        imgname: "\
+          incus_image.\
+          {{lxdbake_base}}v\
+          _{{lxdbake_type}}\
+          [\"{{lxdbake_plex}}\"]\
+        "
+    - name: prepare_operator_for_wait
+      debug:
+        msg: "making image: {{imgname}}, eta 5m asof-20250120, please wait..."
+
+    - name: clobbered_create_image_by_type
+      terraform:
+        state: '{{item}}'
+        targets: ['{{imgname}}']
+        variables:
+          baketime: true
+          bakehost: '{{lxdbake_plex}}'
+          bakenode: '{{lxdbake_name}}'
+        binary_path: '{{lxdbake_tfbin}}'
+        project_path: '{{playbook_dir}}/tf'
+        complex_vars: true
+      with_items:
+        # todo: we should do something with old images rather than
+        # delete, but atm this is how we refresh the type image
+        - absent
+        - present

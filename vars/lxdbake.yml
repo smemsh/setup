@@ -1,0 +1,21 @@
+#
+---
+
+lxdbake_tfbin: /usr/bin/tofu
+
+# upload image dated according to time bake play finishes
+#
+# TODO: this var unused, instead for the moment we have names like u22v_adm
+# which us ubuntu 22, virtual machine, adm type.  left in as holdover from
+# older gce imgbake playbook
+#
+lxdbake_upload_name: "{{
+  lxdbake_name +
+  '-' +
+  ansible_date_time.year +
+  ansible_date_time.month +
+  ansible_date_time.day +
+  ansible_date_time.hour +
+  ansible_date_time.minute +
+  ''
+}}"
