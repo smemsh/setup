@@ -1,0 +1,15 @@
+#
+
+host_init: false
+
+host_do_ssh: true
+host_do_known: true
+host_do_hosts: true
+host_do_genders: true
+host_do_resolver: true
+
+# for when we're not passing in the target, but applying the role directly
+host_by_inventory: false
+
+host_privkey: "{{'keys/host/' + ip_fqdn + '-id_rsa'}}"
+host_pubkey: "{{host_privkey + '.pub'}}"
