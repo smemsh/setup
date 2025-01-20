@@ -117,7 +117,10 @@ resource "incus_image" "u22v_adm" {
 
   aliases = ["u22v_adm"]
   source_instance = {
-    name = incus_instance.imgbake[each.value].name
+    # only matters at create-time, but we leave it persistent, so
+    # subsequent runs rely on the bake-time instance, which typically
+    # only exists when "-var baketime=true", hence the try clause
+    name = try(incus_instance.imgbake[each.key].name, "")
   }
 
   lifecycle {
