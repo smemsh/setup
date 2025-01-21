@@ -160,6 +160,14 @@
       when: lxdbake_init | d(false)
 
 
+- name: reset_node_identity
+  hosts: '{{lxdbake_name}}'
+  user: '{{cfmgmt_username}}'
+  tasks:
+    - name: remove_cloudinit_state
+      command: cloud-init clean --machine-id --seed
+
+
 # shut down bakenode and upload to image storage for use as base image
 # for later provisions (with new cloud-inits).  then destroy bakenode.
 # this will destroy an existing image.
