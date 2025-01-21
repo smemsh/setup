@@ -54,7 +54,6 @@
 - name: restore_resolvconf_sanity
   user: '{{cfmgmt_username}}'
   hosts: '{{lxdbake_name}}'
-  become: true
   tasks:
 
     - name: remove_resolvconf_package
