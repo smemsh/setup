@@ -89,6 +89,12 @@
     - include_role: { name: boot }
     - include_role: { name: rootauth }
 
+
+- name: apply_type_roles
+  hosts: '{{lxdbake_name}}'
+  user: '{{cfmgmt_username}}'
+  tasks:
+
     # run the list of roles as per machine type
     # we use 'include:' rather than 'roles:' or an 'include_role:' loop to
     # work around inability to either:
