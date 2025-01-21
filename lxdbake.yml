@@ -43,6 +43,7 @@
         state: started
         timeout: 90
 
+
 - name: prep_for_cfmgmt
   user: '{{cfmgmt_username}}'
   hosts: '{{lxdbake_name}}'
@@ -50,6 +51,7 @@
   tasks:
     - include_role: { name: cfgnode }
       vars:         { cfgnode_mode: init }
+
 
 - name: restore_resolvconf_sanity
   user: '{{cfmgmt_username}}'
@@ -68,6 +70,7 @@
         content: |
           nameserver 8.8.8.8
           nameserver 8.8.4.4
+
 
 - name: apply_mainstay_roles
   hosts: '{{lxdbake_name}}'
