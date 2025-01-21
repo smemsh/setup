@@ -19,7 +19,7 @@
   tasks:
 
     - name: clobbered_create_bakenode
-      terraform:
+      cloud.terraform.terraform:
         state: '{{item}}'
         targets: ['incus_instance.imgbake["{{lxdbake_plex}}"]']
         variables:
@@ -209,7 +209,7 @@
         msg: "making image: {{imgname}}, eta 5m asof-20250120, please wait..."
 
     - name: clobbered_create_image_by_type
-      terraform:
+      cloud.terraform.terraform:
         state: '{{item}}'
         targets: ['{{imgname}}']
         variables:
