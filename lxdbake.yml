@@ -192,7 +192,7 @@
     #  project=default
     #
     #- name: shutdown_bakenode
-    #  incus_instance:
+    #  kmpm.incus.incus_instance:
     #    name: '{{lxdbake_name}}'
     #    state: stopped
 
