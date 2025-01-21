@@ -37,3 +37,6 @@ this*
 !/venv/Makefile
 !/venv/requirements.in
 !/venv/requirements.txt
+
+.terraform*
+terraform.tfstate*
