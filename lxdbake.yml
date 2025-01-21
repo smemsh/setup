@@ -212,6 +212,7 @@
       cloud.terraform.terraform:
         state: '{{item}}'
         targets: ['{{imgname}}']
+        refresh: false
         variables:
           baketime: true
           bakehost: '{{lxdbake_plex}}'
