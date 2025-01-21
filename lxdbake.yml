@@ -179,7 +179,7 @@
   tasks:
 
     - name: shutdown_bakenode
-      command: incus stop --force {{lxdbake_name}}
+      command: incus stop {{lxdbake_name}}
       register: r
       failed_when: r.rc == 1 and 'already' not in r.stderr
       changed_when: r.rc == 0
