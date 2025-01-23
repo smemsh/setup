@@ -58,6 +58,7 @@ ubunode_remove_packages:
   - update-notifier
   - update-notifier-common
   - ubuntu-pro-client
+  - smartmontools # todo: remove except group 'phy'
 
 ubunode_erase_paths:
   - /etc/update-notifier
