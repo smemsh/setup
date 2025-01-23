@@ -57,6 +57,7 @@ ubunode_remove_packages:
   - unattended-upgrades
   - update-notifier
   - update-notifier-common
+  - ubuntu-pro-client
 
 ubunode_erase_paths:
   - /etc/update-notifier
