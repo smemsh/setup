@@ -71,6 +71,33 @@
     - iscsid
   when: ansible_facts.services[item] is defined
 
+- name: prefer_sshd_port_config
+  block:
+
+    - name: ensure_system_preset_dir
+      file:
+        path: /etc/systemd/system-preset
+        state: directory
+
+    - name: disable_ssh_socket_service_preset
+      copy:
+        dest: /etc/systemd/system-preset/98-disable-ssh-socket.preset
+        content: disable ssh.socket # systemd competes to define port
+
+    - name: disable_ssh_socket_service_unit
+      systemd:
+        name: ssh.socket
+        state: stopped
+        enabled: false
+        daemon_reload: true
+
+    - name: disable_ssh_socket_service_unit
+      systemd:
+        name: ssh.service
+        state: restarted
+        enabled: true
+        daemon_reload: true
+
 ## TODO resolvconf uninstall and /etc/resolv.conf removal seems
 ## to be duplicated in the bake play? commenting out for now
 ##
