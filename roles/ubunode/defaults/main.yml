@@ -46,7 +46,6 @@ ubunode_remove_packages:
   - ubuntu-release-upgrader-core
   - upgrade-notifier-common
   - plymouth
-  - apparmor
   - open-iscsi
   - apport
   - resolvconf
@@ -59,6 +58,9 @@ ubunode_remove_packages:
   - update-notifier-common
   - ubuntu-pro-client
   - smartmontools # todo: remove except group 'phy'
+
+  # incus server hard-requires installed, even if disabled on kcli
+  #- apparmor
 
 ubunode_erase_paths:
   - /etc/update-notifier
