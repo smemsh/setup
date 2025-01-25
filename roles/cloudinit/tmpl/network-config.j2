@@ -14,7 +14,9 @@ ethernets:
       name: e*
     addresses:
       - '{{ip_address}}/{{ip_prefix}}'
-    gateway4: '{{ip_gateway}}'
+    routes:
+      - to: 0.0.0.0/0
+        via: '{{ip_gateway}}'
     nameservers:
       addresses:
         - 8.8.8.8
