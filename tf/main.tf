@@ -3,6 +3,7 @@
 locals {
   home = data.external.env.result.HOME
 
+  domain  = "smemsh.net"
   masklen = 22
 
   plexhosts  = toset(["omnius", "vernius"])
@@ -26,6 +27,9 @@ locals {
 
   cloudinits   = var.baketime ? data.external.cloudinits[0].result : null
   cloudinit_id = var.bakenode
+
+  omnicount = 1 # omniplexN will be the last host
+  omnihosts  = toset([for n in range(1, local.omnicount + 1) : "omniplex${n}"])
 }
 
 ###
@@ -354,4 +358,52 @@ resource "ansible_vault" "sshprivkey" {
   vault_file = "../keys/host/${each.value}.${local.domain}-id_rsa"
 
   vault_password_file = "../bin/ansvault"
+}
+
+resource "incus_instance" "omniadmv" {
+  for_each    = local.omnihosts
+  name        = each.value
+  remote      = "omnius"
+  description = "omniplex-instance-${each.value}"
+
+  type     = "virtual-machine"
+  image    = incus_image.u22v_adm["omnius"].fingerprint
+  running  = true
+  profiles = ["default"]
+
+  config = {
+
+    "cloud-init.network-config" = <<-HERE
+      #
+      ---
+      version: 2
+      ethernets:
+        eth0:
+          addresses:
+            - ${format("%s/%s", local.hostdb[each.value], local.masklen)}
+          routes:
+            - to: 0.0.0.0/0
+              via: ${local.hostdb[local.plexbyhost["omnius"]]}
+          nameservers:
+            addresses:
+              - 8.8.8.8
+              - 8.8.4.4
+    HERE
+
+    # bake-time user-data is more complicated, but for nodes
+    # instantiated from baked images, we only set hostname ssh key
+    #
+    "cloud-init.user-data" = <<-HERE
+      #cloud-config
+      ---
+      fqdn: ${each.value}.${local.domain}
+      hostname: ${each.value}
+      create_hostname_file: true
+      prefer_fqdn_over_hostname: true
+      ssh_keys:
+        rsa_private: ${jsonencode(ansible_vault.sshprivkey[each.value].yaml)}
+        rsa_public: ${jsonencode(file(format("../keys/host/%s.%s-id_rsa.pub",
+                                             each.value, local.domain)))}
+    HERE
+  }
 }
