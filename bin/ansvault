@@ -3,4 +3,4 @@
 # used by ansible-vault via $ANSIBLE_VAULT_PASSWORD_FILE
 # see ~/.gnupg/gpg-agent.conf for caching params
 #
-gpg2 --decrypt --pinentry-mode=loopback ${ANSVAULT_PGPFILE:?}
+gpg2 --decrypt --pinentry-mode=loopback ${ANSVAULT_PGPFILE:?} 2>/dev/null

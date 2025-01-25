@@ -59,6 +59,10 @@ terraform {
       source  = "lxc/incus"
       version = "0.2.0"
     }
+    ansible = {
+      source  = "ansible/ansible"
+      version = "1.3.0"
+    }
     external = {
       source  = "hashicorp/external"
       version = "2.3.4"
@@ -341,4 +345,13 @@ resource "incus_instance" "imgbake" {
     "cloud-init.network-config" = sensitive(local.cloudinits.network-config)
     "cloud-init.user-data"      = sensitive(local.cloudinits.user-data)
   }
+}
+
+###
+
+resource "ansible_vault" "sshprivkey" {
+  for_each   = local.omnihosts
+  vault_file = "../keys/host/${each.value}.${local.domain}-id_rsa"
+
+  vault_password_file = "../bin/ansvault"
 }
