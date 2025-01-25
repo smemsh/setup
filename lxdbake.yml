@@ -165,7 +165,7 @@
   user: '{{cfmgmt_username}}'
   tasks:
     - name: remove_cloudinit_state
-      command: cloud-init clean --machine-id --seed
+      command: cloud-init clean --logs --machine-id --seed
 
 
 # shut down bakenode and upload to image storage for use as base image
