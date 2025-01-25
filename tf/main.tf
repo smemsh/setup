@@ -398,6 +398,8 @@ resource "incus_instance" "omniadmv" {
       ---
       fqdn: ${each.value}.${local.domain}
       hostname: ${each.value}
+      manage_etc_hosts: false
+      manage_resolv_conf: false
       create_hostname_file: true
       prefer_fqdn_over_hostname: true
       ssh_keys:
