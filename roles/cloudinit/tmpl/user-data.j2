@@ -68,6 +68,7 @@ rsyslog:                  {configs: [{content: "*.debug /var/log/messages"}]}
 #   makes 127.0.0.1 instead of real static ip), which we want it to be
 #
 prefer_fqdn_over_hostname: true
+create_hostname_file:     true
 manage_etc_hosts:         false
 manage_resolv_conf:       false
 hostname:                 '{{ip_referent}}'
