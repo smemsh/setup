@@ -69,12 +69,16 @@
     force: true
 
 - name: interfaces
-  template:
-    group: root
-    owner: root
-    mode: '0644'
-    src: tmpl/interfaces.j2
+  copy:
+    content: source interfaces.d/*cloud-init.cfg
     dest: /etc/network/interfaces
+
+  #template:
+  #  group: root
+  #  owner: root
+  #  mode: '0644'
+  #  src: tmpl/interfaces.j2
+  #  dest: /etc/network/interfaces
 
 - name: do_ssh_hostkeys
   when: host_do_ssh | bool
