@@ -107,6 +107,13 @@ runcmd:
   # for spelunking prior to cfmgmt
   - echo "set editing-mode vi" > /root/.inputrc
 
+  # want eni renderer/activator first, it is second only to netplan, which we
+  # will remove.  this cannot be overridden in user-data sadly, but since we
+  # have a two-stage image bake pipeline we can do it in the first stage and
+  # the second stage will then use eni
+  #
+  - sed -i -e "s/'netplan',//" /etc/cloud/cloud.cfg
+
 ssh_keys:
 
   # note: preserve indent offsets, since this is templated yaml
