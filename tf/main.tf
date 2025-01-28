@@ -372,7 +372,6 @@ resource "incus_instance" "omniadmv" {
   profiles = ["default"]
 
   config = {
-
     "cloud-init.network-config" = <<-HERE
       #
       ---
@@ -408,6 +407,11 @@ resource "incus_instance" "omniadmv" {
         rsa_public: ${jsonencode(file(format(
           "%s/keys/host/%s.%s-id_rsa.pub",
           local.home, each.value, local.domain)))}
+      write_files:
+        - path: /etc/hosts
+          owner: root:root
+          permissions: '0644'
+          content: ${jsonencode(file("${local.home}/crypt/hostfiles/hosts"))}
     HERE
   }
 }
