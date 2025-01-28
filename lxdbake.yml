@@ -178,6 +178,9 @@
   become_flags: '-i'
   tasks:
 
+    # TODO: use running=false in the terraform imgbake resource
+    # see also clobbered_create_image_by_type
+    #
     - name: shutdown_bakenode
       command: incus stop {{lxdbake_name}}
       register: r
@@ -212,6 +215,8 @@
       cloud.terraform.terraform:
         state: '{{item}}'
         targets: ['{{imgname}}']
+        # TODO: try running=false in terraform imgbake resource
+        # see also shutdown_bakenode
         refresh: false
         variables:
           baketime: true
