@@ -402,6 +402,7 @@ resource "incus_instance" "omniadmv" {
       manage_resolv_conf: false
       create_hostname_file: true
       prefer_fqdn_over_hostname: true
+      apt_preserve_sources_list: true
       ssh_keys:
         rsa_private: ${jsonencode(ansible_vault.sshprivkey[each.value].yaml)}
         rsa_public: ${jsonencode(file(format(
