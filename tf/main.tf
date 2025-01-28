@@ -355,9 +355,9 @@ resource "incus_instance" "imgbake" {
 
 resource "ansible_vault" "sshprivkey" {
   for_each   = local.omnihosts
-  vault_file = "../keys/host/${each.value}.${local.domain}-id_rsa"
+  vault_file = "${local.home}/keys/host/${each.value}.${local.domain}-id_rsa"
 
-  vault_password_file = "../bin/ansvault"
+  vault_password_file = "${local.home}/bin/ansvault"
 }
 
 resource "incus_instance" "omniadmv" {
@@ -404,8 +404,9 @@ resource "incus_instance" "omniadmv" {
       prefer_fqdn_over_hostname: true
       ssh_keys:
         rsa_private: ${jsonencode(ansible_vault.sshprivkey[each.value].yaml)}
-        rsa_public: ${jsonencode(file(format("../keys/host/%s.%s-id_rsa.pub",
-                                             each.value, local.domain)))}
+        rsa_public: ${jsonencode(file(format(
+          "%s/keys/host/%s.%s-id_rsa.pub",
+          local.home, each.value, local.domain)))}
     HERE
   }
 }
