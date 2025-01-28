@@ -112,7 +112,14 @@ runcmd:
   # have a two-stage image bake pipeline we can do it in the first stage and
   # the second stage will then use eni
   #
-  - sed -i -e "s/'netplan',//" /etc/cloud/cloud.cfg
+  - sed -i -e "s/'netplan',//"
+    /etc/cloud/cloud.cfg
+
+  # for some reason it ignores manage_etc_hosts in user-data, have found
+  # no other way to disable this for second boot TODO
+  #
+  - sed -r -i -e "/^[[:space:]]+-[[:space:]]+update_etc_hosts$/d"
+    /etc/cloud/cloud.cfg
 
 ssh_keys:
 
