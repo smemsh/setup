@@ -201,16 +201,16 @@ class CallbackModule(CallbackModule_default):
             t = stats.summarize(h)
 
             self._display.display(
-                f"  {hostcolor(h, t)} : {colorize('ok', t['ok'], C.COLOR_OK)} {colorize('changed', t['changed'], C.COLOR_CHANGED)} "
-                f"{colorize('unreachable', t['unreachable'], C.COLOR_UNREACHABLE)} {colorize('failed', t['failures'], C.COLOR_ERROR)} "
-                f"{colorize('rescued', t['rescued'], C.COLOR_OK)} {colorize('ignored', t['ignored'], C.COLOR_WARN)}",
+                f"{hostcolor(h, t).strip()}: {"\x20".join(colorize('ok', t['ok'], C.COLOR_OK).split())} {colorize('changed', t['changed'], C.COLOR_CHANGED).strip()} "
+                f"{colorize('unreachable', t['unreachable'], C.COLOR_UNREACHABLE).strip()} {colorize('failed', t['failures'], C.COLOR_ERROR).strip()} "
+                f"{colorize('rescued', t['rescued'], C.COLOR_OK).strip()} {colorize('ignored', t['ignored'], C.COLOR_WARN).strip()}",
                 screen_only=True
             )
 
             self._display.display(
-                f"  {hostcolor(h, t, False)} : {colorize('ok', t['ok'], None)} {colorize('changed', t['changed'], None)} "
-                f"{colorize('unreachable', t['unreachable'], None)} {colorize('failed', t['failures'], None)} {colorize('rescued', t['rescued'], None)} "
-                f"{colorize('ignored', t['ignored'], None)}",
+                f"{hostcolor(h, t, False).strip()}: {"\x20".join(colorize('ok', t['ok'], None).split())} {colorize('changed', t['changed'], None).strip()} "
+                f"{colorize('unreachable', t['unreachable'], None).strip()} {colorize('failed', t['failures'], None).strip()} {colorize('rescued', t['rescued'], None).strip()} "
+                f"{colorize('ignored', t['ignored'], None).strip()}",
                 log_only=True
             )
         if stats.custom and self.get_option('show_custom_stats'):
