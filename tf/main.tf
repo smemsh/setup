@@ -363,6 +363,7 @@ resource "ansible_vault" "sshprivkey" {
 resource "incus_instance" "omniadmv" {
   for_each    = local.omnihosts
   name        = each.value
+  project     = incus_project.plex["omnius"].name
   remote      = "omnius"
   description = "omniplex-instance-${each.value}"
 
