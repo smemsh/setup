@@ -27,7 +27,7 @@ from ansible import context
 from ansible.module_utils.common.text.converters import to_text
 from ansible.plugins.callback.default import CallbackModule as CallbackModule_default
 
-### below block directly copied from lib/ansible/utils/color.py
+### below began as lib/ansible/utils/color.py
 ##############################################################################
 
 import re
@@ -105,7 +105,7 @@ def stringc(text, color, wrap_nonvisible_chars=False):
 
 def colorize(lead, num, color):
     """ Print 'lead' = 'num' in 'color' """
-    s = u"%s=%-4s" % (lead, str(num))
+    s = u"%s=%s" % (lead, str(num))
     if num != 0 and ANSIBLE_COLOR and color is not None:
         s = stringc(s, color)
     return s
@@ -114,14 +114,14 @@ def colorize(lead, num, color):
 def hostcolor(host, stats, color=True):
     if ANSIBLE_COLOR and color:
         if stats['failures'] != 0 or stats['unreachable'] != 0:
-            return u"%-37s" % stringc(host, C.COLOR_ERROR)
+            return u"%s" % stringc(host, C.COLOR_ERROR)
         elif stats['changed'] != 0:
-            return u"%-37s" % stringc(host, C.COLOR_CHANGED)
+            return u"%s" % stringc(host, C.COLOR_CHANGED)
         else:
-            return u"%-37s" % stringc(host, C.COLOR_OK)
-    return u"%-26s" % host
+            return u"%s" % stringc(host, C.COLOR_OK)
+    return u"%s" % host
 
-### above directly copied from lib/ansible/utils/color.py
+### above from lib/ansible/utils/color.py
 ##############################################################################
 
 class CallbackModule(CallbackModule_default):
@@ -296,16 +296,16 @@ class CallbackModule(CallbackModule_default):
             t = stats.summarize(h)
 
             self._display.display(
-                f"{hostcolor(h, t).strip()}: {"\x20".join(colorize('ok', t['ok'], C.COLOR_OK).split())}{colorize('changed', t['changed'], C.COLOR_CHANGED).strip()} "
-                f"{colorize('unreachable', t['unreachable'], C.COLOR_UNREACHABLE).strip()} {"\x20".join(colorize('failed', t['failures'], C.COLOR_ERROR).split())}"
-                f"{colorize('rescued', t['rescued'], C.COLOR_OK).strip()} {colorize('ignored', t['ignored'], C.COLOR_WARN).strip()}",
+                f"{hostcolor(h, t)}: {colorize('ok', t['ok'], C.COLOR_OK)} {colorize('changed', t['changed'], C.COLOR_CHANGED)} "
+                f"{colorize('unreachable', t['unreachable'], C.COLOR_UNREACHABLE)} {colorize('failed', t['failures'], C.COLOR_ERROR)} "
+                f"{colorize('rescued', t['rescued'], C.COLOR_OK)} {colorize('ignored', t['ignored'], C.COLOR_WARN)}",
                 screen_only=True
             )
 
             self._display.display(
-                f"{hostcolor(h, t, False).strip()}: {"\x20".join(colorize('ok', t['ok'], None).split())} {colorize('changed', t['changed'], None).strip()} "
-                f"{colorize('unreachable', t['unreachable'], None).strip()} {colorize('failed', t['failures'], None).strip()} {colorize('rescued', t['rescued'], None).strip()} "
-                f"{colorize('ignored', t['ignored'], None).strip()}",
+                f"{hostcolor(h, t, False)}: {"\x20".join(colorize('ok', t['ok'], None).split())} {colorize('changed', t['changed'], None)} "
+                f"{colorize('unreachable', t['unreachable'], None)} {colorize('failed', t['failures'], None)} {colorize('rescued', t['rescued'], None)} "
+                f"{colorize('ignored', t['ignored'], None)}",
                 log_only=True
             )
         if stats.custom and self.get_option('show_custom_stats'):
