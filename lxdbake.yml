@@ -27,7 +27,7 @@
           bakehost: '{{lxdbake_plex}}'
           bakenode: '{{lxdbake_name}}'
         binary_path: '{{lxdbake_tfbin}}'
-        project_path: '{{playbook_dir}}/tf'
+        project_path: '{{playbook_dir}}/terraform'
         complex_vars: true
       with_items:
         - absent
@@ -223,7 +223,7 @@
           bakehost: '{{lxdbake_plex}}'
           bakenode: '{{lxdbake_name}}'
         binary_path: '{{lxdbake_tfbin}}'
-        project_path: '{{playbook_dir}}/tf'
+        project_path: '{{playbook_dir}}/terraform'
         complex_vars: true
       with_items:
         # todo: we should do something with old images rather than
