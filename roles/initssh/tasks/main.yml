@@ -19,3 +19,4 @@
   with_file:
     - 'keys/ssh/{{initssh_keyid}}-id_rsa.pub'
   when: initssh_keyid is defined
+  no_log: true
