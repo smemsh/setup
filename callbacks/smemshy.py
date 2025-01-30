@@ -201,8 +201,8 @@ class CallbackModule(CallbackModule_default):
             t = stats.summarize(h)
 
             self._display.display(
-                f"{hostcolor(h, t).strip()}: {"\x20".join(colorize('ok', t['ok'], C.COLOR_OK).split())} {colorize('changed', t['changed'], C.COLOR_CHANGED).strip()} "
-                f"{colorize('unreachable', t['unreachable'], C.COLOR_UNREACHABLE).strip()} {colorize('failed', t['failures'], C.COLOR_ERROR).strip()} "
+                f"{hostcolor(h, t).strip()}: {"\x20".join(colorize('ok', t['ok'], C.COLOR_OK).split())}{colorize('changed', t['changed'], C.COLOR_CHANGED).strip()} "
+                f"{colorize('unreachable', t['unreachable'], C.COLOR_UNREACHABLE).strip()} {"\x20".join(colorize('failed', t['failures'], C.COLOR_ERROR).split())}"
                 f"{colorize('rescued', t['rescued'], C.COLOR_OK).strip()} {colorize('ignored', t['ignored'], C.COLOR_WARN).strip()}",
                 screen_only=True
             )
