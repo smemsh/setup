@@ -9,7 +9,7 @@ from __future__ import (absolute_import, division, print_function)
 __metaclass__ = type
 
 DOCUMENTATION = r"""
-name: smemshy
+name: unixz
 type: stdout
 author: Al Bowles (@akatch), modified by Scott Mcdermott (@smemsh)
 short_description: condensed Ansible output
@@ -140,7 +140,7 @@ class CallbackModule(CallbackModule_default):
 
     CALLBACK_VERSION = 2.0
     CALLBACK_TYPE = 'stdout'
-    CALLBACK_NAME = 'community.general.smemshy'
+    CALLBACK_NAME = 'community.general.unixz'
 
     def _run_is_verbose(self, result):
         return ((self._display.verbosity > 0 or '_ansible_verbose_always' in result._result) and '_ansible_verbose_override' not in result._result)
