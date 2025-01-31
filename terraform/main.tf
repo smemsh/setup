@@ -1,39 +1,5 @@
 #
 
-locals {
-  home = data.external.env.result.HOME
-
-  domain  = "smemsh.net"
-  masklen = 22
-
-  plexhosts  = toset(["omnius", "vernius"])
-  plexgates  = [for h in local.plexhosts : replace(h, "/us$/", "plex")]
-  plexbyhost = zipmap(local.plexhosts, local.plexgates)
-
-  volsz_default = "10GiB"
-  volsz_plex    = "128GiB"
-
-  # posix systems need 64k uids, and let container hosts nest 1k such systems
-  uidspace_unpriv   = 64 * 1024
-  uidspace_nestpriv = local.uidspace_unpriv * 1024
-
-  lxdfeatures = [
-    "networks", "networks.zones",
-    "images", "profiles",
-    "storage.volumes", "storage.buckets"
-  ]
-
-  hostdb = data.external.hosts.result
-
-  cloudinits   = var.baketime ? data.external.cloudinits[0].result : null
-  cloudinit_id = var.bakenode
-
-  omnicount = 1 # omniplexN will be the last host
-  omnihosts  = toset([for n in range(1, local.omnicount + 1) : "omniplex${n}"])
-}
-
-###
-
 data "external" "env" {
   program = ["jq", "-n", "env"]
 }
@@ -56,56 +22,6 @@ data "external" "cloudinits" {
 
 ###
 
-terraform {
-  required_version = "1.9.0"
-  required_providers {
-    incus = {
-      source  = "lxc/incus"
-      version = "0.2.0"
-    }
-    ansible = {
-      source  = "ansible/ansible"
-      version = "1.3.0"
-    }
-    external = {
-      source  = "hashicorp/external"
-      version = "2.3.4"
-    }
-  }
-  backend "local" {
-    # path = ".terraform/terraform.tfstate"
-    # todo: gcs, but must also setup encryption, and what about when lan
-    #  but no internet? and what if gcs bucket became inaccessible?
-    #  possibly, periodic statefile copies from gcs to local might
-    #  accomplish this, backend could be switched to local then, as long
-    #  as statefile is same format/information.  obviously if using gce
-    #  nodes, if gcs is gone gce will probably be gone also so it would
-    #  only matter for non-gce nodes
-  }
-}
-
-provider "incus" {
-  remote {
-    name    = "local"
-    scheme  = "unix"
-    default = true
-  }
-
-  # :8443
-  remote {
-    name    = "omnius"
-    scheme  = "https"
-    address = "omnius.proxima"
-  }
-  remote {
-    name    = "vernius"
-    scheme  = "https"
-    address = "vernius.proxima"
-  }
-}
-
-###
-
 resource "incus_image" "u22v" {
   for_each = local.plexhosts
   remote   = each.value
@@ -116,7 +32,6 @@ resource "incus_image" "u22v" {
     type         = "virtual-machine"
     architecture = "x86_64"
   }
-
 }
 
 resource "incus_image" "u22v_adm" {
@@ -314,25 +229,6 @@ resource "incus_instance" "tekius" {
 }
 
 ###
-
-# set by an ansible play that initiates the bake and makes an image
-variable "baketime" {
-  description = "build-bakehost-yn"
-  type        = bool
-  default     = false
-}
-
-variable "bakehost" {
-  description = "bakehost-remote"
-  type        = string
-  default     = ""
-}
-
-variable "bakenode" {
-  description = "bakehost-nodename"
-  type        = string
-  default     = ""
-}
 
 resource "incus_instance" "imgbake" {
   name        = var.bakenode
