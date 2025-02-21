@@ -22,16 +22,10 @@ data "external" "cloudinits" {
 
 ###
 
-resource "incus_image" "u22v" {
+module "osimgs" {
   for_each = local.plexhosts
+  source   = "./osimgs"
   remote   = each.value
-  aliases  = ["u22v"]
-  source_image = {
-    remote       = "images"
-    name         = "ubuntu/22.04/cloud"
-    type         = "virtual-machine"
-    architecture = "x86_64"
-  }
 }
 
 resource "incus_image" "u22v_adm" {
@@ -237,7 +231,7 @@ resource "incus_instance" "imgbake" {
   description = "imgbake-instance"
 
   type     = "virtual-machine"
-  image    = incus_image.u22v[each.value].fingerprint
+  image    = module.osimgs[var.bakehost].incus_image.osimgs["u22v"].fingerprint
   running  = true
   profiles = ["default"]
 
