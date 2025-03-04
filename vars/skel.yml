@@ -9,9 +9,9 @@ skel_repos_exes:
   git-reltag: master-1.8.2
 
 skel_repos_rcfiles:
-  .bash: master-2.10.11
   .vim: master-2.2.10
+  .bash: master-2.10.11
   .tmux: master-1.2.7
-  .terminfo: master-1.0.1
    # note: override with private branch on personal
   .gitcli: master-1.12.2
+  .terminfo: master-1.0.1
