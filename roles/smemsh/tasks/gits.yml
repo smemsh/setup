@@ -19,7 +19,7 @@
     verify_commit: true
   with_dict: '{{skel_repos_rcfiles}}'
 
-# copies the exes from each repo to ~/bin/
+# installx copies the exes from each repo to ~/bin/
 #
 - name: exe_checkouts
   git:
