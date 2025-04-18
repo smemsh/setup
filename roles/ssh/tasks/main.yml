@@ -191,10 +191,10 @@
 
     - name: hostkey_algs_remove
       replace:
-        regexp: '^\s*HostKeyAlgorithms(?!.ssh-rsa$).*$'
+        regexp: '^\s*HostKeyAlgorithms(?!.{{ssh_hostkey_algs}}$).*$'
         dest: '{{ssh_client_rcfile}}'
 
     - name: hostkey_algs_set
       lineinfile:
-        line: 'HostKeyAlgorithms ssh-rsa'
+        line: 'HostKeyAlgorithms {{ssh_hostkey_algs}}'
         dest: '{{ssh_client_rcfile}}'
