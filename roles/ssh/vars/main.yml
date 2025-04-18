@@ -6,4 +6,4 @@ ssh_daemon_rcfile:    /etc/ssh/sshd_config
 ssh_client_rcfile:    /etc/ssh/ssh_config
 
 #
-ssh_hostkey_algs:     ssh-rsa
+ssh_hostkey_algs:     rsa-sha2-256,rsa-sha2-512,ssh-rsa
