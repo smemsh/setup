@@ -4,15 +4,16 @@
 skel_github: smemsh
 
 skel_repos_exes:
-  utilsh: master-1.13.3
-  utilpy: master-0.14.0
+  utilsh: master-1.13.7
+  utilpy: master-0.15.1
+  utiladm: master-0.4.1
   installx: master-0.13.1
   git-reltag: master-1.8.2
 
 skel_repos_rcfiles:
-  .vim: master-2.2.10
-  .bash: master-2.10.11
-  .tmux: master-1.2.7
+  .vim: master-2.2.11
+  .bash: master-2.12.12
+  .tmux: master-1.2.8
    # note: override with private branch on personal
   .gitcli: master-1.12.2
   .terminfo: master-1.0.1
