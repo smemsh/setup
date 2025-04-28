@@ -47,6 +47,7 @@
   vars:
     auth_username: '{{cfgnode_username}}'
     auth_password: '{{cfgnode_password}}'
+    auth_users: ['{{cfgnode_username}}']
 
 - name: deposit_skeleton_files
   include_role:
