@@ -7,7 +7,6 @@ python3_patch: 2
 python3_version: '{{python3_major}}.{{python3_minor}}.{{python3_patch}}'
 
 python3_sslver: 3.0.16
-python3_base: python-{{python3_version}}
 
 python3_dist_map:
   7:  [u22, static]
@@ -21,14 +20,23 @@ python3_distn: '{{python3_dist_map[ansible_distribution_major_version | int]}}'
 python3_osrel: '{{python3_distn[0]}}'
 python3_linkt: '{{python3_distn[1]}}'
 
-python3_install_files:
-  - "{{python3_base}}\
-     _{{python3_linkt}}\
-     _staticssl-{{python3_sslver}}\
-     _opt_amd64_{{python3_osrel}}\
-    .tar.zst"
+# the archive created by pybuild is named "python-version_linktype_..." but
+# extracts to "/opt/python-..." (dynamic), or "/opt/pystatic-..." (static)
+#
+python3_vername: python-{{python3_version}}
+python3_basename: '{{(python3_linkt == "static") | ternary("pystatic", "python")}}'
+python3_buildver: '{{python3_basename}}-{{python3_version}}'
 
-python3_install_root: /opt/{{python3_base}}
+python3_install_files:
+  - "\
+    {{python3_vername}}\
+    _{{python3_linkt}}\
+    _staticssl-{{python3_sslver}}\
+    _opt_amd64_{{python3_osrel}}\
+    .tar.zst\
+    "
+
+python3_install_root: /opt/{{python3_buildver}}
 python3_symlinks_in: /usr/local
 
 # python3_install_symlinks:

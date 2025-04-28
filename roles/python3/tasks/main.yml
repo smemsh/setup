@@ -3,7 +3,7 @@
 
 - name: test_if_already_present
   stat:
-    path: /opt/{{python3_base}}
+    path: /opt/{{python3_buildver}}
   register: r
 
 - name: install_if_not_already
