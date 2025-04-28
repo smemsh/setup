@@ -10,6 +10,7 @@ python3_sslver: 3.0.16
 
 python3_dist_map:
   7:  [u22, static]
+  12: [u22, dynamic]
   14: [u22, static]
   16: [u22, static]
   18: [u22, static]
