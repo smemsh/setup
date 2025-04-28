@@ -50,7 +50,7 @@
 
     - name: warn_unsupported_distro
       debug:
-        msg: 'caution: only ubuntu supported at the moment!'
+        msg: 'caution: only tested on ubuntu'
       when: (ansible_distribution | lower) != 'ubuntu'
 
     ## openssl installs certificates in different path on rhel than ubuntu
