@@ -21,4 +21,4 @@ gcsurl_base:              https://storage.googleapis.com/pvn.files.smemsh.net
 
 ssh_port:                 22022
 
-aptmirror:                mirrors.rit.edu
+aptmirror:                mirrors.xtom.com
