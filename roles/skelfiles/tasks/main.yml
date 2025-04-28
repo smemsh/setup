@@ -22,7 +22,7 @@
     state: present
   when: skelfiles_install_rsync
 
-- name: determine_account_entry
+- name: get_account_entry
   getent:
     key: '{{skelfiles_user}}'
     database: passwd
