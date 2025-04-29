@@ -1,0 +1,40 @@
+#
+---
+
+- name: select_run_method
+  set_fact:
+    mailtype: "{{mode | default('gmek')}}"
+
+- name: install_postfix
+  package:
+    name: postfix
+    state: present
+
+- name: enable_postfix_service
+  service:
+    name: postfix
+    state: started
+    enabled: true
+
+- name: deploy_dnsroute
+  when: postfix_do_dnsroute
+  block:
+    - name: install_gmail_relay_route_script
+      copy:
+        src: '{{playbook_dir}}/srcx/utiladm/dnsroute'
+        dest: '{{postfix_dnsroute_bindir}}'
+        mode: '0755'
+
+    - name: install_gmail_relay_route_cron
+      cron:
+        name: gmail_relay_route
+        user: root
+        minute: '*/15'
+        cron_file: smtproute
+        job: >-
+          {{postfix_dnsroute_bindir}}/{{postfix_dnsroute_name}}
+          {{postfix_dnsroute_line}}
+
+- name: configure_postfix_rcfiles
+  include_tasks: rctmpl.yml
+  with_fileglob: ['{{role_path}}/tmpl/{{mailtype}}-*.j2']

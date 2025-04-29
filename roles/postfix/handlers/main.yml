@@ -1,0 +1,7 @@
+#
+---
+
+- name: host_handler_postfix_reload
+  service:
+    name: postfix
+    state: restarted

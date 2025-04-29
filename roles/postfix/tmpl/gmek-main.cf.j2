@@ -1,0 +1,83 @@
+#
+# route all mail to the google apps account
+# format: scott+$shorthostname-$localpart@smemsh.net
+#
+##############################################################################
+
+#
+inet_protocols		= ipv4
+
+# defaults that changed with compatibility
+respectful_logging	= no
+append_dot_mydomain	= yes
+compatibility_level	= 3.6
+
+# all mail to be injected locally and relayed to gmail using
+# our relay account and smtp auth credentials
+#
+mydestination		=
+
+# note: we use ip-based relay acl for our domain.  only meklar will be
+# accepted, so mta host needs a relay route via meklar to ensure access
+#
+relayhost		= [smtp-relay.gmail.com]:587
+
+# any other egress path should cause an error on attempt
+# ($default_transport shall remain for route to $relayhost)
+#
+local_transport		= error
+virtual_transport	= error
+relay_transport		= error
+fallback_transport	= error
+
+# route all mail to the relay, leaving payload headers unchanged
+# (local maps should never be consulted after this mapping)
+#
+recipient_canonical_classes = envelope_recipient
+recipient_canonical_maps = regexp:/etc/postfix/recipient_canonical
+
+# locally generated mail should never bounce, everything is
+# relayed, but we do not want it to vanish on misconfiguration
+# (monitor for "SOFTBOUNCE" in logs)
+#
+soft_bounce		= yes
+
+# encrypt session with gmail relay (uses app-specific 2fa token)
+# forcing tls, even though google prefers rc4 (?) -- see ciphers(1)
+#
+tls_high_cipherlist		= DEFAULT:-ALL:DHE-DSS-AES256-SHA:DHE-RSA-AES256-SHA:AES256-SHA
+tls_random_exchange_name	= /var/lib/postfix/prng_exch
+smtp_tls_mandatory_protocols	= TLSv1.3
+smtp_tls_mandatory_ciphers	= high
+smtp_tls_security_level		= secure
+smtp_tls_CAfile			= /etc/ssl/certs/ca-certificates.crt
+smtp_tls_loglevel		= 1
+
+# todo: consider using a fallback relay via smtp auth, in case vpn down
+#
+smtp_sasl_auth_enable		= no
+#smtp_sasl_auth_enable		= yes
+#smtp_sasl_password_maps	= hash:/etc/postfix/sasl_auth_map
+#smtp_sasl_security_options	= noanonymous
+
+###
+
+# accommodate distro paths and use of alternatives mechanism
+#
+mail_owner		= postfix
+setgid_group		= postdrop
+manpage_directory	= /usr/share/man
+mailq_path		= /usr/bin/mailq
+newaliases_path		= /usr/bin/newaliases
+sendmail_path		= /usr/sbin/sendmail
+command_directory	= /usr/sbin
+daemon_directory	= /usr/lib/postfix/sbin
+queue_directory		= /var/spool/postfix
+data_directory		= /var/lib/postfix
+shlib_directory		= /usr/lib/postfix
+
+# disable scache, unnecessary service for our usage
+# TODO: maybe this is fine, it will just try and fail to
+# connect to scache if disabled in master.cf?
+#
+smtp_connection_cache_on_demand = no

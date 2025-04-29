@@ -1,0 +1,18 @@
+#
+---
+
+postfix_do_dnsroute: true
+
+postfix_dnsroute_bindir: /usr/local/sbin
+postfix_dnsroute_name: dnsroute
+postfix_dnsroute_line: smtp-relay.gmail.com meklar.terra
+
+pfrelay_user: scott
+pfrelay_domain: smemsh.net
+
+pfrelay_host: '{{inventory_hostname_short}}'
+pfrelay_base: '{{pfrelay_user}}+{{pfrelay_host}}'
+
+pfrelay_base_esc: '{{pfrelay_base | regex_escape}}'
+pfrelay_domain_esc: '{{pfrelay_domain | regex_escape}}'
+

@@ -1,0 +1,55 @@
+#
+# rewrites all mails to {{pfrelay_base}}-foo@{{pfrelay_domain}}
+#
+# MAPPINGS
+# - unqualified -> {{pfrelay_base}}-unqualified@{{pfrelay_domain}}
+# - qualified on-hosts -> {{pfrelay_base}}-$localpart@{{pfrelay_domain}}
+# - qualified off-hosts -> {{pfrelay_base}}-malformed@{{pfrelay_domain}}
+#
+# NOTES
+# - performed on injection (at cleanup(8))
+# - only recipient addresses rewritten ($recipient_canonical)
+# - rewrite envelope only ($recipient_canonical_classes)
+# - happens before local maps, we bypass those completely for all mail
+# - qualification ($append_*) occurs before us so we can skip that
+# - after our rewrite, mail never gets routed to local transport
+# - designed so $mydestination will be empty
+# - designed for $*_transport = error (except $default_transport to $relayhost)
+#
+# TODO
+#   - if we could use $myhostname in patterns, same map used anywhere
+#     - no dynamic mechanism or variable expansion is available in maps
+#     - attempts to use a script as a map via 'proxy:' and/or 'pipe:' failed
+#     - was initial reason to switch to a cfmgmt role, to template hostname
+#
+##############################################################################
+
+# if canonicalized already, leave unchanged to avoid recursion
+/^({{pfrelay_base_esc}}-[^+@]+@{{pfrelay_domain_esc}})$/
+	${1}
+
+# trivial-rewrite (as called by cleanup) in local context will
+# already have done some rewriting before canonicalization
+# maps are matched, under control of relevant variables:
+#
+#   $append_dot_mydomain: root@localhost -> root@localhost.$mydomain
+#   $append_at_myorigin:  root -> root@$myorigin
+#
+# so canonical mapping will not actually see those forms ever,
+# unless we set $append_* to false, which we do not, so we
+# handle each of the permutations that will result from
+# locally injected mail undergoing these rules
+#
+/^([^+@]+)@(localhost|{{pfrelay_host}})(\.(localdomain|{{pfrelay_domain_esc}})){0,1}$/
+	{{pfrelay_base}}-${1}@{{pfrelay_domain}}
+
+# totally unqualified recipients are never actually seen since
+# we use $append_*, but we leave this here in case that
+# changes, and to note it
+#
+/^([^+@]+)$/
+	{{pfrelay_base}}-${1}@{{pfrelay_domain}}
+
+# anything else is malformed
+/(.*)/
+	{{pfrelay_base}}-malformed@{{pfrelay_domain}}

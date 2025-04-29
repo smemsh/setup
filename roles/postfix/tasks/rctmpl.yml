@@ -1,0 +1,9 @@
+#
+---
+
+- name: render_postfix_template
+  template:
+    src: '{{item}}'
+    dest: /etc/postfix/{{(item | basename)[((mailtype | length) + 1):-3]}}
+  notify:
+    host_handler_postfix_reload
