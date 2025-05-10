@@ -20,20 +20,30 @@
   when: postfix_do_dnsroute
   block:
     - name: install_gmail_relay_route_script
+      register: ret_copy
       copy:
         src: '{{playbook_dir}}/srcx/utiladm/dnsroute'
         dest: '{{postfix_dnsroute_bindir}}'
         mode: '0755'
 
+    - name: construct_gmail_relay_route_command
+      set_fact:
+        dnsroutecmd: >-
+          {{postfix_dnsroute_bindir}}/{{postfix_dnsroute_name}}
+          {{postfix_dnsroute_line}}
+
     - name: install_gmail_relay_route_cron
+      register: ret_cron
       cron:
         name: gmail_relay_route
+        job: '{{dnsroutecmd}}'
         user: root
         minute: '*/15'
         cron_file: smtproute
-        job: >-
-          {{postfix_dnsroute_bindir}}/{{postfix_dnsroute_name}}
-          {{postfix_dnsroute_line}}
+
+    - name: do_initial_dnsroute_run
+      when: (ret_copy.changed | bool) or (ret_cron.changed | bool)
+      command: '{{dnsroutecmd}}'
 
 - name: configure_postfix_rcfiles
   include_tasks: rctmpl.yml
