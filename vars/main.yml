@@ -8,7 +8,7 @@ cfmgmt_homedir:           /home/{{cfmgmt_username}}
 setup_username:           setup
 setup_homedir:            /home/{{setup_username}}
 
-locgroup_linode:          lnd
+locgroup_linode:          lin
 locgroup_google:          gce
 locgroup_roc:             roc
 
