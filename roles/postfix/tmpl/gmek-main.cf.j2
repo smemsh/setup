@@ -1,6 +1,22 @@
 #
-# route all mail to the google apps account
-# format: scott+$shorthostname-$localpart@smemsh.net
+{# #}
+{% set h = inventory_hostname_short %}
+{% set plexnodes = groups['vm'] + groups['vos'] %}
+{% set plexnodes = plexnodes | difference(groups['lin']) %}
+{% set is_plexnode = true if h in plexnodes else false %}
+{% set is_plexhost = true if h in groups['plex'] else false %}
+{# #}
+{% set address = ansible_eth0.ipv4.address + '/' + ansible_eth0.ipv4.prefix %}
+{% set network = address | ansible.utils.ipaddr('1') %}
+{% set gateway = network | ansible.utils.ipaddr('address') %}
+{% set relayhost = gateway if is_plexnode else postfix_grelay_host %}
+{% set relayport = '25' if is_plexnode else '587' %}
+{# #}
+# rewrite all mail to scott+$shorthostname-$localpart@smemsh.net
+# meklar relays to smtp-relay.gmail.com:587 directly, allowed by ip
+# plexnodes relay to plexhost:25 directly
+# plexhosts relay to smtp-relay.gmail.com:587 via meklar.terra with nat
+# plexhosts run utiladm/dnsroute from cron to maintain route via meklar
 #
 ##############################################################################
 
@@ -12,15 +28,10 @@ respectful_logging	= no
 append_dot_mydomain	= yes
 compatibility_level	= 3.6
 
-# all mail to be injected locally and relayed to gmail using
-# our relay account and smtp auth credentials
-#
 mydestination		=
-
-# note: we use ip-based relay acl for our domain.  only meklar will be
-# accepted, so mta host needs a relay route via meklar to ensure access
-#
-relayhost		= [smtp-relay.gmail.com]:587
+mynetworks_style	= subnet
+relayhost		= [{{relayhost}}]:{{relayport}}
+#smtp_host_lookup	= native
 
 # any other egress path should cause an error on attempt
 # ($default_transport shall remain for route to $relayhost)
@@ -35,15 +46,28 @@ fallback_transport	= error
 #
 recipient_canonical_classes = envelope_recipient
 recipient_canonical_maps = regexp:/etc/postfix/recipient_canonical
+local_recipient_maps =
+alias_maps =
 
+{% if is_plexhost %}
+# these don't seem to have expected result, recipient_canonical is still
+# consulted when submitted via smtp and the cleanup lookup to
+# trivial-rewrite is for "local" rule (not remote).  instead we use -o
+# with a separate cleanup service in master.cf, for smtp-submitted mail
+#
+local_header_rewrite_clients =
+remote_header_rewrite_domain =
+
+{% endif %}
+{# #}
 # locally generated mail should never bounce, everything is
 # relayed, but we do not want it to vanish on misconfiguration
 # (monitor for "SOFTBOUNCE" in logs)
 #
 soft_bounce		= yes
 
-# encrypt session with gmail relay (uses app-specific 2fa token)
-# forcing tls, even though google prefers rc4 (?) -- see ciphers(1)
+{% if not is_plexnode %}
+# encrypt session with gmail relay
 #
 tls_high_cipherlist		= DEFAULT:-ALL:DHE-DSS-AES256-SHA:DHE-RSA-AES256-SHA:AES256-SHA
 tls_random_exchange_name	= /var/lib/postfix/prng_exch
@@ -53,6 +77,8 @@ smtp_tls_security_level		= secure
 smtp_tls_CAfile			= /etc/ssl/certs/ca-certificates.crt
 smtp_tls_loglevel		= 1
 
+{% endif %}
+{# #}
 # todo: consider using a fallback relay via smtp auth, in case vpn down
 #
 smtp_sasl_auth_enable		= no
