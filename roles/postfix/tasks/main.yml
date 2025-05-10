@@ -38,7 +38,7 @@
         name: gmail_relay_route
         job: '{{dnsroutecmd}}'
         user: root
-        minute: '*/15'
+        minute: '*/{{postfix_dnsroute_interval | string}}'
         cron_file: smtproute
 
     - name: do_initial_dnsroute_run
