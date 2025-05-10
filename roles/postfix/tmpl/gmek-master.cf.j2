@@ -37,8 +37,3 @@ smtp      inet  n       -       y       -       -       smtpd
 nocanon   unix  n       -       n       -       0       cleanup
   -o recipient_canonical_maps=
 {% endif %}
-
-#recipient_canonical_lookup
-#          unix  -       n       n       -       -       pipe
-#          user=nobody flags=R
-#          argv=/etc/postfix/recipient_canonical.sh ${recipient}
