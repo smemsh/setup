@@ -3,9 +3,10 @@
 
 postfix_do_dnsroute: true
 
-postfix_dnsroute_bindir: /usr/local/sbin
+postfix_grelay_host: smtp-relay.gmail.com
+postfix_dnsroute_line: '{{postfix_grelay_host}} meklar.terra'
 postfix_dnsroute_name: dnsroute
-postfix_dnsroute_line: smtp-relay.gmail.com meklar.terra
+postfix_dnsroute_bindir: /usr/local/sbin
 
 pfrelay_user: scott
 pfrelay_domain: smemsh.net
@@ -15,4 +16,3 @@ pfrelay_base: '{{pfrelay_user}}+{{pfrelay_host}}'
 
 pfrelay_base_esc: '{{pfrelay_base | regex_escape}}'
 pfrelay_domain_esc: '{{pfrelay_domain | regex_escape}}'
-
