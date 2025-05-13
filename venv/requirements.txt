@@ -4,12 +4,8 @@
 #
 #    pip-compile --strip-extras requirements.in
 #
-ansible==11.5.0
-    # via -r requirements.in
 ansible-core==2.18.5
-    # via
-    #   -r requirements.in
-    #   ansible
+    # via -r requirements.in
 ansible-runner==2.4.0
     # via -r requirements.in
 apache-libcloud==3.8.0

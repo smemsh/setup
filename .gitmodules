@@ -13,3 +13,12 @@
 [submodule "collections/terraform"]
 	path = collections/terraform
 	url = https://github.com/smemsh/ansible-cloud-terraform
+[submodule "collections/posix"]
+	path = collections/posix
+	url = https://github.com/ansible-collections/ansible.posix
+[submodule "collections/utils"]
+	path = collections/utils
+	url = https://github.com/ansible-collections/ansible.utils
+[submodule "collections/general"]
+	path = collections/general
+	url = https://github.com/ansible-collections/community.general
