@@ -10,9 +10,6 @@
 [submodule "srcx/utiladm"]
 	path = srcx/utiladm
 	url = https://github.com/smemsh/utiladm
-[submodule "collections/incus"]
-	path = collections/incus
-	url = https://github.com/kmpm/ansible-collection-incus
 [submodule "collections/terraform"]
 	path = collections/terraform
 	url = https://github.com/smemsh/ansible-cloud-terraform
