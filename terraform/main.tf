@@ -231,7 +231,10 @@ resource "incus_instance" "imgbake" {
   description = "imgbake-instance"
 
   type     = "virtual-machine"
-  image    = module.osimgs[var.bakehost].incus_image.osimgs["u22v"].fingerprint
+  image    = try(
+    module.osimgs[var.bakehost].incus_image.osimgs["u22v"].fingerprint,
+    ""
+  )
   running  = true
   profiles = ["default"]
 
