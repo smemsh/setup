@@ -41,6 +41,7 @@ alias j='jobs'
 alias f='fg'
 alias m='fg -'
 alias h=hostname
+alias ansj=ANSIBLE_STDOUT_CALLBACK=json\ ansible
 
 complete -C /usr/bin/tofu tofu
 
