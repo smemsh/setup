@@ -1,3 +1,23 @@
+#
+# internal (part of 'ansible' pypi) collections we use today:
+#ansible.posix
+#ansible.utils
+#community.general
+#
+# internal collections we either did before or may use in near future:
+#ansible.netcommon
+#cloud.common
+#community.docker
+#community.grafana
+#containers.podman
+#google.cloud
+#grafana.grafana
+#kubernetes.core
+#kubevirt.core
+#
+# get the repo urls and versions to peg from:
+#  upsrc/ansible-build-data/<major>/ansible-<major>.<minor>.<patch>-tags.yaml
+#
 [submodule ".vim"]
 	path = .vim
 	url = https://github.com/smemsh/.vim
