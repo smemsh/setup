@@ -57,7 +57,7 @@
 - include_role:
     name: sysadmin
     public: true
-  when: skel_sysadmin | default() | bool()
+  when: skel_sysadmin | bool
 
 - include_role:
     name: mkuser
