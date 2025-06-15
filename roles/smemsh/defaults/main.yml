@@ -1,8 +1,8 @@
 #
 ---
 
-#
-skel_repobase: 'https://github.com/{{skel_github}}'
+# github username that contains skeleton repos needed to flesh homedir
+skel_github: smemsh
 
 # todo: don't use '~', not sure if this always expands to the right user
 # (there's local, remote, become user, not sure it works in all cases)
@@ -10,14 +10,33 @@ skel_repobase: 'https://github.com/{{skel_github}}'
 skel_srcx_dir: '~/srcx'
 skel_rcfiles_dir: '~'
 
-# these need to be supplied in vars
+# skel_repos_* key is repo name to checkout.  value is tag to checkout.
+# if empty, enumerates tags on github and determines latest by "loose"
+# version sort (alg from 'version_sort' filter).  if value contains any
+# digits, taken as an exact tag, otherwise a prefix, where only tags
+# starting therewith will be considered.  exes copied into ~/bin/
+# whereas rcfiles are symlinked from home dir into the repo as dotfiles
+# (ala installx/installrc)
 #
-skel_repos_exes: {}
-skel_repos_rcfiles: {}
+skel_repos_exes:
+  utilsh: master-1.13.7
+  utilpy: master-0.15.1
+  utiladm: master-0.4.1
+  installx: master-0.13.1
+  git-reltag: master-1.8.2
+#
+skel_repos_rcfiles:
+  .vim: master-2.2.11
+  .bash: master-2.12.12
+  .tmux: master-1.2.8
+  .terminfo: master-1.0.1
+  .gitcli: master-1.12.2
 
-# so far unused
+# override single keys from these defaults by supplying in an *_addl
+# key-val.  the whole lot can be replaced by redefining skel_repos_*
 #
-skel_repos_all: '{{
-  skel_repos_rcfiles +
-  skel_repos_exes
-}}'
+skel_exes_addl: {}
+skel_rcfiles_addl: {}
+skel_repos_rcall: '{{skel_repos_rcfiles | combine(skel_rcfiles_addl)}}'
+skel_repos_exall: '{{skel_repos_exes | combine(skel_exes_addl)}}'
+skel_repos_all: '{{skel_repos_rcall | combine(skel_repos_exall)}}'

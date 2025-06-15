@@ -8,24 +8,20 @@
 #
 ---
 
-# installrc will put symlinks in ~/
-#
-- name: rcfile_checkouts
-  git:
-    repo: '{{skel_repobase}}/{{item.key}}'
-    dest: '{{skel_rcfiles_dir}}/{{item.key}}'
-    version: '{{item.value}}'
-    recursive: false
-    verify_commit: true
-  with_dict: '{{skel_repos_rcfiles}}'
 
-# installx copies the exes from each repo to ~/bin/
-#
-- name: exe_checkouts
+- name: repo_checkouts
   git:
-    repo: '{{skel_repobase}}/{{item.key}}'
-    dest: '{{skel_srcx_dir}}/{{item.key}}'
+    repo: 'https://github.com/{{skel_github}}/{{item.key}}'
     version: '{{item.value}}'
     recursive: false
     verify_commit: true
-  with_dict: '{{skel_repos_exes}}'
+    dest: |-
+      {%- if item.key in skel_repos_rcall -%}
+      {%-     set destdir = skel_rcfiles_dir -%}
+      {%- elif item.key in skel_repos_exall -%}
+      {%-     set destdir = skel_srcx_dir -%}
+      {%- else -%}
+      {%-     set destdir = undef() -%}
+      {%- endif -%}
+      {{destdir}}/{{item.key}}
+  with_dict: '{{skel_repos_all}}'
