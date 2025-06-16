@@ -1,9 +1,15 @@
 #
 # gits.yml
-#   git checkout specified versions (see defaults) and verify tags
+#   git checkout latest or specified versions (see defaults) and verify tags
 #
 ---
 
+- name: do_ghreltags_lookups
+  set_fact:
+    skel_repos_all: '{{
+      skel_repos_all | ghreltags(skel_github, skel_tagprefix, skel_apitok)
+    }}'
+  delegate_to: localhost
 
 - name: repo_checkouts
   git:

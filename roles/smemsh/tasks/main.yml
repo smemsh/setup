@@ -4,7 +4,7 @@
 #
 # desc:
 #   - for applying to newly provisioned hosts to create smemsh user skeleton
-#   - checkout repos from github at specified tag
+#   - checkout repos from github at specified tag or latest tag matching prefix
 #   - verify tag signatures
 #   - each repository gets installx/installrc run
 #
