@@ -14,10 +14,10 @@
 #   - (todo: choose paths according to what variables?)
 #
 # vars:
-#   skel_sysadmin: whether to run sysadmin role and add to group
-#   mkuser_user: account name to pass to mkuser role
-#   initpgp_keyid: initpgp email
-#   initssh_keyid: initssh email
+#   skel_sysadmin: whether to run sysadmin role and add to group [true]
+#   mkuser_user: account name to pass to mkuser role (always run) [scott]
+#   initpgp_keyid: initpgp email (run if truthy+) [scott@smemsh.net]
+#   initssh_keyid: initssh email (run if truthy+) [scott@omnius.smemsh.net]
 #
 # todo:
 #   - skel_sysadmin still being used downstream?
@@ -71,14 +71,14 @@
     apply:
       become: true
       become_user: '{{mkuser_user}}'
-  when: initpgp_keyid is defined
+  when: initpgp_keyid is truthy(convert_bool=true)
 
 - include_role:
     name: initssh
     apply:
       become: true
       become_user: '{{mkuser_user}}'
-  when: initssh_keyid is defined
+  when: initssh_keyid is truthy(convert_bool=true)
 
 - block:
   - import_tasks: gits.yml
