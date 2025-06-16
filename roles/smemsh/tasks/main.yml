@@ -3,10 +3,10 @@
 #   setup home skeleton from git repositories following rcfile+exe convention
 #
 # desc:
-#   - for applying to newly provisioned machines
-#   - checks out repos from github at specified tag (todo: where?)
-#   - verifies tag signatures
-#   - each repository gets installx/installrc run (todo: where are vars files?)
+#   - for applying to newly provisioned hosts to create smemsh user skeleton
+#   - checkout repos from github at specified tag
+#   - verify tag signatures
+#   - each repository gets installx/installrc run
 #
 # what:
 #   - symlinks for rcfiles: ~/.foorc -> ~/.foo/rc (see installrc)
@@ -14,12 +14,16 @@
 #   - (todo: choose paths according to what variables?)
 #
 # vars:
-#   skel_sysadmin: whether we require ansible-role-sysadmin
+#   skel_sysadmin: whether to run sysadmin role and add to group
+#   mkuser_user: account name to pass to mkuser role
+#   initpgp_keyid: initpgp email
+#   initssh_keyid: initssh email
 #
 # todo:
 #   - skel_sysadmin still being used downstream?
-#   - we should replace installx with ansible so it's not a dependency
-#   - (maybe by converting it to a plugin / module)
+#   - make installx importable to be usable as module when not __main__
+#   - allow to bypass mkuser role if mkuser_user undefined (eg, not our host)
+#   - likewise, able to run without acl package installed
 #
 ---
 

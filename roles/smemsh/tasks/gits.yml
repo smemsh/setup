@@ -1,10 +1,6 @@
 #
 # gits.yml
-#    git check out and verify signature on tags
-#
-# scott@smemsh.net
-# https://github.com/smemsh/utilsh/ (installx.sh)
-# https://spdx.org/licenses/GPL-2.0
+#   git checkout specified versions (see defaults) and verify tags
 #
 ---
 

@@ -1,6 +1,6 @@
 #
 # installx.yml
-#   runs installx, installrc from https://github.com/smemsh/utilsh
+#   runs installx and/or installrc from https://github.com/smemsh/installx/
 #
 # desc:
 #   - runs installrc on those from skel_repos_rcfiles
@@ -8,7 +8,7 @@
 #
 # todo:
 #   - this depends on their path, but they could be installed in bin
-#   - installx.sh functionality should be reimplemented in ansible
+#   - installx should be made importable as ansible module
 #
 ---
 
