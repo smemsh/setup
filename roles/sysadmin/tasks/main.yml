@@ -23,12 +23,18 @@
   when: not getent_group[sysadmin_name]
 
 - name: verify_sudoers_dir_include
-  command: "grep -q 'includedir.*{{sudoers_dir}}' /etc/sudoers"
-  changed_when: false
+  lineinfile:
+    name: /etc/sudoers
+    line: '@includedir {{sudoers_dir}}'
+  check_mode: true
+  register: r
+  failed_when: (r is changed) or (r is failed)
 
 - name: verify_sudoers_dir_exists
-  command: "test -d {{sudoers_dir}}"
-  changed_when: false
+  stat:
+    path: '{{sudoers_dir}}'
+  register: r
+  failed_when: not r.stat.exists
 
 - name: add_sudoers_files
   template:
