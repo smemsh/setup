@@ -39,7 +39,7 @@
 - name: add_sudoers_files
   template:
     src: '{{item}}'
-    dest: '{{sudoers_dir}}/{{item | basename() | splitext() | first()}}'
+    dest: '{{sudoers_dir}}/{{item | basename | splitext | first}}'
     owner: root
     group: root
     mode: 0400
