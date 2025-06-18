@@ -24,7 +24,7 @@
 - name: ensure_atleast_ubuntu14
   when: (ansible_distribution | lower) == 'ubuntu'
   assert:
-    that: ansible_distribution_major_version > 12
+    that: (ansible_distribution_major_version | int) > 12
     msg: "ubuntu < 14 'ln' does not have '--relative', needed by 'installrc'"
 
 - name: do_installrc
