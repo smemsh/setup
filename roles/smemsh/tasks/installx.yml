@@ -15,8 +15,8 @@
 - name: do_installx
   shell: '{{skel_srcx_dir}}/installx/installx -qf'
   args:
-    chdir: '{{skel_srcx_dir}}/{{item.key}}'
-  with_dict: '{{skel_repos_exes}}'
+    chdir: '{{skel_srcx_dir}}/{{item}}'
+  with_items: '{{skel_repos_exes | list}}'
 
 # installrc requires 'ln --relative'
 # (not present in u12 coreutils)
@@ -30,5 +30,5 @@
 - name: do_installrc
   shell: '{{skel_srcx_dir}}/installx/installrc -qf'
   args:
-    chdir: '{{skel_rcfiles_dir}}/{{item.key}}'
-  with_dict: '{{skel_repos_rcfiles}}'
+    chdir: '{{skel_rcfiles_dir}}/{{item}}'
+  with_items: '{{skel_repos_rcfiles | list}}'
