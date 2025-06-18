@@ -10,6 +10,7 @@
       skel_repos_all | ghreltags(skel_github, skel_tagprefix, skel_apitok)
     }}'
   delegate_to: localhost
+  delegate_facts: true
 
 - name: repo_checkouts
   git:
@@ -26,4 +27,4 @@
       {%-     set destdir = undef() -%}
       {%- endif -%}
       {{destdir}}/{{item.key}}
-  with_dict: '{{skel_repos_all}}'
+  with_dict: '{{hostvars.localhost.skel_repos_all}}'
