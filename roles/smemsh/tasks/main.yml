@@ -30,33 +30,24 @@
 - assert:
     that: mkuser_user is defined
 
-- command: which setfacl
-  register: r
-  ignore_errors: true # we check it ourselves, and want to get that far
+
+# needs 'setfacl' command available ('acl' package) on the target
+# for 'copy' or 'template' module to work when all three conditions
+# met (1) become is used; (2) remote_user is not root; (3)
+# become_user is not root.  in this case ansible uses 'setfacl' to
+# allow the bundle to be deposited by one user and read by another
+# ('allow_world_readable_tmpfiles' would also work, but we don't
+# want to do that); see
+# https://docs.ansible.com/ansible/latest/user_guide/become.html#becoming-an-unprivileged-user
+#
+- name: verify_setacl_invokable
+  command: which setfacl
   changed_when: false
 
-- name: check_acl_package_installed
-  fail:
-    msg: >
-      needs 'setfacl' command available ('acl' package) on the target for
-      'copy' or 'template' module to work when all three conditions met (1)
-      become is used; (2) remote_user is not root; (3) become_user is not
-      root.  in this case ansible uses 'setfacl' to allow the bundle to be
-      deposited by one user and read by another
-      ('allow_world_readable_tmpfiles' would also work, but we don't want to
-      do that); see
-      https://docs.ansible.com/ansible/latest/user_guide/become.html#becoming-an-unprivileged-user
-  when: r.rc != 0
-
-- command: which git
-  register: r
-  ignore_errors: true
+- name: verify_git_invokable
+  command: which git
   changed_when: false
 
-- name: check_git_package_installed
-  fail:
-    msg: requires that 'git' is installed already on the remote system
-  when: r.rc != 0
 
 - include_role:
     name: sysadmin
