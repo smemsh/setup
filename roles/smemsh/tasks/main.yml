@@ -7,6 +7,8 @@
 #   - checkout repos from github at specified tag or latest tag matching prefix
 #   - verify tag signatures
 #   - each repository gets installx/installrc run
+#   - pass skel_init=true on first run to get user create, pgp, ssh, etc
+#   - use afterwards without skel_init to just sync git checkouts and symlinks
 #
 # what:
 #   - symlinks for rcfiles: ~/.foorc -> ~/.foo/rc (see installrc)
@@ -14,6 +16,7 @@
 #   - (todo: choose paths according to what variables?)
 #
 # vars:
+#   skel_init: run initialization roles: sysadmin, mkuser, initssh/pgp [false]
 #   skel_sysadmin: whether to run sysadmin role and add to group [true]
 #   mkuser_user: account name to pass to mkuser role (always run) [scott]
 #   initpgp_keyid: initpgp email (run if truthy+) [scott@smemsh.net]
@@ -22,7 +25,6 @@
 # todo:
 #   - skel_sysadmin still being used downstream?
 #   - make installx importable to be usable as module when not __main__
-#   - allow to bypass mkuser role if mkuser_user undefined (eg, not our host)
 #   - likewise, able to run without acl package installed
 #
 ---
@@ -32,46 +34,55 @@
     that: mkuser_user is defined
     quiet: true
 
+- name: first_run_tasks
+  when: skel_init | default | bool
+  block:
 
-# needs 'setfacl' command available ('acl' package) on the target
-# for 'copy' or 'template' module to work when all three conditions
-# met (1) become is used; (2) remote_user is not root; (3)
-# become_user is not root.  in this case ansible uses 'setfacl' to
-# allow the bundle to be deposited by one user and read by another
-# ('allow_world_readable_tmpfiles' would also work, but we don't
-# want to do that); see
-# https://docs.ansible.com/ansible/latest/user_guide/become.html#becoming-an-unprivileged-user
-#
-- name: verify_setacl_invokable
-  command: which setfacl
-  changed_when: false
+    # needs 'setfacl' command available ('acl' package) on the target
+    # for 'copy' or 'template' module to work when all three conditions
+    # met (1) become is used; (2) remote_user is not root; (3)
+    # become_user is not root.  in this case ansible uses 'setfacl' to
+    # allow the bundle to be deposited by one user and read by another
+    # ('allow_world_readable_tmpfiles' would also work, but we don't
+    # want to do that); see
+    # https://docs.ansible.com/ansible/latest/user_guide/become.html#becoming-an-unprivileged-user
+    #
+    - name: verify_setacl_invokable
+      command: which setfacl
+      changed_when: false
 
-- name: verify_git_invokable
-  command: which git
-  changed_when: false
+    - name: verify_git_invokable
+      command: which git
+      changed_when: false
 
+    - include_role:
+        name: sysadmin
+        public: true
+      when: skel_sysadmin | bool
 
-- include_role:
-    name: sysadmin
-    public: true
-  when: skel_sysadmin | bool
+    - include_role:
+        name: mkuser
 
-- include_role:
-    name: mkuser
+    - include_role:
+        name: initpgp
+        apply:
+          become: true
+          become_user: '{{mkuser_user}}'
+      when: initpgp_keyid is truthy(convert_bool=true)
 
-- include_role:
-    name: initpgp
-    apply:
-      become: true
-      become_user: '{{mkuser_user}}'
-  when: initpgp_keyid is truthy(convert_bool=true)
+    - include_role:
+        name: initssh
+        apply:
+          become: true
+          become_user: '{{mkuser_user}}'
+      when: initssh_keyid is truthy(convert_bool=true)
 
-- include_role:
-    name: initssh
-    apply:
-      become: true
-      become_user: '{{mkuser_user}}'
-  when: initssh_keyid is truthy(convert_bool=true)
+- name: verify_account
+  getent:
+    database: passwd
+    fail_key: true
+    key: '{{mkuser_user}}'
+  when: not (skel_init | default | bool)
 
 - name: do_repository_setups
   block:
