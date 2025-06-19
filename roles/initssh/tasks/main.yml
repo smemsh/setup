@@ -9,7 +9,10 @@
 #
 ---
 
-- assert: { that: 'mkuser_user is defined' }
+- name: verify_ssh_user_supplied
+  assert:
+    that: mkuser_user is defined
+    quiet: true
 
 - name: do_ssh_authkey
   authorized_key:

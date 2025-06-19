@@ -27,8 +27,10 @@
 #
 ---
 
-- assert:
+- name: verify_user_arg_supplied
+  assert:
     that: mkuser_user is defined
+    quiet: true
 
 
 # needs 'setfacl' command available ('acl' package) on the target
@@ -71,8 +73,9 @@
       become_user: '{{mkuser_user}}'
   when: initssh_keyid is truthy(convert_bool=true)
 
-- block:
-  - import_tasks: gits.yml
-  - import_tasks: installx.yml
+- name: do_repository_setups
+  block:
+    - import_tasks: gits.yml
+    - import_tasks: installx.yml
   become: true
   become_user: '{{mkuser_user}}'
