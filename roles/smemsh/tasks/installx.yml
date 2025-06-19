@@ -13,13 +13,19 @@
 ---
 
 - name: do_installx
-  shell: '{{skel_srcx_dir}}/installx/installx -qf'
+  shell: '{{skel_srcx_dir}}/installx/installx -sqf'
   args:
     chdir: '{{skel_srcx_dir}}/{{item}}'
   with_items: '{{skel_repos_exes | list}}'
+  register: r
+  changed_when: r.rc == 1
+  failed_when: r.rc > 1
 
 - name: do_installrc
-  shell: '{{skel_srcx_dir}}/installx/installrc -qf'
+  shell: '{{skel_srcx_dir}}/installx/installrc -sqf'
   args:
     chdir: '{{skel_rcfiles_dir}}/{{item}}'
   with_items: '{{skel_repos_rcfiles | list}}'
+  register: r
+  changed_when: r.rc == 1
+  failed_when: r.rc > 1
