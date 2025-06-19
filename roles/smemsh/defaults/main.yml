@@ -32,7 +32,7 @@ skel_rcfiles_dir: '~'
 skel_sysadmin: true
 
 # run mkuser role with this username (this role always run, but is idempotent)
-mkuser_user: scott
+skel_user: scott
 
 # run initpgp role: initialize gpg config and trust our own key
 initpgp_keyid: scott@smemsh.net

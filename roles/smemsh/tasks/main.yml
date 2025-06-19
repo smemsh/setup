@@ -17,8 +17,8 @@
 #
 # vars:
 #   skel_init: run initialization roles: sysadmin, mkuser, initssh/pgp [false]
+#   skel_user: account name of user whose home we will create/alter [scott]
 #   skel_sysadmin: whether to run sysadmin role and add to group [true]
-#   mkuser_user: account name to pass to mkuser role (always run) [scott]
 #   initpgp_keyid: initpgp email (run if truthy+) [scott@smemsh.net]
 #   initssh_keyid: initssh email (run if truthy+) [scott@omnius.smemsh.net]
 #
@@ -31,7 +31,7 @@
 
 - name: verify_user_arg_supplied
   assert:
-    that: mkuser_user is defined
+    that: skel_user is defined
     quiet: true
 
 - name: first_run_tasks
@@ -62,26 +62,30 @@
 
     - include_role:
         name: mkuser
+      vars:
+        mkuser_user: '{{skel_user}}'
 
     - include_role:
         name: initpgp
         apply:
           become: true
-          become_user: '{{mkuser_user}}'
+          become_user: '{{skel_user}}'
       when: initpgp_keyid is truthy(convert_bool=true)
 
     - include_role:
         name: initssh
         apply:
           become: true
-          become_user: '{{mkuser_user}}'
+          become_user: '{{skel_user}}'
+      vars:
+        initssh_user: '{{skel_user}}'
       when: initssh_keyid is truthy(convert_bool=true)
 
 - name: verify_account
   getent:
     database: passwd
     fail_key: true
-    key: '{{mkuser_user}}'
+    key: '{{skel_user}}'
   when: not (skel_init | default | bool)
 
 - name: do_repository_setups
@@ -89,4 +93,4 @@
     - import_tasks: gits.yml
     - import_tasks: installx.yml
   become: true
-  become_user: '{{mkuser_user}}'
+  become_user: '{{skel_user}}'

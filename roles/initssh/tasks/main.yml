@@ -11,12 +11,12 @@
 
 - name: verify_ssh_user_supplied
   assert:
-    that: mkuser_user is defined
+    that: initssh_user is defined
     quiet: true
 
 - name: do_ssh_authkey
   authorized_key:
-    user: '{{mkuser_user}}'
+    user: '{{initssh_user}}'
     key: '{{item}}'
     manage_dir: true
   with_file:
