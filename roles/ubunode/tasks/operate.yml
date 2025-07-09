@@ -144,10 +144,9 @@
       #
       install bpfilter /bin/true
     dest: /etc/modprobe.d/livm-blacklist-bpfilter.conf
-  when: "(
+  when:
     ((ansible_distribution | lower) == 'ubuntu') and
     ((ansible_distribution_major_version | int) >= 20)
-  )"
 
 # logrotate waits until there is 1M of acct data, which takes a long time on
 # some machines, in the meantime this thing is running monthly and giving
@@ -164,3 +163,23 @@
     fi
   changed_when: r.rc == 1
   failed_when: r.rc == 2
+
+# make sure useradd does not alter /etc/sub[ug]id, but workaround breaks
+# useradd on u20 and below, see task 2aec2e78-bfbc-4a99-a87b-2407634cbb55
+#
+- name: disable_shadow_subuid_modification
+  when:
+    ((ansible_distribution | lower) == 'ubuntu') and
+    ((ansible_distribution_major_version | int) >= 24)
+
+  block:
+    - name: shadow_subugid_remove_old
+      replace:
+        regexp: '^\s*SUB_.ID_COUNT\s+[^0]+.*$'
+        dest: '{{shadow_rcfile}}'
+
+    - name: shadow_subugid_disable
+      lineinfile:
+        line: SUB_{{item}}ID_COUNT 0
+        dest: '{{shadow_rcfile}}'
+      with_items: ['U', 'G']
