@@ -5,6 +5,7 @@ cfmgmt_username:          config
 cfmgmt_password:          '{{secret_cfmgmt_password}}'
 cfmgmt_homedir:           /home/{{cfmgmt_username}}
 
+setup_prefix:             smemsh
 setup_username:           setup
 setup_homedir:            /home/{{setup_username}}
 
