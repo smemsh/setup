@@ -42,7 +42,7 @@
         job: '{{dnsroutecmd}}'
         user: root
         minute: '*/{{postfix_dnsroute_interval | string}}'
-        cron_file: smtproute
+        cron_file: '{{setup_prefix}}-smtproute'
 
     - name: do_initial_dnsroute_run
       when: (ret_copy.changed | bool) or (ret_cron.changed | bool)
