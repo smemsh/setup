@@ -7,7 +7,7 @@ postfix_grelay_host: smtp-relay.gmail.com
 postfix_dnsroute_line: '{{postfix_grelay_host}} meklar.terra'
 postfix_dnsroute_name: dnsroute
 postfix_dnsroute_bindir: /usr/local/sbin
-postfix_dnsroute_interval: 15  # polling interval minutes
+postfix_dnsroute_interval: 5  # polling interval minutes
 
 pfrelay_user: scott
 pfrelay_domain: smemsh.net
