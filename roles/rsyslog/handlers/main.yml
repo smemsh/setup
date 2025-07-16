@@ -1,0 +1,15 @@
+#
+---
+
+- name: rsyslog_handler_reload
+  service:
+    name: rsyslog
+    state: restarted
+    #
+    # apparently a reload is insufficient, although it should not
+    # be, and contradicts rsyslog documentation, but logging in and
+    # hanging up rsyslogd, it still does not pick up the change, so
+    # a full restart is needed
+    # reconfirmed on rsyslog-v7 u14 20210111
+    #
+    #state: reloaded
