@@ -1,0 +1,23 @@
+#
+---
+
+- name: install_klogpoll_script
+  copy:
+    src: '{{playbook_dir}}/srcx/utiladm/klogpoll'
+    dest: '{{dmesg_klogpoll_bindir}}'
+    mode: '0755'
+
+- name: install_klogpoll_cronjob
+  copy:
+    dest: /etc/cron.d/{{setup_prefix}}-klogpoll
+    mode: 0644
+    owner: root
+    content: |
+      #
+      #MAILTO=root
+      PATH=/usr/local/bin:/usr/local/sbin:/bin:/sbin:/usr/bin:/usr/sbin
+      */5 * * * * {{
+        ((ansible_os_family | lower) == 'debian') |
+         ternary('syslog', 'root')
+      }} klogpoll
+

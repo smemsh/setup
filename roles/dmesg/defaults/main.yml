@@ -1,0 +1,4 @@
+#
+---
+
+dmesg_klogpoll_bindir: /usr/local/sbin
