@@ -4,7 +4,11 @@
 - name: copy_remote_syslog_configs
   copy:
     src: '{{rcfile}}'
-    dest: /etc/rsyslog.d/
+    dest: "{{
+      '/etc/rsyslog.d/' + (
+        rcfile | basename | regex_replace(
+          '^(\\d\\d-)', '\\1' + setup_prefix + '-'
+    ))}}"
   loop_control:
     loop_var: rcfile
   with_fileglob: 'files/*'
