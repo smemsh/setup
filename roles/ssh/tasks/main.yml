@@ -42,13 +42,13 @@
       replace:
         regexp: '^\s*PrintLastLog\s+yes.*$'
         dest: '{{ssh_daemon_rcfile}}'
-      notify: ssh_handler_server_reload
+      notify: ssh_handler_reload
 
     - name: lastlog_disable
       lineinfile:
         line: 'PrintLastLog no'
         dest: '{{ssh_daemon_rcfile}}'
-      notify: ssh_handler_server_reload
+      notify: ssh_handler_reload
 
 - name: disable_sshd_strict_permissions
   block:
@@ -57,13 +57,13 @@
       replace:
         regexp: '^\s*StrictModes\s+yes.*$'
         dest: '{{ssh_daemon_rcfile}}'
-      notify: ssh_handler_server_reload
+      notify: ssh_handler_reload
 
     - name: strictmodes_disable
       lineinfile:
         line: 'StrictModes no'
         dest: '{{ssh_daemon_rcfile}}'
-      notify: ssh_handler_server_reload
+      notify: ssh_handler_reload
 
 # why would anyone want to have four different possible hostkeys? pick
 # the good algorithm and use it.  we use rsa2k, since everyone has it;
@@ -81,7 +81,7 @@
   with_items: [dsa, ecdsa, ed25519]
 #
 - name: disable_non_rsa_hostkeys
-  notify: ssh_handler_server_reload
+  notify: ssh_handler_reload
   replace:
     regexp: '^(HostKey./etc/ssh/ssh_host_{{item}}_key)'
     replace: '#\1'
@@ -95,13 +95,13 @@
       replace:
         regexp: '^\s*UseDNS\s+yes.*$'
         dest: '{{ssh_daemon_rcfile}}'
-      notify: ssh_handler_server_reload
+      notify: ssh_handler_reload
 
     - name: usedns_disable
       lineinfile:
         line: 'UseDNS no'
         dest: '{{ssh_daemon_rcfile}}'
-      notify: ssh_handler_server_reload
+      notify: ssh_handler_reload
 
 - name: disable_distbanner
   when: is_debian | d(false)
@@ -111,13 +111,13 @@
       replace:
         regexp: '^\s*DebianBanner\s+yes.*$'
         dest: '{{ssh_daemon_rcfile}}'
-      notify: ssh_handler_server_reload
+      notify: ssh_handler_reload
 
     - name: debian_banner_disable
       lineinfile:
         line: 'DebianBanner no'
         dest: '{{ssh_daemon_rcfile}}'
-      notify: ssh_handler_server_reload
+      notify: ssh_handler_reload
 
 - name: disable_passwords
   block:
@@ -128,13 +128,13 @@
         replace:
           regexp: '^\s*PasswordAuthentication\s+yes.*$'
           dest: '{{ssh_daemon_rcfile}}'
-        notify: ssh_handler_server_reload
+        notify: ssh_handler_reload
 
       - name: passauth_disable
         lineinfile:
           line: 'PasswordAuthentication no'
           dest: '{{ssh_daemon_rcfile}}'
-        notify: ssh_handler_server_reload
+        notify: ssh_handler_reload
 
     - block:
 
@@ -142,13 +142,13 @@
         replace:
           regexp: '^\s*ChallegeResponseAuthentication\s+yes.*$'
           dest: '{{ssh_daemon_rcfile}}'
-        notify: ssh_handler_server_reload
+        notify: ssh_handler_reload
 
       - name: chalresp_disable
         lineinfile:
           line: 'ChallengeResponseAuthentication no'
           dest: '{{ssh_daemon_rcfile}}'
-        notify: ssh_handler_server_reload
+        notify: ssh_handler_reload
 
 ### SSH ######################################################################
 

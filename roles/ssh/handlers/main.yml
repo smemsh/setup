@@ -1,5 +1,5 @@
 #
 ---
 
-- name: ssh_handler_server_reload
+- name: ssh_handler_reload
   include_tasks: reload.yml
