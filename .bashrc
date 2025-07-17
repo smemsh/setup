@@ -43,6 +43,9 @@ alias m='fg -'
 alias h=hostname
 alias ansj=ANSIBLE_STDOUT_CALLBACK=json\ ansible
 
+for ((i = 1; i <= 64; i++)); do alias $i="fg $i"; done
+unset i
+
 complete -C /usr/bin/tofu tofu
 
 r       () { sudo -iu root bash -c "$*"; }
