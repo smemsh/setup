@@ -44,7 +44,16 @@ alias h=hostname
 alias ansj=ANSIBLE_STDOUT_CALLBACK=json\ ansible
 
 for ((i = 1; i <= 64; i++)); do alias $i="fg $i"; done
-unset i
+enable -n .
+alias .="cd \$OLDPWD"
+alias ..="cd .."
+for ((i = 3; i < 10; i++)); do
+	aname=''; dir=''
+	for ((j = 0; j < i; j++)); do aname+=.; done
+	for ((j = 0; j < i-1; j++)); do dir+=../; done
+	alias $aname="cd ${dir%/}"
+done
+unset i j aname dir
 
 complete -C /usr/bin/tofu tofu
 
