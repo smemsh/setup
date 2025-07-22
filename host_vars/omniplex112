@@ -1,6 +1,5 @@
 #
 ---
 
-ipnet: 10.32.195.112/22
 domain: smemsh.net
 bridge: br0
