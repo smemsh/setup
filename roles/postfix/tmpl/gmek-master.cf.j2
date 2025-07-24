@@ -1,7 +1,7 @@
 #
 {# #}
 {% set h = inventory_hostname_short %}
-{% set is_plexhost = true if h in groups['plex'] else false %}
+{% set is_plexhost = true if h in groups['plexhost'] else false %}
 {# #}
 # service type  private unpriv  chroot  wakeup  maxproc command + args
 #               (yes)   (yes)   (no)    (never) (100)

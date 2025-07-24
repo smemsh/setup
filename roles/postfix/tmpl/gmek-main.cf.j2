@@ -1,10 +1,8 @@
 #
 {# #}
 {% set h = inventory_hostname_short %}
-{% set plexnodes = groups['vm'] + groups['vos'] %}
-{% set plexnodes = plexnodes | difference(groups['lin']) %}
-{% set is_plexnode = true if h in plexnodes else false %}
-{% set is_plexhost = true if h in groups['plex'] else false %}
+{% set is_plexnode = true if h in groups['plexnode'] else false %}
+{% set is_plexhost = true if h in groups['plexhost'] else false %}
 {# #}
 {% set address = ansible_eth0.ipv4.address + '/' + ansible_eth0.ipv4.prefix %}
 {% set network = address | ansible.utils.ipaddr('1') %}
