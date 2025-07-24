@@ -25,7 +25,8 @@ anvil     unix  -       -       y       -       1       anvil
 scache    unix  -       -       y       -       1       scache
 discard   unix  -       -       y       -       -       discard
 retry     unix  -       -       y       -       -       error
-{# #}
+
+{# TODO: use 'bridge' var from inventory #}
 {% if is_plexhost %}
 # anything coming in on tcp 25 is a plex node, it's for relay without needing
 # to have a route to meklar, and should already be canonicalized
