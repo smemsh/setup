@@ -20,6 +20,7 @@ test.*
 this*
 
 /.bash_history
+/.python_history
 
 /.ansible/**
 !/.ansible/**/
