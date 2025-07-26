@@ -1,0 +1,30 @@
+#!/usr/bin/env bash
+#
+# ansvarps
+#    display ansible variable precedence list, consulting online documentation
+#
+# scott@smemsh.net
+# https://github.com/smemsh/setup/
+# https://opensource.org/licenses/gpl-2-0
+
+url=https://docs.ansible.com/ansible/latest/playbook_guide/playbooks_variables.html
+
+elinks \
+  -dump \
+  -dump-width 999 \
+  -dump-charset ascii \
+  -no-home \
+  -no-connect \
+  -no-numbering \
+  -no-references \
+  $url \
+| grep -PA999 '^\s*Understanding.variable.precedence' \
+| sed -n -r \
+  -e '/^$/d' \
+  -e 's/^[[:space:]]+//' \
+  -e '/^>[[:space:]]+[[:digit:]]+\.[[:space:]]/,/^[^>]/p' \
+| grep '^>' \
+| sed -r \
+  -e 's,[[:space:]]*\[[[:digit:]]+\]$,,' \
+  -e 's,^>[[:space:]]+,,' \
+;
