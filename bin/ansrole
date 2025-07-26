@@ -42,12 +42,13 @@ init_cfbase ()
 	then cfbase="$PWD"
 	else echo "cwd must be a playbase" >&2; false; exit; fi
 
+	# disabled for now, we only run as setup user these days
 	#export ANSIBLE_CONFIG="$cfbase/.ansible.cfg"
 	#export ANSIBLE_INVENTORY="$cfbase/.ansible.hosts"
-	export ANSIBLE_CONFIG="$cfbase/.ansible.cfg"
-	export ANSIBLE_INVENTORY=/dev/null
-
-	cd $cfbase
+	#export ANSIBLE_CONFIG="$cfbase/.ansible.cfg"
+	#export ANSIBLE_INVENTORY=/dev/null
+	#
+	#cd $cfbase
 }
 
 # note: adjust this in comment header too
