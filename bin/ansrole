@@ -9,10 +9,11 @@
 #           [ <varname=value> | <json> ] [...]
 #           # adjust in usagex() also ## fixme
 # desc:
-#   - includes the role in roles/<name>.yml passing params in extra args,
+#   - executes role in "./roles/<role-to-apply>/" onto <apply-onto-pattern>
+#   - passes trailing var=val params as '-e' args to ansible-playbook
 #   - applies the role onto specified host (or inventory pattern if given)
-#   - creates symlinks to plays in a `mktemp -d`
-#   - runs in the tmpdir after overlaying temporary playbook to include_role
+#   - creates symlinks to play/role dirs in a `mktemp -d` directory
+#   - runs in the tmpdir after creating temporary playbook with static role
 #   - (ansible can only do playbook-relative, not cwd-relative paths)
 #
 # todo:
@@ -69,7 +70,7 @@ process_args ()
 {
 	local match nmatches onto role inv
 
-	# temporary hack to skip fact gathering for raw roles
+	# skip fact gathering for raw roles, must be first arg
 	if [[ $1 == '--nofacts' || $1 == '-n' ]]; then
 		dofacts='false'; shift; fi
 
@@ -100,7 +101,7 @@ process_args ()
 
 	[[ $onto && $role ]] && rolename=$role || usagex
 
-	# var=val or json strings to pass in ansible-playbook -e
+	# rest are var=val or json strings for ansible-playbook -e
 	shift; for arg; do extras+=(-e); extras+=("$arg"); done
 }
 
