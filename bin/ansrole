@@ -5,13 +5,13 @@
 #
 # usage:
 #   ansrole [-n | --nofacts] [--ansible-playbook-opt] [...] \
-#           [<invspec>:]<apply-onto-host-pattern>:<role-to-apply> \
+#           <apply-onto-pattern(s)> <role-to-apply> \
 #           [ <varname=value> | <json> ] [...]
 #           # adjust in usagex() also ## fixme
 # desc:
 #   - executes role in "./roles/<role-to-apply>/" onto <apply-onto-pattern>
 #   - passes trailing var=val params as '-e' args to ansible-playbook
-#   - applies the role onto specified host (or inventory pattern if given)
+#   - uses rc-configured inventory; pass '--inventory=' to override
 #   - creates symlinks to play/role dirs in a `mktemp -d` directory
 #   - runs in the tmpdir after creating temporary playbook with static role
 #   - (ansible can only do playbook-relative, not cwd-relative paths)
@@ -22,6 +22,8 @@
 #   - and 19305 will allow roles to be incl dynamically with include_role:
 #   - and 22985 with roles: itself instead of needing a task
 #   - after adjusting usage in comment header, usagex() also needs update
+#   - do not use this pdsh_all_skip exclusion if --inventory supplied
+#   - use our own option for the host_list case that won't need 'all'
 #
 # scott@smemsh.net
 # https://github.com/smemsh/setup/
@@ -59,13 +61,19 @@ usagex ()
 {
 	cat <<- %
 	ansrole [-n | --nofacts] [--ansible-playbook-opt] [...] \\
-	    [<invspec>:]<apply-onto>:<role-to-apply> \\
+	    <apply-onto-pattern(s)>:<role-to-apply> \\
 	    [ <varname=value> | <json> ] [...]
 	%
 	false
 	exit
 }
 
+# - ansrole [options] <apply-onto-patterns> <role> [var=val] ...
+# - multiple patterns allowed: <pattern>[:<pattern>][...]
+# - used as a "--limit=<onto>" with playbook target always 'all'
+# - special case: 'all' itself gets --limit set to $allnodes var
+# - to use a host_list instead, use '--inventory=host1,host2,'
+#
 process_args ()
 {
 	local match nmatches onto role inv
@@ -78,28 +86,10 @@ process_args ()
 	while [[ $1 == -* ]]
 	do opts+=("$1"); shift; done
 
-	# - format is invspec:onto:role, or host[,host[,...]]:role
-	# - invspec is x that makes sense to ansible '--inventory=x'
-	# - if 'onto' given, used as host pattern for --limit='onto' of 'all'
-	# - else list of one or more hostnames (uses dns, not inventory)
-	# - hostname is implemented with '--inventory=onto,'
-	#
-	if [[ $1 =~ ^([^:]+):(.+):([^:]+)$ ]]
-	then
-		onto="${BASH_REMATCH[2]}" role=${BASH_REMATCH[3]}
-		[[ "$onto" == all ]] && onto="$allnodes"
-		invarg=(--inventory="${BASH_REMATCH[1]}" --limit="$onto")
-
-	elif [[ $1 =~ ^([^:]+):([^:]+)$ ]]
-	then
-		onto=${BASH_REMATCH[1]} role=${BASH_REMATCH[2]}
-		invarg=(--inventory=$onto, --limit=$onto)
-	else
-		echo "no valid pattern match for first arg" >&2
-		usagex
-	fi
-
+	onto="$1"; role=$2; shift 2
+	[[ "$onto" == all ]] && onto="$allnodes"
 	[[ $onto && $role ]] && rolename=$role || usagex
+	limits=(--limit="$onto")
 
 	# rest are var=val or json strings for ansible-playbook -e
 	shift; for arg; do extras+=(-e); extras+=("$arg"); done
@@ -150,7 +140,7 @@ main ()
 	generate_tmp_playbook &&
 	ansible-playbook \
 		"${opts[@]}" \
-		"${invarg[@]}" \
+		"${limits[@]}" \
 		$tmpplay \
 		"${extras[@]}" \
 	;
