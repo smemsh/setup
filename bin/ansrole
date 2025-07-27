@@ -57,7 +57,7 @@ init_cfbase ()
 usagex ()
 {
 	cat <<- %
-	ansrole [--ansible-playbook-opt] [...] \\
+	ansrole [-n | --nofacts] [--ansible-playbook-opt] [...] \\
 	    [<invspec>:]<apply-onto>:<role-to-apply> \\
 	    [ <varname=value> | <json> ] [...]
 	%
