@@ -7,7 +7,6 @@
 #   ansrole [-n | --nofacts] [--ansible-playbook-opt] [...] \
 #           <apply-onto-pattern(s)> <role-to-apply> \
 #           [ <varname=value> | <json> ] [...]
-#           # adjust in usagex() also ## fixme
 # desc:
 #   - executes role in "./roles/<role-to-apply>/" onto <apply-onto-pattern>
 #   - passes trailing var=val params as '-e' args to ansible-playbook
@@ -21,7 +20,6 @@
 #   - also see 21890 because include_role won't expose vars until then
 #   - and 19305 will allow roles to be incl dynamically with include_role:
 #   - and 22985 with roles: itself instead of needing a task
-#   - after adjusting usage in comment header, usagex() also needs update
 #   - do not use this pdsh_all_skip exclusion if --inventory supplied
 #   - use our own option for the host_list case that won't need 'all'
 #
@@ -36,6 +34,17 @@ allnodes="all:!pdsh_all_skip" # hostpattern actually used when 'all' requested
 
 tmpdir=`mktemp -d /tmp/ansrole-XXXXXXXX` || exit 121
 #trap "rm -rf ${tmpdir:?}" EXIT
+
+usage_until=todo:
+usagex () { usage; false; exit; }
+usage ()
+{
+	grep -B 999 -m 1 '^$' "$BASH_SOURCE"  | # until first blank
+	grep -B 999 -m 1 "^..${usage_until}$" | # until stop record
+	head -n -2 |	# but not the match
+	tail -n +3 |	# or interpreter line
+	cut -b 3-	# strip comment prefix
+}
 
 init_cfbase ()
 {
@@ -52,20 +61,6 @@ init_cfbase ()
 	#export ANSIBLE_INVENTORY=/dev/null
 	#
 	#cd $cfbase
-}
-
-# note: adjust this in comment header too
-# todo: maybe reformat directly from $BASH_SOURCE
-#
-usagex ()
-{
-	cat <<- %
-	ansrole [-n | --nofacts] [--ansible-playbook-opt] [...] \\
-	    <apply-onto-pattern(s)>:<role-to-apply> \\
-	    [ <varname=value> | <json> ] [...]
-	%
-	false
-	exit
 }
 
 # - ansrole [options] <apply-onto-patterns> <role> [var=val] ...
