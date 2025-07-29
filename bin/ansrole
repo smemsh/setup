@@ -4,7 +4,16 @@
 #   executes a role against hosts or inventory groups, passing varval args
 #
 # usage:
-#   ansrole [-n | --nofacts] [--ansible-playbook-opt] [...] \
+#   ansrole [-n | --nofacts] [--syntax] [--step] \
+#           [-b | --become] [[-B | --buser][=]<become_user>]
+#           [-C | --check] [-D | --diff] \
+#           [-v | --verbose] ... \
+#           [[-k | --key][=]<ssh_keyfile>] \
+#           [[-u | --user][=]<remote_user>] \
+#           [[-f | --forks][=]<fork_limit>] \
+#           [[-s | --start][=]<start_at_task>] \
+#           [[-c | --connection][=]<connection_plugin>] \
+#           [[-i | --inventory][=]<inventory_override>] [...] \
 #           <apply-onto-pattern(s)> <role-to-apply> \
 #           [ <varname=value> | <json> ] [...]
 # desc:
@@ -76,19 +85,56 @@ check_sanity ()
 process_args ()
 {
 	local onto role arg
+	local ours mods flags opts exts helps
+	local chars longs
 
-	# 1/2
-	eval set -- $(getopt -n $invname \
-	-o hn \
-	-l help,nofacts \
-	-- "$@")
+	# 1/3 header
 
-	# 2/2
+	# 2/3
+	ours=n mods=k:B:s: flags=DCbv opts=u:f:i:c: exts=e: helps=h
+	chars=${ours}${mods}${flags}${opts}${exts}${helps}
+	longs=(
+	-l nofacts                              # ours
+	-l syntax,key:,buser:,start:            # mods
+	-l step,diff,check,become,verbose       # flags
+	-l user:,forks:,inventory:,connection:  # opts
+	-l extra:,extra-vars:                   # exts
+	-l help                                 # helps
+	) eval set -- $(getopt -n $invname -o $chars "${longs[@]}" -- "$@")
+
+	# 3/3
 	while true; do case $1 in
+
+	# ours
 	(-n|--nofacts) dofacts=false; shift;;
+
+	# mods
+	(--syntax) playopts+=(--syntax-check); shift;;
+	(-k|--key) playopts+=(--private-key $2); shift 2;;
+	(-B|--buser) playopts+=(--become-user $2); shift 2;;
+	(-s|--start) playopts+=(--start-at-task $2); shift 2;;
+
+	# flags
+	(--step) ;&
+	(-D|--diff) ;&
+	(-C|--check) ;&
+	(-b|--become) ;&
+	(-v|--verbose) playopts+=($1); shift;;
+
+	# opts
+	(-u|--user) ;&
+	(-f|--forks) ;&
+	(-i|--inventory) ;&
+	(-c|--connection) playopts+=($1 $2); shift 2;;
+
+	# exts: reject extra vars from options, allow only in trailing args
+	(-e|--extra|--extra-vars)
+	bomb "give all extras at end using var=val or json";;
+
 	(-h|--help) usage; true; exit;;
 	(--) shift; break;;
-	(*) playopts+=("$1"); shift;;
+	(*) err "unrecognized option '$1'"; usagex;;
+
 	esac; done
 
 	onto="$1"; role=$2; shift 2
@@ -97,7 +143,7 @@ process_args ()
 	limits=(--limit="$onto")
 
 	# rest are var=val or json strings for ansible-playbook -e
-	shift; for arg; do extras+=(-e); extras+=("$arg"); done
+	for arg; do extras+=(-e); extras+=("$arg"); done
 
 	args=("$@")
 }
