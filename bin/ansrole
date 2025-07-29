@@ -197,8 +197,8 @@ ansrole ()
 	ansible-playbook \
 		"${playopts[@]}" \
 		"${limits[@]}" \
-		$tmpplay \
 		"${extras[@]}" \
+		$tmpplay \
 	;
 }
 
