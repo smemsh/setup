@@ -35,6 +35,9 @@ allnodes="all:!pdsh_all_skip" # hostpattern actually used when 'all' requested
 tmpdir=`mktemp -d /tmp/ansrole-XXXXXXXX` || exit 121
 #trap "rm -rf ${tmpdir:?}" EXIT
 
+bomb () { echo "${FUNCNAME[1]}: ${*}, aborting" >&2; false; exit; }
+err  () { echo "${FUNCNAME[1]}: ${*}" >&2; }
+
 usage_until=todo:
 usagex () { usage; false; exit; }
 usage ()
@@ -46,13 +49,14 @@ usage ()
 	cut -b 3-	# strip comment prefix
 }
 
-init_cfbase ()
+###
+
+check_sanity ()
 {
 	local cfbase
 
-	if test -f $anscfg
-	then cfbase="$PWD"
-	else echo "cwd must be a playbase" >&2; false; exit; fi
+	if ! test -f $anscfg
+	then err "cwd must be a playbase"; false; fi
 
 	# disabled for now, we only run as setup user these days
 	#export ANSIBLE_CONFIG="$cfbase/.ansible.cfg"
@@ -71,15 +75,21 @@ init_cfbase ()
 #
 process_args ()
 {
-	local match nmatches onto role inv
+	local onto role arg
 
-	# skip fact gathering for raw roles, must be first arg
-	if [[ $1 == '--nofacts' || $1 == '-n' ]]; then
-		dofacts='false'; shift; fi
+	# 1/2
+	eval set -- $(getopt -n $invname \
+	-o hn \
+	-l help,nofacts \
+	-- "$@")
 
-	# leading -o or --options we'll pass to ansible intact
-	while [[ $1 == -* ]]
-	do opts+=("$1"); shift; done
+	# 2/2
+	while true; do case $1 in
+	(-n|--nofacts) dofacts=false; shift;;
+	(-h|--help) usage; true; exit;;
+	(--) shift; break;;
+	(*) playopts+=("$1"); shift;;
+	esac; done
 
 	onto="$1"; role=$2; shift 2
 	[[ "$onto" == all ]] && onto="$allnodes"
@@ -88,6 +98,8 @@ process_args ()
 
 	# rest are var=val or json strings for ansible-playbook -e
 	shift; for arg; do extras+=(-e); extras+=("$arg"); done
+
+	args=("$@")
 }
 
 generate_tmp_playbook ()
@@ -127,18 +139,30 @@ init_tmp_playbase ()
 	# than just a role executor
 }
 
-main ()
+ansrole ()
 {
-	init_cfbase &&
-	process_args "$@" &&
 	init_tmp_playbase &&
 	generate_tmp_playbook &&
 	ansible-playbook \
-		"${opts[@]}" \
+		"${playopts[@]}" \
 		"${limits[@]}" \
 		$tmpplay \
 		"${extras[@]}" \
 	;
 }
+
+main ()
+{
+	process_args "$@" \
+	&& check_sanity \
+	|| bomb "initialization failed"
+
+	if [[ $(declare -F $invname) ]]
+	then $invname "${args[@]}"
+	else bomb "unimplemented command '$invname'"; fi
+}
+
+invname=${0##*/} # 0.8.0
+invdir=${0%/*}
 
 main "$@"
