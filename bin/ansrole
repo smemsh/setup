@@ -29,7 +29,6 @@
 #   - also see 21890 because include_role won't expose vars until then
 #   - and 19305 will allow roles to be incl dynamically with include_role:
 #   - and 22985 with roles: itself instead of needing a task
-#   - do not use this pdsh_all_skip exclusion if --inventory supplied
 #   - use our own option for the host_list case that won't need 'all'
 #
 # scott@smemsh.net
@@ -39,7 +38,9 @@
 ##############################################################################
 
 anscfg=.ansible.cfg
-allnodes="all:!pdsh_all_skip" # hostpattern actually used when 'all' requested
+
+# pattern actually used when 'all' requested and default inventory in use
+allnodes="all:!pdsh_all_skip"
 
 tmpdir=`mktemp -d /tmp/ansrole-XXXXXXXX` || exit 121
 #trap "rm -rf ${tmpdir:?}" EXIT
@@ -79,27 +80,28 @@ check_sanity ()
 # - ansrole [options] <apply-onto-patterns> <role> [var=val] ...
 # - multiple patterns allowed: <pattern>[:<pattern>][...]
 # - used as a "--limit=<onto>" with playbook target always 'all'
-# - special case: 'all' itself gets --limit set to $allnodes var
+# - special case: 'all' with default inventory gets --limit="$allnodes"
 # - to use a host_list instead, use '--inventory=host1,host2,'
 #
 process_args ()
 {
 	local onto role arg
-	local ours mods flags opts exts helps
+	local ours mods flags opts invs exts helps
 	local chars longs
 
 	# 1/3 header
 
 	# 2/3
-	ours=n mods=k:B:s: flags=DCbv opts=u:f:i:c: exts=e: helps=h
-	chars=${ours}${mods}${flags}${opts}${exts}${helps}
+	ours=n mods=k:B:s: flags=DCbv opts=u:f:c: invs=i: exts=e: helps=h
+	chars=${ours}${mods}${flags}${opts}${invs}${exts}${helps}
 	longs=(
-	-l nofacts                              # ours
-	-l syntax,key:,buser:,start:            # mods
-	-l step,diff,check,become,verbose       # flags
-	-l user:,forks:,inventory:,connection:  # opts
-	-l extra:,extra-vars:                   # exts
-	-l help                                 # helps
+	-l nofacts                          # ours
+	-l syntax,key:,buser:,start:        # mods
+	-l step,diff,check,become,verbose   # flags
+	-l user:,forks:,connection:         # opts
+	-l inventory:                       # invs
+	-l extra:,extra-vars:               # exts
+	-l help                             # helps
 	) eval set -- $(getopt -n $invname -o $chars "${longs[@]}" -- "$@")
 
 	# 3/3
@@ -124,8 +126,10 @@ process_args ()
 	# opts
 	(-u|--user) ;&
 	(-f|--forks) ;&
-	(-i|--inventory) ;&
 	(-c|--connection) playopts+=($1 $2); shift 2;;
+
+	# invs: if user supplies the inventory, don't unselect pdsh_all_skip
+	(-i|--inventory) allnodes=all; playopts+=($1 $2); shift 2;;
 
 	# exts: reject extra vars from options, allow only in trailing args
 	(-e|--extra|--extra-vars)
