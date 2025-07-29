@@ -15,7 +15,7 @@
 #           [[-c | --connection][=]<connection_plugin>] \
 #           [[-i | --inventory][=]<inventory_override>] [...] \
 #           <apply-onto-pattern(s)> <role-to-apply> \
-#           [ <varname=value> | <json> ] [...]
+#           [<extra-var-name=value> | <json-var>] [...]
 # desc:
 #   - executes role in "./roles/<role-to-apply>/" onto <apply-onto-pattern>
 #   - passes trailing var=val params as '-e' args to ansible-playbook
@@ -77,8 +77,8 @@ check_sanity ()
 	#cd $cfbase
 }
 
-# - ansrole [options] <apply-onto-patterns> <role> [var=val] ...
-# - multiple patterns allowed: <pattern>[:<pattern>][...]
+# - ansrole [options] <apply-onto-patterns> <role> [var=val | json] [...]
+# - multiple patterns allowed with colon: <pattern>[:<pattern>][...]
 # - used as a "--limit=<onto>" with playbook target always 'all'
 # - special case: 'all' with default inventory gets --limit="$allnodes"
 # - to use a host_list instead, use '--inventory=host1,host2,'
