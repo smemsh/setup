@@ -204,7 +204,7 @@ ansrole ()
 {
 	init_tmp_playbase &&
 	generate_tmp_playbook &&
-	set -x
+	set -x &&
 	ansible-playbook \
 		"${playopts[@]}" \
 		"${limits[@]}" \
