@@ -88,6 +88,7 @@ process_args ()
 	local onto role arg
 	local ours mods flags opts invs exts helps
 	local chars longs
+	local -a pats=(); local i
 
 	# 1/3 header
 
@@ -151,7 +152,17 @@ process_args ()
 	role=${BASH_REMATCH[3]}
 	shift
 
-	[[ "$onto" == all ]] && onto="$allnodes"
+	# if any of the patterns are 'all', add the skip group,
+	# these are typically machines which don't exist or are down
+	#
+	pats=($(IFS=: compgen -W "$onto"))
+	for ((i = 0; i < ${#pats[@]}; i++))
+	do [[ "${pats[i]}" == 'all' ]] && pats[$i]="$allnodes"; done
+	IFS=:; onto="${pats[*]}"; unset IFS
+
+	# we use the pattern as a limit, and always target the 'all'
+	# group in the constructed playbook itself
+	#
 	[[ $onto && $role ]] && rolename=$role || usagex
 	limits=(--limit="$onto")
 
