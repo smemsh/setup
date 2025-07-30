@@ -168,9 +168,13 @@ process_args ()
 
 generate_tmp_playbook ()
 {
-	# linear: some roles require lockstep tasks or disaster will
-	# ensue, like mysql master update phase.  change it only very
-	# carefully.  TODO: add script args to control strategy/params
+	# - linear: some roles require lockstep tasks or disaster will
+	#   ensue, like mysql master update phase.  change it only very
+	#   carefully.  TODO: add script args to control strategy/params
+	#
+	# - vars_files: see ansible issue 85051, eventually vars_files
+	#   can take a templated list and then we can generate it with a
+	#   fileglob lookup
 	#
 	cat <<- % >$tmpplay
 	- hosts: all
@@ -178,10 +182,7 @@ generate_tmp_playbook ()
 	  serial: 100%
 	  become: ${become:-'true'}
 	  gather_facts: ${dofacts:-'true'}
-	  vars_files: [$(
-	    ls vars/*.yml \
-	    | awk -F / '{printf("\"%s\", ", $NF)}'
-	  )]
+	  vars_files: [$(printf %s, vars/*.yml)]
 	  roles: ['$rolename']
 	%
 }
