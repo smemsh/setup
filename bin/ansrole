@@ -188,22 +188,17 @@ generate_tmp_playbook ()
 	%
 }
 
-# workaround ansible requiring everything to be relative to
-# the play base, by making a temporary one of our own,
-# populated by symlinks to the real one.  this is truly a
-# hack, to work around ansible not having a cwd or
-# specific-dir -relative mode
+# work around ansible requiring everything to be relative to the
+# playbook, by making a temporary root dir of our own, populated by
+# symlinks to the real playbook_dir.  mainly this is to avoid writes in
+# what is a git checkout, and so we can leave temporary files for debug
 #
 init_tmp_playbase ()
 {
-	local d; for d in */; do
-		d=${d%/}; ln -s $(readlink -f $d) $tmpdir/; done
-
+	local dir
+	for dir in */
+	do dir=${dir%/}; ln -s $(readlink -f $dir) $tmpdir/; done
 	tmpplay=$tmpdir/ansrole-${rolename:?}.yml
-
-	# todo: might have to copy *.yml files from the
-	# playbase too at some point if we ever become more
-	# than just a role executor
 }
 
 ansrole ()
