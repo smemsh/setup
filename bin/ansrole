@@ -6,7 +6,7 @@
 # usage:
 #   ansrole [-n | --nofacts] [--syntax] [--step] \
 #           [-b | --become] [[-B | --buser][=]<become_user>]
-#           [-C | --check] [-D | --diff] \
+#           [-C | --check] [-D | --diff] [-p | --prefix] \
 #           [-v | --verbose] ... \
 #           [[-k | --key][=]<ssh_keyfile>] \
 #           [[-u | --user][=]<remote_user>] \
@@ -92,10 +92,10 @@ process_args ()
 	# 1/3 header
 
 	# 2/3
-	ours=n mods=k:B:s: flags=DCbv opts=u:f:c: invs=i: exts=e: helps=h
+	ours=pn mods=k:B:s: flags=DCbv opts=u:f:c: invs=i: exts=e: helps=h
 	chars=${ours}${mods}${flags}${opts}${invs}${exts}${helps}
 	longs=(
-	-l nofacts                                  # ours
+	-l prefix,nofacts                           # ours
 	-l syntax,key:,buser:,start:                # mods
 	-l step,diff,check,become,verbose           # flags
 	-l user:,forks:,connection:                 # opts
@@ -108,6 +108,7 @@ process_args ()
 	while true; do case $1 in
 
 	# ours
+	(-p|--prefix) let prefix++; shift;;
 	(-n|--nofacts) dofacts=false; shift;;
 
 	# mods
@@ -147,7 +148,23 @@ process_args ()
 	limits=(--limit="$onto")
 
 	# rest are var=val or json strings for ansible-playbook -e
-	for arg; do extras+=(-e); extras+=("$arg"); done
+	for arg
+	do
+		local name val
+		if ((prefix)) && [[ $arg =~ ^([[:alnum:]_]+)=(.*)$ ]]
+		then
+			# if requested, prefix vars with role name to save
+			# typing.  not all roles have all variables prefixed
+			# so we don't make this the default but it's handy
+			# for some roles.  does not handle json vars however
+			#
+			name=${BASH_REMATCH[1]}
+			val="${BASH_REMATCH[2]}"
+			arg=${rolename}_$name="$val"
+		fi
+		extras+=(-e)
+		extras+=("$arg")
+	done
 
 	args=("$@")
 }
