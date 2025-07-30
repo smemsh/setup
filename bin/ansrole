@@ -189,8 +189,8 @@ generate_tmp_playbook ()
 	- hosts: all
 	  strategy: linear
 	  serial: 100%
-	  become: ${become:-'true'}
-	  gather_facts: ${dofacts:-'true'}
+	  become: ${become:-true}
+	  gather_facts: ${dofacts:-true}
 	  vars_files: [$(printf %s, vars/*.yml)]
 	  roles: ['$rolename']
 	%
