@@ -5,7 +5,7 @@
 #
 # usage:
 #   ansrole [-n | --nofacts] [--syntax] [--step] \
-#           [-b | --become] [[-B | --buser][=]<become_user>]
+#           [-U | --unbecome] [[-B | --buser][=]<become_user>]
 #           [-C | --check] [-D | --diff] [-p | --prefix] \
 #           [-v | --verbose] ... \
 #           [[-k | --key][=]<ssh_keyfile>] \
@@ -92,12 +92,12 @@ process_args ()
 	# 1/3 header
 
 	# 2/3
-	ours=pn mods=k:B:s: flags=DCbv opts=u:f:c: invs=i: exts=e: helps=h
+	ours=pnU mods=k:B:s: flags=DCv opts=u:f:c: invs=i: exts=e: helps=h
 	chars=${ours}${mods}${flags}${opts}${invs}${exts}${helps}
 	longs=(
 	-l prefix,nofacts                           # ours
 	-l syntax,key:,buser:,start:                # mods
-	-l step,diff,check,become,verbose           # flags
+	-l step,diff,check,verbose                  # flags
 	-l user:,forks:,connection:                 # opts
 	-l inventory:                               # invs
 	-l extra:,extra-vars:                       # exts
@@ -110,6 +110,7 @@ process_args ()
 	# ours
 	(-p|--prefix) let prefix++; shift;;
 	(-n|--nofacts) dofacts=false; shift;;
+	(-U|--unbecome) become=false; shift;;
 
 	# mods
 	(--syntax) playopts+=(--syntax-check); shift;;
@@ -121,7 +122,6 @@ process_args ()
 	(--step) ;&
 	(-D|--diff) ;&
 	(-C|--check) ;&
-	(-b|--become) ;&
 	(-v|--verbose) playopts+=($1); shift;;
 
 	# opts
@@ -175,7 +175,7 @@ generate_tmp_playbook ()
 	  # only very carefully.  TODO: script args to control
 	  strategy: linear
 	  serial: 100%
-	  become: true
+	  become: ${become:-'true'}
 	  gather_facts: ${dofacts:-'true'}
 	  vars_files: [$(
 	    ls vars/*.yml \
