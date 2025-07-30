@@ -102,7 +102,7 @@ process_args ()
 	-l inventory:                       # invs
 	-l extra:,extra-vars:               # exts
 	-l help                             # helps
-	) eval set -- $(getopt -n $invname -o $chars "${longs[@]}" -- "$@")
+	); eval set -- $(getopt -n $invname -o $chars "${longs[@]}" -- "$@")
 
 	# 3/3
 	while true; do case $1 in
