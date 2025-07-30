@@ -168,11 +168,12 @@ process_args ()
 
 generate_tmp_playbook ()
 {
+	# linear: some roles require lockstep tasks or disaster will
+	# ensue, like mysql master update phase.  change it only very
+	# carefully.  TODO: add script args to control strategy/params
+	#
 	cat <<- % >$tmpplay
 	- hosts: all
-	  # some roles require lockstep tasks or disaster will
-	  # ensue, like mysql master update phase.  change it
-	  # only very carefully.  TODO: script args to control
 	  strategy: linear
 	  serial: 100%
 	  become: ${become:-'true'}
