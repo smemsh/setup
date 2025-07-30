@@ -164,8 +164,6 @@ process_args ()
 		fi
 		extras+=(-e "$arg")
 	done
-
-	args=("$@")
 }
 
 generate_tmp_playbook ()
