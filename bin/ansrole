@@ -162,8 +162,7 @@ process_args ()
 			val="${BASH_REMATCH[2]}"
 			arg=${rolename}_$name="$val"
 		fi
-		extras+=(-e)
-		extras+=("$arg")
+		extras+=(-e "$arg")
 	done
 
 	args=("$@")
