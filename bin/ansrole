@@ -14,7 +14,7 @@
 #           [[-s | --start][=]<start_at_task>] \
 #           [[-c | --connection][=]<connection_plugin>] \
 #           [[-i | --inventory][=]<inventory_override>] [...] \
-#           <apply-onto-pattern(s)> <role-to-apply> \
+#           <apply-onto-pattern | multi:pattern>:[:*]<role-to-apply> \
 #           [<extra-var-name=value> | <json-var>] [...]
 # desc:
 #   - executes role in "./roles/<role-to-apply>/" onto <apply-onto-pattern>
@@ -77,8 +77,8 @@ check_sanity ()
 	#cd $cfbase
 }
 
-# - ansrole [options] <apply-onto-patterns> <role> [var=val | json] [...]
-# - multiple patterns allowed with colon: <pattern>[:<pattern>][...]
+# - ansrole [options] <applyspec> [var=val | json] [...]
+# - applyspec: either <pattern>::*<role> or <multi>:<pattern>:*<role>
 # - used as a "--limit=<onto>" with playbook target always 'all'
 # - special case: 'all' with default inventory gets --limit="$allnodes"
 # - to use a host_list instead, use '--inventory=host1,host2,'
@@ -142,7 +142,15 @@ process_args ()
 
 	esac; done
 
-	onto="$1"; role=$2; shift 2
+	# first non-option arg is a ':'-delimited list of patterns,
+	# followed by any number of contiguous ':', followed by rolename
+	#
+	if ! [[ $1 =~ ^(([^:]+:?)+):+([^:]+)$ ]]
+	then bomb "invalid pattern:role spec"; fi
+	onto="${BASH_REMATCH[1]%:}"
+	role=${BASH_REMATCH[3]}
+	shift
+
 	[[ "$onto" == all ]] && onto="$allnodes"
 	[[ $onto && $role ]] && rolename=$role || usagex
 	limits=(--limit="$onto")
