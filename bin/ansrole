@@ -95,13 +95,13 @@ process_args ()
 	ours=n mods=k:B:s: flags=DCbv opts=u:f:c: invs=i: exts=e: helps=h
 	chars=${ours}${mods}${flags}${opts}${invs}${exts}${helps}
 	longs=(
-	-l nofacts                          # ours
-	-l syntax,key:,buser:,start:        # mods
-	-l step,diff,check,become,verbose   # flags
-	-l user:,forks:,connection:         # opts
-	-l inventory:                       # invs
-	-l extra:,extra-vars:               # exts
-	-l help                             # helps
+	-l nofacts                                  # ours
+	-l syntax,key:,buser:,start:                # mods
+	-l step,diff,check,become,verbose           # flags
+	-l user:,forks:,connection:                 # opts
+	-l inventory:                               # invs
+	-l extra:,extra-vars:                       # exts
+	-l help                                     # helps
 	); eval set -- $(getopt -n $invname -o $chars "${longs[@]}" -- "$@")
 
 	# 3/3
