@@ -5,7 +5,7 @@
 #
 # usage:
 #   ansrole [-n | --nofacts] [--syntax] [--step] \
-#           [-U | --unbecome] [[-B | --buser][=]<become_user>]
+#           [-U | --unbecome] [[-B | --buser][=]<become-user>]
 #           [-C | --check] [-D | --diff] [-p | --prefix] \
 #           [-v | --verbose] ... \
 #           [[-k | --key][=]<ssh_keyfile>] \
