@@ -14,7 +14,7 @@
 ip_referent:      "{{host | d(target | d(inventory_hostname))}}"
 
 #
-ip_host:          "{{hostvars[ip_referent].ipnet}}"
+ip_host:          "{{ip_referent | addrof}}/{{hostvars[ip_referent].prefix}}"
 ip_domain:        "{{hostvars[ip_referent].domain}}"
 ip_subdomain:     "{{ip_domain.split('.') | first}}"
 ip_fqdn:          "{{ip_referent}}.{{ip_domain}}"
