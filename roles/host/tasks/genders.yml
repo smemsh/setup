@@ -5,6 +5,7 @@
   become: false
   command: mkgenders
   register: r
+  run_once: true
   delegate_to: localhost
   changed_when: false
 
