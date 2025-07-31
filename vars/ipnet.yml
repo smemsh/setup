@@ -3,22 +3,13 @@
 #   useful IP networking related stuff, several roles may find useful
 #
 # usage:
-#   - supply 'host' var in extra args
-#   - include_var thisfile (i.e. we have in global vars/ for ansrole)
+#   - supply 'host' var in extra args, or 'target' if not
+#   - falls back on 'inventory_hostname'
+#   - use include_var or vars_files (we have in global vars/ for ansrole)
 #   - in doing so: get ip_* populated from inventory for that system
 #
-# hostvars:
-#   - host, ipnet, domain
 ---
 
-# we don't want to define 'host' directly from 'inventory_hostname' if
-# it was unset, because it's dangerous in the case that a role like
-# 'vmiterate' -- which uses it as the indirect target for doing
-# destructive things -- runs, but it got defined by the host the play is
-# running on instead.  in this case, the host machine, instead of the
-# target would end up being nuked.  so protect it in the affected roles
-# by letting them bail out as undefined instead.  but this way, we still
-# retain the capability to use it when given.
 #
 ip_referent:      '{{host | d(target | d(inventory_hostname))}}'
 
