@@ -15,9 +15,7 @@
   notify: host_handler_nscd_reload
 
 - name: genders
-  copy:
-    src: files/genders
-    dest: /etc/genders
+  include_tasks: genders.yml
   when: host_do_genders | bool
 
 - name: resolver
