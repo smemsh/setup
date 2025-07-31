@@ -1,0 +1,136 @@
+#!/usr/bin/env python3
+"""
+mkgenders
+  render ansible-inventory output to LLNL libgenders file format on stdout
+
+"""
+__url__     = 'https://github.com/smemsh/setup/'
+__author__  = 'Scott Mcdermott <scott@smemsh.net>'
+__license__ = 'GPL-2.0'
+__devskel__ = '0.8.0'
+
+from sys import exit, hexversion
+if hexversion < 0x030900f0: exit("minpython: %s" % hexversion)
+
+import json
+
+from sys import argv, stdout, stderr
+from subprocess import run, CalledProcessError
+
+from os.path import basename
+from os import (
+    getenv, unsetenv,
+    EX_OK as EXIT_SUCCESS,
+    EX_SOFTWARE as EXIT_FAILURE,
+)
+
+###
+
+CMD_INVENTORY = 'ansible-inventory --list --export'
+CMD_COMPRESS = 'nodeattr --compress -f /dev/stdin'
+
+###
+
+def err(*args, **kwargs):
+    print(*args, file=stderr, **kwargs)
+
+def bomb(*args, **kwargs):
+    err(*args, **kwargs)
+    exit(EXIT_FAILURE)
+
+def exe(cmd, **kwargs):
+    defaults = dict(capture_output=True, check=True, text=True)
+    kwargs = defaults | kwargs
+    try: r = run(cmd.split(), **kwargs)
+    except CalledProcessError as e:
+        err(f"--> \"{cmd}\": returned {e.returncode}")
+        for iostream in 'stdout', 'stderr':
+            if buf := getattr(e, iostream):
+                err(f"--> {iostream}:\n{buf}")
+        bomb("aborting...")
+    except FileNotFoundError:
+        bomb(f"invocation failure: \"{cmd}\", aborting...")
+    return r.stdout
+
+###
+
+def mkgenders():
+
+    def gethosts(group):
+        hosts = []
+        hosts += data[group].get('hosts', [])
+        for child in data[group].get('children', []):
+            hosts += gethosts(child)
+        return hosts
+
+    cmdout = exe(CMD_INVENTORY)
+    data = json.loads(cmdout)
+
+    # not a relevant group for genders, so we don't include it
+    del data['_meta']
+
+    # - is a special virtual group, which results in duplicate 'all' attrs
+    # - has a child virtual 'ungrouped' which does not exist in our data
+    # - ansrole 'all' has special handling already, removes pdsh_all_skip
+    # - pdsh has implicit 'all' group with '-a' that removes pdsh_all_skip
+    #
+    del data['all']
+
+    lines = []
+    for group in data:
+        hosts = gethosts(group)
+        genders = set()
+        for host in hosts:
+            genders.add((host, group))
+        for gender in genders:
+            lines += ['\x20'.join(gender)]
+
+    cmdout = exe(CMD_COMPRESS, input='\n'.join(lines))
+    print(cmdout)
+
+###
+
+def main():
+
+    if debug == 1:
+        breakpoint()
+
+    try: subprogram = globals()[invname]
+    except (KeyError, TypeError):
+        from inspect import trace
+        if len(trace()) == 1: bomb("unimplemented")
+        else: raise
+
+    return subprogram()
+
+###
+
+if __name__ == "__main__":
+
+    invname = basename(argv[0])
+    args = argv[1:]
+
+    from bdb import BdbQuit
+    if debug := int(getenv('DEBUG') or 0):
+        import pdb
+        from pprint import pp
+        err('debug: enabled')
+        unsetenv('DEBUG')  # otherwise forked children hang
+
+    try: main()
+    except BdbQuit: bomb("debug: stop")
+    except SystemExit: raise
+    except KeyboardInterrupt: bomb("interrupted")
+    except:
+        from traceback import print_exc
+        print_exc(file=stderr)
+        if debug: pdb.post_mortem()
+        else: bomb("aborting...")
+    finally:  # cpython bug 55589
+        try: stdout.flush()
+        finally:
+            try: stdout.close()
+            finally:
+                try: stderr.flush()
+                except: pass
+                finally: stderr.close()
