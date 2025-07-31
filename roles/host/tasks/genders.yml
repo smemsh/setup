@@ -7,18 +7,6 @@
   register: r
   delegate_to: localhost
   changed_when: false
-  #when: false
-
-#- become: false
-#  delegate_to: localhost
-#  block:
-#    #- command: whoami
-#    #- command: pwd
-#    #- command: printenv
-#    #- command: which mkgenders
-#    - command: mkgenders
-#
-#- meta: end_play
 
 - name: copy_genders_data
   copy:
