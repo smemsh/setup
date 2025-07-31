@@ -71,6 +71,46 @@
     dest: /etc/hostname
     force: true
 
+# isc-dhcp-client is the preferred one of ifupdown (first it will use
+# with 'dhcp' keyword, if installed). if present hooks are run upon
+# lease which set the system hostname and replace resolv.conf if
+# systemd-resolved is not in use.  the hook scripts are sourced,
+# including the first one which we will just 'exit' so no hooks run
+#
+# see also defaults.yml:host_do_resolver (cannot use because we have
+# 'host' var indirection here)
+#
+- name: dhclient_hook_suppress
+  when: host not in groups.noresolv
+  block:
+
+    - name: test_dhclient_installed
+      stat:
+        path: /etc/dhcp/dhclient-enter-hooks.d
+      register: r
+
+    - name: deposit_entry_hook_if_none
+      when: r.stat.exists
+      copy:
+        content: |
+          # ansible-managed: disable hook processing
+          true; exit
+        dest: '{{r.stat.path | splitext | first}}'
+        owner: root
+        group: root
+        force: false
+      register: r
+
+    - name: symlink_exit_hook_symlink
+      when: r.changed
+      file:
+        src: '{{r.dest}}'
+        dest: "{{r.dest | basename | regex_replace('enter', 'exit')}}"
+        state: link
+        owner: root
+        group: root
+        force: false
+
 - name: interfaces
   copy:
     content: source interfaces.d/*cloud-init.cfg

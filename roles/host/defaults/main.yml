@@ -9,7 +9,7 @@ host_do_hosts: true
 host_do_genders: true
 host_do_resolver: "{{
   false if inventory_hostname_short in groups.noresolv else true
-}}"
+}}" # see also tasks/main.yml:dhclient_hook_suppress
 
 # for when we're not passing in the target, but applying the role directly
 host_by_inventory: false
