@@ -6,6 +6,10 @@
   assert:
     that: [host is defined or (host_by_inventory and host_init)]
     quiet: true
+    fail_msg: >
+      set 'host' to impose the configuration of a different host on the
+      target, or 'host_by_inventory' if the target should be configured
+      as itself
 
 - name: quell_systemd_networking_invasion_post14
   systemd:
