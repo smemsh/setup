@@ -11,6 +11,17 @@
     }}'
   delegate_to: localhost
   delegate_facts: true
+  #
+  # TODO we probably can't make this run_once because there could be per-host
+  # overrides of the variables that go into creating skel_repos_all, so
+  # they'll get evaluated to different values on different hosts.  however
+  # this will result in a lot of extra api traffic, especially with large
+  # numbers of hosts, and github places limits on api usage, even for logged
+  # in users.  we should do something to cache based on skel_repos_all and
+  # only do another set of lookups if the value not already present in cache.
+  # or find some other way to mitigate.
+  #
+  #run_once: true
 
 - name: repo_checkouts
   git:
