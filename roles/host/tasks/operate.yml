@@ -19,7 +19,9 @@
   when: host_do_genders | bool
 
 - name: resolver
-  copy:
-    src: files/resolv.conf
+  template:
+    src: tmpl/resolv.conf.j2
     dest: /etc/resolv.conf
+    owner: root
+    group: root
   when: host_do_resolver | bool

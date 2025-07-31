@@ -3,10 +3,13 @@
 host_init: false
 
 host_do_ssh: true
+
 host_do_known: true
 host_do_hosts: true
 host_do_genders: true
-host_do_resolver: true
+host_do_resolver: "{{
+  false if inventory_hostname_short in groups.noresolv else true
+}}"
 
 # for when we're not passing in the target, but applying the role directly
 host_by_inventory: false
