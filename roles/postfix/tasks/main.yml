@@ -27,7 +27,7 @@
       copy:
         src: '{{playbook_dir}}/srcx/utiladm/dnsroute'
         dest: '{{postfix_dnsroute_bindir}}'
-        mode: '0755'
+        mode: '0755' # keep as string to avoid bugs
 
     - name: construct_gmail_relay_route_command
       set_fact:

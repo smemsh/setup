@@ -5,12 +5,12 @@
   copy:
     src: '{{playbook_dir}}/srcx/utiladm/klogpoll'
     dest: '{{dmesg_klogpoll_bindir}}'
-    mode: '0755'
+    mode: '0755' # keep as string to avoid bugs
 
 - name: install_klogpoll_cronjob
   copy:
     dest: /etc/cron.d/{{setup_prefix}}-klogpoll
-    mode: 0644
+    mode: '0644' # keep as string to avoid bugs
     owner: root
     content: |
       #

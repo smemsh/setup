@@ -5,13 +5,13 @@
   copy:
     src: '{{playbook_dir}}/srcx/utiladm/{{item}}'
     dest: '{{volmon_bindir}}'
-    mode: '0755'
+    mode: '0755' # keep as string to avoid bugs
   with_items: '{{volmon_monitors}}'
 
 - name: install_volmon_cronjobs
   copy:
     dest: /etc/cron.d/{{setup_prefix}}-{{item}}
-    mode: 0644
+    mode: '0644' # keep as string to avoid bugs
     owner: root
     content: |
       PATH=/usr/local/bin:/usr/local/sbin:/bin:/sbin:/usr/bin:/usr/sbin

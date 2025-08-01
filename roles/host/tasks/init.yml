@@ -119,7 +119,7 @@
   #template:
   #  group: root
   #  owner: root
-  #  mode: '0644'
+  #  mode: '0644' # keep as string to avoid bugs
   #  src: tmpl/interfaces.j2
   #  dest: /etc/network/interfaces
 
@@ -140,7 +140,7 @@
         dest: /etc/ssh/ssh_host_rsa_key
         owner: root
         group: root
-        mode: '0600'
+        mode: '0600' # keep as string to avoid bugs
       notify:
         - host_handler_sshd_reload
 
@@ -150,6 +150,6 @@
         dest: /etc/ssh/ssh_host_rsa_key.pub
         owner: root
         group: root
-        mode: '0644'
+        mode: '0644' # keep as string to avoid bugs
       notify:
         - host_handler_sshd_reload

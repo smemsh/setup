@@ -42,6 +42,6 @@
     dest: '{{sudoers_dir}}/{{item | basename | splitext | first}}'
     owner: root
     group: root
-    mode: 0400
+    mode: '0400' # keep as string to avoid bugs
   with_fileglob:
     - 'templates/??-sudoers-*.j2'

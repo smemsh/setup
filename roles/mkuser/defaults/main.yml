@@ -1,7 +1,7 @@
 #
 ---
 
-mkuser_hmode:       0751
+mkuser_hmode:       '0751' # keep as string to avoid bugs
 mkuser_shell:       /bin/bash
 mkuser_homedirs:    /home
 

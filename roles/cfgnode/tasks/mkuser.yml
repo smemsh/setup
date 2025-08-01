@@ -22,7 +22,7 @@
   file:
     path: '{{cfgnode_homedir}}/.ssh'
     state: directory
-    mode: 0700
+    mode: '0700' # keep as string to avoid bugs
     owner: '{{cfgnode_username}}'
     group: '{{cfgnode_username}}'
 
@@ -37,7 +37,7 @@
 - name: make_cfmgmt_home_public
   file:
     path: '{{cfgnode_homedir}}'
-    mode: 0755
+    mode: '0755' # keep as string to avoid bugs
 
 # note: this will end up managing directory perms on ~config/.ssh
 #

@@ -8,7 +8,7 @@ accts_skel:     true
 accts_addauth:  true
 accts_base:     /home
 accts_shell:    /bin/bash
-accts_mode:     '02775' # keep it a string, else j2 default() breaks
+accts_mode:     '02775' # keep as string to avoid bugs
 
 # if true, only subset of users in $sysadmin_group will be setup
 accts_sysadmin_only: false

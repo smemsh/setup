@@ -12,7 +12,7 @@
 - name: make_gpg_dir
   file:
     state: directory
-    mode: 0700
+    mode: '0700' # keep as string to avoid bugs
     path: '{{initpgp_dir}}'
 
 - name: templatize_config

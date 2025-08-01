@@ -34,7 +34,7 @@
     dest: /etc/fstab
     owner: root
     group: root
-    mode: '0644' # leave it as string to avoid nesting bugs
+    mode: '0644' # keep as string to avoid bugs
   when: >
     (ip_subdomain == 'dev'
      or (groups['prodx'] is defined and inventory_hostname in groups['prodx']))
