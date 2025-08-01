@@ -1,0 +1,7 @@
+#
+---
+
+volmon_bindir: /usr/local/sbin
+volmon_monitors:
+  - dfmon
+  - lvmchk

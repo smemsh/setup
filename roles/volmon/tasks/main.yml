@@ -1,0 +1,19 @@
+#
+---
+
+- name: install_volmon_scripts
+  copy:
+    src: '{{playbook_dir}}/srcx/utiladm/{{item}}'
+    dest: '{{volmon_bindir}}'
+    mode: '0755'
+  with_items: '{{volmon_monitors}}'
+
+- name: install_volmon_cronjobs
+  copy:
+    dest: /etc/cron.d/{{setup_prefix}}-{{item}}
+    mode: 0644
+    owner: root
+    content: |
+      PATH=/usr/local/bin:/usr/local/sbin:/bin:/sbin:/usr/bin:/usr/sbin
+      */5 * * * * root {{item}}
+  with_items: '{{volmon_monitors}}'
