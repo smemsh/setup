@@ -5,3 +5,7 @@ volmon_bindir: /usr/local/sbin
 volmon_monitors:
   - dfmon
   - lvmchk
+
+volmon_intervals:
+  dfmon: "*/5 * * * *"
+  lvmchk: "*/5 * * * *"

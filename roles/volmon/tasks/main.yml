@@ -15,5 +15,5 @@
     owner: root
     content: |
       PATH=/usr/local/bin:/usr/local/sbin:/bin:/sbin:/usr/bin:/usr/sbin
-      */5 * * * * root {{item}}
+      {{volmon_intervals[item]}} root {{item}}
   with_items: '{{volmon_monitors}}'
