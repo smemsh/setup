@@ -20,6 +20,7 @@
         content: |
           #
           kernel/mm/transparent_hugepage/enabled = madvise
+          kernel/mm/transparent_hugepage/defrag = defer+madvise
         dest: /etc/sysfs.d/thpmadvise.conf
 
     - name: load_sysfs_tunables
