@@ -75,7 +75,7 @@
 # with 'dhcp' keyword, if installed). if present hooks are run upon
 # lease which set the system hostname and replace resolv.conf if
 # systemd-resolved is not in use.  the hook scripts are sourced,
-# including the first one which we will just 'exit' so no hooks run
+# and we will override the shell functions that do these things
 #
 # see also defaults.yml:host_do_resolver (cannot use because we have
 # 'host' var indirection here)
@@ -100,16 +100,6 @@
         group: root
         force: false
       register: r
-
-    - name: symlink_exit_hook_symlink
-      when: r.changed
-      file:
-        src: '{{r.dest}}'
-        dest: "{{r.dest | basename | regex_replace('enter', 'exit')}}"
-        state: link
-        owner: root
-        group: root
-        force: false
 
 - name: interfaces
   copy:
