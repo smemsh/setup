@@ -21,6 +21,11 @@
           # ansible-managed
           kernel/mm/transparent_hugepage/enabled = madvise
           kernel/mm/transparent_hugepage/defrag = defer+madvise
+          kernel/mm/transparent_hugepage/khugepaged/pages_to_scan = 65536
+          kernel/mm/transparent_hugepage/khugepaged/max_ptes_swap = 511
+          kernel/mm/transparent_hugepage/khugepaged/max_ptes_shared = 511
+          kernel/mm/transparent_hugepage/khugepaged/scan_sleep_millisecs = 3000
+          kernel/mm/transparent_hugepage/khugepaged/alloc_sleep_millisecs = 10000
         dest: /etc/sysfs.d/thpmadvise.conf
 
     - name: load_sysfs_tunables
