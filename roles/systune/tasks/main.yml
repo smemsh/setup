@@ -18,7 +18,7 @@
     - name: set_transparent_hugepage_madvise
       copy:
         content: |
-          #
+          # ansible-managed
           kernel/mm/transparent_hugepage/enabled = madvise
           kernel/mm/transparent_hugepage/defrag = defer+madvise
         dest: /etc/sysfs.d/thpmadvise.conf
