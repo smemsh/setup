@@ -26,7 +26,7 @@
           kernel/mm/transparent_hugepage/khugepaged/max_ptes_shared = 511
           kernel/mm/transparent_hugepage/khugepaged/scan_sleep_millisecs = 3000
           kernel/mm/transparent_hugepage/khugepaged/alloc_sleep_millisecs = 10000
-        dest: /etc/sysfs.d/thpmadvise.conf
+        dest: /etc/sysfs.d/thp.conf
 
     - name: load_sysfs_tunables
       service:
