@@ -46,7 +46,7 @@
 - name: sanity_check_sysctl_mapping_uniqueness
   fail:
     msg: sysctl group mapping must be unique
-  when: "(systune_group | length) > 1"
+  when: (systune_group | length) > 1
 
 - name: construct_sysctl_filename
   set_fact:
