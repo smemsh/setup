@@ -87,20 +87,40 @@
     - name: test_dhclient_installed
       stat:
         path: /etc/dhcp/dhclient-enter-hooks.d
-      register: r
+      register: dir
 
-    - name: deposit_entry_hook_if_none
-      when: r.stat.exists
+    - name: set_hookfile_path
+      when: dir.stat.exists
+      set_fact:
+        hookpath: '{{dir.stat.path | splitext | first}}'
+
+    - name: test_dhclient_hook_exists
+      when: dir.stat.exists
+      stat:
+        path: /etc/dhcp/dhclient-enter-hooks
+      register: hook
+
+    - name: test_already_managed
+      when: hook.skipped is not defined and hook.stat.exists
+      lineinfile:
+        state: present
+        path: '{{hookpath}}'
+        line: "# ansible-managed"
+        insertbefore: BOF
+      check_mode: true
+      register: mgmt
+
+    - name: manage_enter_hook
+      when: dir.stat.exists and (not hook.stat.exists or not mgmt.changed)
       copy:
         content: |
           # ansible-managed
           make_resolv_conf () { true; }
           set_hostname () { true; }
-        dest: '{{r.stat.path | splitext | first}}'
+        dest: '{{hookpath}}'
         owner: root
         group: root
-        force: false
-      register: r
+        force: true
 
 - name: interfaces
   copy:
