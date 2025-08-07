@@ -42,6 +42,7 @@ alias f='fg'
 alias m='fg -'
 alias h=hostname
 alias ansj=ANSIBLE_STDOUT_CALLBACK=json\ ansible
+alias ansdoc=ansible-doc
 
 for ((i = 1; i <= 64; i++)); do alias $i="fg $i"; done
 enable -n .
