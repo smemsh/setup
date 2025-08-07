@@ -27,12 +27,13 @@
           kernel/mm/transparent_hugepage/khugepaged/scan_sleep_millisecs = 3000
           kernel/mm/transparent_hugepage/khugepaged/alloc_sleep_millisecs = 10000
         dest: /etc/sysfs.d/thp.conf
+      register: r
 
     - name: load_sysfs_tunables
       service:
         name: sysfsutils
         state: restarted
-      when: systune_now or false
+      when: (systune_now | bool) and r.changed
 
 - name: determine_sysctl_group_mapping
   set_fact:
@@ -55,7 +56,8 @@
   copy:
     src: '{{systune_sysctl_filename}}'
     dest: /etc/sysctl.conf
+  register: r
 
 - name: maybe_set_sysctls
   command: sysctl -p
-  when: systune_now or false
+  when: (systune_now | bool) and r.changed
