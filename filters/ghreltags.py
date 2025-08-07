@@ -1,18 +1,22 @@
 #!/usr/bin/env python3
 #
 # ghreltags filter
-#  - takes a dictionary as input
+#   input dict of reponames and return with latest release tag as values
+#
+# desc:
+#   - takes dict of github repos as filter input (see args spec)
+#   - tags looked up, filtered by prefix (in dict value) or provided default
+#   - dict returned with values replaced by highest tag via version sort
+#
+# args:
+#   1: dictionary                                          [filter input]
 #      - keys are github reponames
 #      - values are full tagnames if contain any digits
 #          - else are tag prefixes if non empty
 #              - if empty, get defaulted from filter arg2
-#  - prefixes get dereferenced via github to highest such tag by version sort
-#  - returns modified dictionary with all values as exact tags after lookups
-#
-# args:
-#  1: github username (required)
-#  2: default prefix for empty keys (required)
-#  3: api key / personal access token (optional) for github lookup
+#   2: github username reponames are relative to (required) [filter arg1]
+#   3: default prefix for empty keys (required)             [filter arg2]
+#   4: api key / access token (optional) for github lookup  [filter arg3]
 #
 # scott@smemsh.net
 # https://github.com/smemsh/setup/
