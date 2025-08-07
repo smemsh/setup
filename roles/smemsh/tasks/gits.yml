@@ -10,7 +10,15 @@
       skel_repos_all | ghreltags(skel_github, skel_tagprefix, skel_apitok)
     }}'
   delegate_to: localhost
-  delegate_facts: true
+
+  # we cannot delegate facts, because each host could have a different
+  # expansion of skel_repos_all based on individual differences, especially
+  # private repos that would be on some hosts but not others.  unfortunately
+  # this means we're doing tons of API lookups all at once and all from the
+  # localhost, and almost all of these are actually duplicates because most
+  # hosts have the exact same set for install
+  #
+  #delegate_facts: true
   #
   # TODO we probably can't make this run_once because there could be per-host
   # overrides of the variables that go into creating skel_repos_all, so
