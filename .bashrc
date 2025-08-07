@@ -12,6 +12,7 @@ export PS1='\n \$ '
 export LANG=en_US.UTF-8
 export MAILCHECK=
 export HISTTIMEFORMAT='%Y%m%d%H%M%S '
+export HISTCONTROL=ignorespace
 export HISTFILE=~/.bash_history
 export HISTFILESIZE=
 export HISTSIZE=
