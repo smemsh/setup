@@ -28,10 +28,21 @@ __devskel__ = '0.8.1'
 from sys import exit, hexversion
 if hexversion < 0x030900f0: exit("minpython: %s" % hexversion)
 
+import argparse, json, re
 import urllib.request as rq
-import json
-import re
-#import sys
+
+from sys import argv
+from sys import stdin, stdout, stderr
+from select import select
+
+from os.path import basename
+from os import (
+    getenv, unsetenv,
+    isatty, dup,
+    close as osclose,
+    EX_OK as EXIT_SUCCESS,
+    EX_SOFTWARE as EXIT_FAILURE,
+)
 
 from ansible.errors import AnsibleFilterError
 from ansible.module_utils.compat.version import LooseVersion
@@ -80,8 +91,8 @@ class FilterModule(object):
             jsdata = []
             while True:
                 apireq = rq.Request(url)
-                #print(f"apiurl: {url}", file=sys.stderr)
-                #sys.stderr.flush
+                #print(f"apiurl: {url}", file=stderr)
+                #stderr.flush
                 for k, v in headers.items():
                     apireq.add_header(k, v)
                 with rq.urlopen(apireq) as rs:
@@ -188,21 +199,6 @@ def main():
 ###
 
 if __name__ == "__main__":
-
-    import argparse
-
-    from sys import argv
-    from sys import stdin, stdout, stderr
-    from select import select
-
-    from os.path import basename
-    from os import (
-        getenv, unsetenv,
-        isatty, dup,
-        close as osclose,
-        EX_OK as EXIT_SUCCESS,
-        EX_SOFTWARE as EXIT_FAILURE,
-    )
 
     invname = basename(argv[0])
     args = argv[1:]
