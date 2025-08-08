@@ -46,4 +46,4 @@
       {%-     set destdir = undef() -%}
       {%- endif -%}
       {{destdir}}/{{item.key}}
-  with_dict: '{{hostvars.localhost.skel_repos_all}}'
+  with_dict: '{{skel_repos_all}}'
