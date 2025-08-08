@@ -5,9 +5,9 @@ ghreltags
 
 desc:
   - takes dict of github repos as filter input (see args spec)
+  - can also run from cmdline with dict provided on stdin as json
   - tags looked up, filtered by prefix (in dict value) or provided default
   - dict returned with values replaced by highest tag via version sort
-  - can also run from cmdline with dict provided on stdin as json
 
 args:
   1: dictionary
