@@ -1,10 +1,10 @@
 #
 
 {% if inventory_hostname_short in groups.lresolv %}
-domain: localdomain
-search: localdomain
-nameserver: 127.0.0.1
+domain localdomain
+search localdomain
+nameserver 127.0.0.1
 {% else %}
-nameserver: 8.8.8.8
-nameserver: 8.8.4.4
+nameserver 8.8.8.8
+nameserver 8.8.4.4
 {% endif %}
