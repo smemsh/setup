@@ -1,7 +1,6 @@
 #
 
 {% if inventory_hostname_short in groups.lresolv %}
-domain localdomain
 search localdomain
 nameserver 127.0.0.1
 {% else %}
