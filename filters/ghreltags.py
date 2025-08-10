@@ -36,6 +36,7 @@ import urllib.request as rq
 
 from sys import argv
 from sys import stdin, stdout, stderr
+from copy import copy
 from time import sleep
 from stat import S_IRUSR, S_IWUSR, S_IRGRP, S_IWGRP, S_IROTH
 from fcntl import flock, LOCK_EX, LOCK_UN, LOCK_NB
@@ -71,10 +72,6 @@ def bomb(*args, **kwargs):
 
 GHAPIBASE = 'https://api.github.com/repos'
 GHAPIVER = '2022-11-28'
-headers = {
-    'Accept': 'application/vnd.github+json',
-    'X-GitHub-Api-Version': GHAPIVER,
-}
 
 CACHEFILE = f"{getenv('HOME')}/.cache/ghreltags.db"
 CACHELOCK = f"{CACHEFILE}.lock"
@@ -175,6 +172,9 @@ class RelTagsCache(object):
 
 class FilterModule(object):
 
+    apiheaders = {'Accept': 'application/vnd.github+json',
+                  'X-GitHub-Api-Version': GHAPIVER }
+
     def filters(self):
         return {'ghreltags': self.ghreltags}
 
@@ -184,6 +184,7 @@ class FilterModule(object):
         cachedict = cache.tagshelf.get(cachekey) or {}
         cache.runid = cachekey  # destructor removes other keys
 
+        headers = copy(self.apiheaders)
         if apikey is not None:
             headers.update({'Authorization': f"Bearer {apikey}"})
 
