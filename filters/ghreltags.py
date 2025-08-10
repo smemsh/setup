@@ -34,14 +34,14 @@ if hexversion < 0x030900f0: exit("minpython: %s" % hexversion)
 import argparse, shelve, json, re
 import urllib.request as rq
 
-from sys import argv
-from sys import stdin, stdout, stderr
+from sys import argv, stdin, stdout, stderr
 from copy import copy
 from time import sleep
+from select import select
+
 from stat import S_IRUSR, S_IWUSR, S_IRGRP, S_IWGRP, S_IROTH
 from fcntl import flock, LOCK_EX, LOCK_UN, LOCK_NB
 from errno import EAGAIN, EWOULDBLOCK, EACCES
-from select import select
 
 from os.path import basename, dirname
 from os import (
