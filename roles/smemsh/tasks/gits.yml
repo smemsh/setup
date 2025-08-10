@@ -4,32 +4,20 @@
 #
 ---
 
+- name: generate_cache_id
+  set_fact:
+    playid: '{{ansible_date_time.epoch | string}}'
+  delegate_to: localhost
+  run_once: true
+
 - name: do_ghreltags_lookups
   set_fact:
     skel_repos_all: '{{
-      skel_repos_all | ghreltags(skel_github, skel_tagprefix, skel_apitok)
+      skel_repos_all
+      | ghreltags(skel_github, skel_tagprefix, playid, skel_apitok)
     }}'
   delegate_to: localhost
-
-  # we cannot delegate facts, because each host could have a different
-  # expansion of skel_repos_all based on individual differences, especially
-  # private repos that would be on some hosts but not others.  unfortunately
-  # this means we're doing tons of API lookups all at once and all from the
-  # localhost, and almost all of these are actually duplicates because most
-  # hosts have the exact same set for install
-  #
-  #delegate_facts: true
-  #
-  # TODO we probably can't make this run_once because there could be per-host
-  # overrides of the variables that go into creating skel_repos_all, so
-  # they'll get evaluated to different values on different hosts.  however
-  # this will result in a lot of extra api traffic, especially with large
-  # numbers of hosts, and github places limits on api usage, even for logged
-  # in users.  we should do something to cache based on skel_repos_all and
-  # only do another set of lookups if the value not already present in cache.
-  # or find some other way to mitigate.
-  #
-  #run_once: true
+  throttle: 1 # essential for filter to benefit from cached prior api calls
 
 - name: repo_checkouts
   git:
