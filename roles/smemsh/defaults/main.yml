@@ -65,11 +65,19 @@ skel_repos_rcfiles:
 # default prefix used to limit matches for sort when key empty/none
 skel_tagprefix: master
 
-# override single keys from these defaults by supplying in an *_addl
+# override individual keys from these defaults by supplying in an *_addl
 # key-val.  the whole lot can be replaced by redefining skel_repos_*
 #
 skel_exes_addl: {}
 skel_rcfiles_addl: {}
-skel_repos_rcall: '{{skel_repos_rcfiles | combine(skel_rcfiles_addl)}}'
-skel_repos_exall: '{{skel_repos_exes | combine(skel_exes_addl)}}'
-skel_repos_all: '{{skel_repos_rcall | combine(skel_repos_exall)}}'
+
+# for excluding specific keys without having to redefine everything
+skel_repos_excludes: []
+
+# final dicts after addl merging and exclusions
+skel_repos_rcall: '{{skel_repos_rcfiles | combine(skel_rcfiles_addl)
+                     | ansible.utils.remove_keys(skel_repos_excludes)}}'
+skel_repos_exall: '{{skel_repos_exes | combine(skel_exes_addl)
+                     | ansible.utils.remove_keys(skel_repos_excludes)}}'
+skel_repos_all: '{{skel_repos_rcall | combine(skel_repos_exall)
+                   | ansible.utils.remove_keys(skel_repos_excludes)}}'
