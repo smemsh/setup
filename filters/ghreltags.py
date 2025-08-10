@@ -206,8 +206,6 @@ class FilterModule(object):
                 jsdata = []
                 while True:
                     apireq = rq.Request(url)
-                    #print(f"apiurl: {url}", file=stderr)
-                    #stderr.flush
                     for k, v in headers.items():
                         apireq.add_header(k, v)
                     with rq.urlopen(apireq) as rs:
