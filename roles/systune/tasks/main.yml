@@ -38,7 +38,7 @@
 - name: determine_sysctl_group_mapping
   set_fact:
     systune_group: "{{
-      lookup('fileglob', 'files/sysctl?*.conf', wantlist=true) |
+      query('fileglob', 'files/sysctl?*.conf') |
       map('regex_replace', '^.*files/sysctl(.*)\\.conf$', '\\1') |
       select('in', group_names)
     }}"

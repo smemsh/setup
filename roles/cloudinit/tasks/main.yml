@@ -5,7 +5,7 @@
   set_fact:
     cloudinits: |
       {%- set cloudinits = [] %}
-      {%- for path in lookup('fileglob', 'tmpl/*.j2', wantlist=true) %}
+      {%- for path in query('fileglob', 'tmpl/*.j2') %}
       {%-     do cloudinits.append(path | basename | splitext | first) %}
       {%- endfor %}
       {{cloudinits}}
