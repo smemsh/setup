@@ -17,7 +17,7 @@
 
 - name: templatize_config
   template:
-    src: 'templates/gpg.conf.j2'
+    src: tmpl/gpg.conf.j2
     dest: '{{initpgp_dir}}/gpg.conf'
 
 - name: copy_pubkey

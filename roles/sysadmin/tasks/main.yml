@@ -44,4 +44,4 @@
     group: root
     mode: '0400' # keep as string to avoid bugs
   with_fileglob:
-    - 'templates/??-sudoers-*.j2'
+    - tmpl/??-sudoers-*.j2
