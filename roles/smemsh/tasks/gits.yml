@@ -23,7 +23,7 @@
   git:
     repo: 'https://github.com/{{skel_github}}/{{item.key}}'
     version: '{{item.value}}'
-    recursive: false
+    recursive: '{{true if item.key in skel_repos_submods else false}}'
     verify_commit: true
     dest: |-
       {%- if item.key in skel_repos_rcall -%}

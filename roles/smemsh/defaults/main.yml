@@ -81,3 +81,13 @@ skel_repos_exall: '{{skel_repos_exes | combine(skel_exes_addl)
                      | ansible.utils.remove_keys(skel_repos_excludes)}}'
 skel_repos_all: '{{skel_repos_rcall | combine(skel_repos_exall)
                    | ansible.utils.remove_keys(skel_repos_excludes)}}'
+
+# for specifying either in inventory or cli the repositories which
+# should get submodule init+update (default false).  note that the
+# corresponding option is 'recursive' in ansible git module, but really
+# only determines whether submodules are dealt with via update+init, and
+# in fact the '--recursive' option is always added to "git submodule"
+# command line, but that command is not run unless 'recursive' module
+# option enabled (it will be if repo present in this list)
+#
+skel_repos_submods: []
