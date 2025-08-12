@@ -23,32 +23,10 @@
     mode: '{{mode}}'
   register: r
 
-# determine if the homedir already exists, and was requested at
-# invocation ('skel' not empty or false)
-#
-# how 'skel or false' works (seems bogus to me):
-# freenode #ansible # 20170614151319:
-#
-#  13:25 < sivel> when you do `when: path` it looks to see if `path` is
-#                 a var, and expands it before evaluation
-#  13:25 < sivel> when you do `when: path or false` "path or false" is
-#                 not a variable, so it doesn't do pre-expansion
-#  13:25 < sivel> and evaluates "path or false"
-#  13:25 < sivel> which is effectively `""  or false` or `"/" or false`
-#  13:26 < sivel> it's an implementation side effect of using jinja2,
-#                 which only has the ability to return strings, so we
-#                 do some shortcutting sometimes, to get native types
-#  13:26 < sivel> like `True` instead of the string`"True"`
-#  13:27 < sivel> it's all very complicated :)
-#  13:28 < sivel> https://github.com/ansible/ansible/blob/devel/lib/ansible/playbook/conditional.py#L136-L144
-#
+# only do homedir skeleton if we made it and requested
 - set_fact: { made_homedir: "{{(r.diff.before.state | default) == 'absent'}}" }
-- set_fact: { init_homedir: '{{(skel or false) and made_homedir}}' }
+- set_fact: { init_homedir: '{{(skel | bool) and made_homedir}}' }
 - name: do_homedir_initialization
-  #
-  # skip homedir creation if already exists, and only upon request,
-  # (ie skel not empty or false)
-  #
   when: init_homedir
   block:
 
@@ -64,15 +42,13 @@
         user: '{{user}}'
         group: '{{group}}'
 
-  # endblock
-
 # and finally we let ansible install the key and set permissions
 # specifically on the ~/.ssh directory (although, note that we do
 # provision with StrictModes=no also); this must be done last after all
 # permissions settings have been done
 #
 - name: setup_authorized_key
-  when: addauth or false
+  when: addauth | bool
   authorized_key:
     user: '{{user}}'
     key: "{{lookup('file', authfile)}}"
