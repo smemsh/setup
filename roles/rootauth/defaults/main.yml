@@ -4,7 +4,7 @@
 rootauth_username: root
 
 rootauth_users:
-  - scott
+  - '{{sysadmin_username}}'
 
 rootauth_password: !vault |
   $ANSIBLE_VAULT;1.1;AES256

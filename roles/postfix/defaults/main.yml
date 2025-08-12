@@ -9,8 +9,8 @@ postfix_dnsroute_name: dnsroute
 postfix_dnsroute_bindir: /usr/local/sbin
 postfix_dnsroute_interval: 5  # polling interval minutes
 
-pfrelay_user: scott
-pfrelay_domain: smemsh.net
+pfrelay_user: '{{sysadmin_username}}'
+pfrelay_domain: '{{sysadmin_domain}}'
 
 pfrelay_host: '{{inventory_hostname_short}}'
 pfrelay_base: '{{pfrelay_user}}+{{pfrelay_host}}'

@@ -3,7 +3,7 @@
 
 boot_serial: 0
 boot_timeout: 3
-boot_distro_name: scott@smemsh.net
+boot_distro_name: '{{sysadmin_username}}@{{sysadmin_domain}}'
 
 # let the user stop filesystem changes from being made, for
 # example to run the role on an already-provisioned node

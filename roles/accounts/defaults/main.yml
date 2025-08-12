@@ -22,10 +22,10 @@ accts_sysadmin_only: false
 #
 accounts:
 
-  - group: sysadmin
-    suppl: [dev]
+  - group: '{{sysadmin_group}}'
+    suppl: ['{{developer_group}}']
     users:
-      - scott
+      - '{{sysadmin_username}}'
 
   #- group: dev
   #  users:

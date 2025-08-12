@@ -32,13 +32,13 @@ skel_rcfiles_dir: '~'
 skel_sysadmin: true
 
 # run mkuser role with this username (this role always run, but is idempotent)
-skel_user: scott
+skel_user: '{{sysadmin_username}}'
 
 # run initpgp role: initialize gpg config and trust our own key
-initpgp_keyid: scott@smemsh.net
+initpgp_keyid: '{{sysadmin_username}}@{{sysadmin_domain}}'
 
 # run initssh role: initialize authorized_keys to allow our key to connect
-initssh_keyid: scott@omnius.smemsh.net
+initssh_keyid: '{{sysadmin_username}}@{{sysadmin_host}}.{{sysadmin_domain}}'
 
 # skel_repos_* key is repo name to checkout.  value is tag to checkout.
 # if empty, enumerates tags on github and determines latest by "loose"

@@ -16,7 +16,7 @@ cfgnode_mode:       update
 
 cfgnode_users:
   - '{{cfmgmt_username}}'
-  - scott
+  - '{{sysadmin_username}}'
 
 cfgnode_pkglist:
 

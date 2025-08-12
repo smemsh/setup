@@ -13,6 +13,10 @@ locgroup_linode:          lin
 locgroup_google:          gce
 locgroup_roc:             roc
 
+sysadmin_username:        scott
+sysadmin_domain:          smemsh.net
+sysadmin_host:            omnius
+
 sysadmin_group:           sysadmin
 sysadmin_gid:             666
 developer_group:          dev
