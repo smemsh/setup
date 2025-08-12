@@ -1,7 +1,7 @@
 #
 
 terraform {
-  required_version = "1.9.1"
+  required_version = "1.10.5"
   required_providers {
     incus = {
       source  = "lxc/incus"
@@ -13,7 +13,7 @@ terraform {
     }
     external = {
       source  = "hashicorp/external"
-      version = "2.3.4"
+      version = "2.3.5"
     }
   }
 }
