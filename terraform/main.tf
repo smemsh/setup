@@ -265,6 +265,10 @@ resource "incus_instance" "omniadmv" {
   running  = true
   profiles = ["default"]
 
+  lifecycle {
+    ignore_changes = [image]
+  }
+
   config = {
     "cloud-init.network-config" = <<-HERE
       #
