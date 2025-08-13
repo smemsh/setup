@@ -78,6 +78,7 @@ process_args ()
 	local onto role arg
 	local ours mods flags opts invs exts helps
 	local chars longs
+	local name val
 	local -a pats=(); local i
 
 	# 1/3 header
@@ -159,7 +160,6 @@ process_args ()
 	# rest are var=val or json strings for ansible-playbook -e
 	for arg
 	do
-		local name val
 		if ((prefix)) && [[ $arg =~ ^([[:alnum:]_]+)=(.*)$ ]]
 		then
 			# if requested, prefix vars with role name to save
