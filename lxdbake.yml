@@ -18,7 +18,7 @@
   become_flags: '-i'
   tasks:
 
-    - name: clobbered_create_bakenode
+    - name: create_or_replace_bakenode
       cloud.terraform.terraform:
         state: '{{item}}'
         targets: ['incus_instance.imgbake["{{lxdbake_plex}}"]']
@@ -211,7 +211,7 @@
       debug:
         msg: "making image: {{imgname}}, eta 5m asof-20250120, please wait..."
 
-    - name: clobbered_create_image_by_type
+    - name: create_or_replace_image_by_type
       cloud.terraform.terraform:
         state: '{{item}}'
         targets: ['{{imgname}}']
