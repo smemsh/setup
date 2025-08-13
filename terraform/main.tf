@@ -288,7 +288,7 @@ resource "incus_instance" "omniadmv" {
     HERE
 
     # bake-time user-data is more complicated, but for nodes
-    # instantiated from baked images, we only set hostname ssh key
+    # instantiated from baked images, we only set hostname and ssh key
     #
     "cloud-init.user-data" = <<-HERE
       #cloud-config
