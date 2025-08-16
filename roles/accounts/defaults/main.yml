@@ -9,7 +9,6 @@ accts_addauth:  true
 accts_base:     /home
 accts_shell:    /bin/bash
 accts_mode:     '02775' # keep as string to avoid bugs
-accts_skel:     false
 
 # if true, only subset of users in $sysadmin_group will be setup
 accts_sysadmin_only: false
