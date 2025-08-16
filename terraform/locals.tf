@@ -11,7 +11,7 @@ locals {
   plexbyhost = zipmap(local.plexhosts, local.plexgates)
 
   volsz_default = "10GiB"
-  volsz_plex    = "128GiB"
+  volsz_plex    = "32GiB"
 
   # posix systems need 64k uids, and let container hosts nest 1k such systems
   uidspace_unpriv   = 64 * 1024
