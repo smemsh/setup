@@ -58,7 +58,7 @@
     - include_role:
         name: sysadmin
         public: true
-      when: skel_sysadmin | bool
+      when: skel_sysadmin | default | bool
 
     - include_role:
         name: mkuser
@@ -70,7 +70,7 @@
         apply:
           become: true
           become_user: '{{skel_user}}'
-      when: initpgp_keyid is truthy(convert_bool=true)
+      when: initpgp_keyid | default | bool
 
     - include_role:
         name: initssh
@@ -79,7 +79,7 @@
           become_user: '{{skel_user}}'
       vars:
         initssh_user: '{{skel_user}}'
-      when: initssh_keyid is truthy(convert_bool=true)
+      when: initssh_keyid | default | bool
 
 - name: verify_account
   getent:
