@@ -29,5 +29,5 @@ locals {
   cloudinit_id = var.bakenode
 
   omnicount = 1 # omniplexN will be the last host
-  omnihosts  = toset([for n in range(1, local.omnicount + 1) : "omniplex${n}"])
+  omnihosts = toset([for n in range(1, local.omnicount + 1) : "omniplex${n}"])
 }
