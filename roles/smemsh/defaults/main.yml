@@ -34,10 +34,14 @@ skel_sysadmin: true
 # run mkuser role with this username (this role always run, but is idempotent)
 skel_user: '{{sysadmin_username}}'
 
-# run initpgp role: initialize gpg config and trust our own key
+# run initpgp role: initialize gpg config and trust our own key.
+# (only done on skel_init, set false to skip and also not verify checkouts)
+#
 initpgp_keyid: '{{sysadmin_username}}@{{sysadmin_domain}}'
 
 # run initssh role: initialize authorized_keys to allow our key to connect
+# (only done on skel_init, set false to skip)
+#
 initssh_keyid: '{{sysadmin_username}}@{{sysadmin_host}}.{{sysadmin_domain}}'
 
 # skel_repos_* key is repo name to checkout.  value is tag to checkout.

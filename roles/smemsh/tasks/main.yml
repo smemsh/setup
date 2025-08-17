@@ -70,7 +70,7 @@
         apply:
           become: true
           become_user: '{{skel_user}}'
-      when: initpgp_keyid | default | bool
+      when: initpgp_keyid is truthy(convert_bool=true)
 
     - include_role:
         name: initssh
@@ -79,7 +79,7 @@
           become_user: '{{skel_user}}'
       vars:
         initssh_user: '{{skel_user}}'
-      when: initssh_keyid | default | bool
+      when: initssh_keyid is truthy(convert_bool=true)
 
 - name: verify_account
   getent:
@@ -88,22 +88,26 @@
     key: '{{skel_user}}'
   when: not (skel_init | default | bool)
 
-# if we fail to pass init flag and never been run before, verify will fail
-# but we don't want to keep going and hit the api, etc if that's the case
-#
-- name: verify_gpg_bootstrapped
-  command: gpg --no-options --check-signatures {{initpgp_keyid}}
-  become: true
-  become_user: '{{skel_user}}'
-  changed_when: false
-  failed_when: false
-  register: r
+- name: gpg_verification_if_configured
+  when: initpgp_keyid is truthy(convert_bool=true)
+  block:
 
-- name: check_initialized
-  assert:
-    that: r.rc == 0
-    quiet: true
-    fail_msg: no gpg sig for {{initpgp_keyid}}, forgot skel_init?
+    # if we fail to pass init flag and never been run before, verify
+    # will fail and we don't want to keep going and hit the api
+    #
+    - name: verify_gpg_bootstrapped
+      command: gpg --no-options --check-signatures {{initpgp_keyid}}
+      become: true
+      become_user: '{{skel_user}}'
+      changed_when: false
+      failed_when: false
+      register: r
+
+    - name: check_initialized
+      assert:
+        that: r.rc == 0
+        quiet: true
+        fail_msg: no gpg sig for {{initpgp_keyid}}, forgot skel_init?
 
 - name: do_repository_setups
   block:

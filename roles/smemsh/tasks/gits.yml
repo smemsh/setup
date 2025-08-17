@@ -24,7 +24,9 @@
     repo: 'https://github.com/{{skel_github}}/{{item.key}}'
     version: '{{item.value}}'
     recursive: '{{true if item.key in skel_repos_submods else false}}'
-    verify_commit: true
+    verify_commit: '{{
+      true if initpgp_keyid is truthy(convert_bool=true) else false
+    }}'
     dest: |-
       {%- if item.key in skel_repos_rcall -%}
       {%-     set destdir = skel_rcfiles_dir -%}
