@@ -278,6 +278,10 @@ resource "incus_instance" "omniadmv" {
     ignore_changes = [image]
   }
 
+  wait_for {
+    type = "ipv4"
+  }
+
   config = {
     "cloud-init.network-config" = <<-HERE
       #
