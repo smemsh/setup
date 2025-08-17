@@ -4,6 +4,9 @@
 # github username that contains skeleton repos needed to flesh homedir
 skel_github: smemsh
 
+# whether to run sysadmin/mkuser/initpgp/initssh roles, ie for first-run
+skel_init: false
+
 # github api limited to only 60 anonymous requests per hour per ip,
 # whereas authentication bumps it to 5000.  situation is exacerbated by
 # api paging limitations, we can only fetch max 100 tags per request.

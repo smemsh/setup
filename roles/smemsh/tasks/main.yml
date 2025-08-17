@@ -58,7 +58,7 @@
     - include_role:
         name: sysadmin
         public: true
-      when: skel_sysadmin | default | bool
+      when: skel_sysadmin | bool
 
     - include_role:
         name: mkuser
@@ -86,7 +86,7 @@
     database: passwd
     fail_key: true
     key: '{{skel_user}}'
-  when: not (skel_init | default | bool)
+  when: not (skel_init | bool)
 
 - name: gpg_verification_if_configured
   when: initpgp_keyid is truthy(convert_bool=true)
