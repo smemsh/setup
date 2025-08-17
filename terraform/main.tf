@@ -197,18 +197,30 @@ resource "incus_profile" "nestpriv" {
   }
 }
 
+resource "incus_profile" "protected" {
+  name        = "protected"
+  for_each    = local.plexhosts
+  remote      = each.value
+  description = "deletion-blocked"
+
+  config = {
+    "security.protection.delete" = "true"
+  }
+}
+
 ###
 
 resource "incus_instance" "scytus" {
   name        = "scytus"
   remote      = "vernius"
+  profiles    = ["default", "protected"]
   description = "pki-host"
 }
 
 resource "incus_instance" "tekius" {
   name        = "tekius"
   remote      = "vernius"
-  profiles    = ["default", "nestpriv"]
+  profiles    = ["default", "nestpriv", "protected"]
   description = "distrobuild-host"
 
   device {
