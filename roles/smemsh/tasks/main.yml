@@ -88,6 +88,23 @@
     key: '{{skel_user}}'
   when: not (skel_init | default | bool)
 
+# if we fail to pass init flag and never been run before, verify will fail
+# but we don't want to keep going and hit the api, etc if that's the case
+#
+- name: verify_gpg_bootstrapped
+  command: gpg --no-options --check-signatures {{initpgp_keyid}}
+  become: true
+  become_user: '{{skel_user}}'
+  changed_when: false
+  failed_when: false
+  register: r
+
+- name: check_initialized
+  assert:
+    that: r.rc == 0
+    quiet: true
+    fail_msg: no gpg sig for {{initpgp_keyid}}, forgot skel_init?
+
 - name: do_repository_setups
   block:
     - import_tasks: gits.yml
