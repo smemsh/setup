@@ -42,7 +42,6 @@ varfiles=(vars/*.yml)
 for ((i = 0; i < ${#varfiles[@]}; i++)); do
 	varfiles[i]="-e @${varfiles[i]}"; done
 
-set -o pipefail
 ansible-playbook "${cliopts[@]}" ${0##*/}.yml \
 	--become \
 	${varfiles[@]} \
