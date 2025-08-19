@@ -11,7 +11,9 @@ locals {
 
   osimgs = {
     for img in local.allimgs : format("%s%d%s",
-      substr(img[0][0], 0, 1), img[0][1], substr(img[1], 0, 1)
+      substr(img[0][0], 0, 1),
+      img[0][1],
+      substr(img[1], 0, 1)
     ) => {
       "virtype" = img[1]
       "imgname" = format("%s%d%s",
