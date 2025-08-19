@@ -4,11 +4,16 @@
 #
 # desc:
 #   - provisions a new base lxd node for baking using terraform
+#   - uses tofu '-target' arg so other terraform state is ignored
 #   - bootstraps bakenode with cloudinit role (via bin/tfcloudinit)
 #   - applies our standard role suite onto the node
 #   - applies type-specific roles onto the node enumerated in types/ yaml
 #   - clears cloud-init so the next boot will get new config/identity
 #   - upload disk to image storage, to be used as base for deployed node
+#
+# todo:
+#   - target bakenode address format only allows one running bake per plex
+#   - effectively locks terraform changes during bake unless they -exclude
 #
 ---
 

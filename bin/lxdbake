@@ -4,16 +4,19 @@
 #   make a base vm image after applying baketime cloudinit and cfmgmt
 #
 # desc:
-#   - wraps lxdbake.yml
-#   - configure in types/$2.yml
-#   - end image is snapshot as $2-YYMMDDHHMM
-#   - note: no care is taken to prevent image accumulation
-#   \ up to the type definition to determine if vme or container
+#   - wraps ansible-playbook lxdbake.yml
+#   - creates a temporary incus_instance.imgbake["<bakehost>"] resource
+#   - applies standard roles and those from types/$2.yml
+#   - uploads an incus_image via terraform var baketime=true
+#   - replaces any existing image
 #
 # args:
-#   - arg1: bakehost:bakenode (remote_name:bake_instance_name)
-#   - arg2: types/arg2.yml
-#   \ arg3: images:ubuntu/22.04/cloud
+#   - arg1: bakehost:bakenode (incus_remote_name:bake_node_name)
+#   - arg2: types/arg2.yml (ie "adm")
+#   - arg3: incus_image base to bake as <base>_<type> (ie "u22v")
+#
+# todo:
+#   - currently only one image at a time can be baked
 #
 # scott@smemsh.net
 # https://github.com/smemsh/setup/
