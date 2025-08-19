@@ -61,7 +61,7 @@ resource "incus_network" "br0" {
     "dns.mode"     = "none" # dnsmasq still starts, see upstream bug 1537
     "ipv6.address" = "none"
     "ipv4.address" = format(
-      "%s/${local.masklen}", local.hostdb[local.plexbyhost[each.value]]
+      "%s/${local.masklen}", local.hostdb[local.gatebyplex[each.value]]
     )
     "ipv6.nat"      = "false"
     "ipv4.nat"      = "false"
@@ -293,7 +293,7 @@ resource "incus_instance" "omniadmv" {
             - ${format("%s/%s", local.hostdb[each.value], local.masklen)}
           routes:
             - to: 0.0.0.0/0
-              via: ${local.hostdb[local.plexbyhost["omnius"]]}
+              via: ${local.hostdb[local.gatebyplex["omnius"]]}
           nameservers:
             addresses:
               - 8.8.8.8
