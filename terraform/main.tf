@@ -28,24 +28,17 @@ module "osimgs" {
   remote   = each.value
 }
 
-resource "incus_image" "u22v_adm" {
+module "typeimgs" {
   for_each = toset(["omnius"])
+  source   = "./typeimgs"
   remote   = each.value
+  allfimgs = local.allfimgs
 
-  aliases = ["u22v_adm"]
-  source_instance = {
-    # only matters at create-time, but we leave it persistent, so
-    # subsequent runs rely on the bake-time instance, which typically
-    # only exists when "-var baketime=true", hence the try clause
-    name = try(incus_instance.imgbake[each.key].name, "")
-  }
-
-  lifecycle {
-    ignore_changes = all
-    # cannot do this because then it changes whether false or true as
-    # long as it's different TODO figure out some way
-    #replace_triggered_by = [terraform_data.imgrefresh["adm"]]
-  }
+  # only used at create-time, but we leave the image persistent, so
+  # subsequent runs would depend on the bake-time instance that only
+  # exists when "-var baketime=true", hence the try()
+  #
+  bakename = try(incus_instance.imgbake[each.value].name, "")
 }
 
 ###
@@ -242,8 +235,8 @@ resource "incus_instance" "imgbake" {
   remote      = each.value
   description = "imgbake-instance"
 
-  type     = "virtual-machine"
-  image    = try(module.osimgs[var.bakehost].images["u22v"].fingerprint, "")
+  type     = try(module.osimgs[var.bakehost].imgs[var.bakebase].source_image.type, "")
+  image    = try(module.osimgs[var.bakehost].imgs[var.bakebase].fingerprint, "")
   running  = true
   profiles = ["default"]
 
@@ -256,21 +249,21 @@ resource "incus_instance" "imgbake" {
 ###
 
 resource "ansible_vault" "sshprivkey" {
-  for_each   = local.omnihosts
+  for_each   = toset(keys(local.plexhocmap))
   vault_file = "${local.home}/keys/host/${each.value}.${local.domain}-id_rsa"
 
   vault_password_file = "${local.home}/bin/ansvault"
 }
 
-resource "incus_instance" "omniadmv" {
-  for_each    = local.omnihosts
-  name        = each.value
-  project     = incus_project.plex["omnius"].name
-  remote      = "omnius"
-  description = "omniplex-instance-${each.value}"
+resource "incus_instance" "plexhocs" {
+  for_each    = local.plexhocmap
+  name        = each.key
+  project     = incus_project.plex[each.value.plex].name
+  remote      = each.value.plex
+  description = "${each.value.plex}-plexhoc-${each.key}"
 
-  type     = "virtual-machine"
-  image    = incus_image.u22v_adm["omnius"].fingerprint
+  type     = each.value.virt
+  image    = module.typeimgs[each.value.plex].imgs[each.value.fimg].fingerprint
   running  = true
   profiles = ["default"]
 
@@ -290,10 +283,10 @@ resource "incus_instance" "omniadmv" {
       ethernets:
         eth0:
           addresses:
-            - ${format("%s/%s", local.hostdb[each.value], local.masklen)}
+            - ${format("%s/%s", local.hostdb[each.key], local.masklen)}
           routes:
             - to: 0.0.0.0/0
-              via: ${local.hostdb[local.gatebyplex["omnius"]]}
+              via: ${local.hostdb[local.gatebyplex[each.value.plex]]}
           nameservers:
             addresses:
               - 8.8.8.8
@@ -306,18 +299,18 @@ resource "incus_instance" "omniadmv" {
     "cloud-init.user-data" = <<-HERE
       #cloud-config
       ---
-      fqdn: ${each.value}.${local.domain}
-      hostname: ${each.value}
+      fqdn: ${each.key}.${local.domain}
+      hostname: ${each.key}
       manage_etc_hosts: false
       manage_resolv_conf: false
       create_hostname_file: true
       prefer_fqdn_over_hostname: true
       preserve_sources_list: true
       ssh_keys:
-        rsa_private: ${jsonencode(ansible_vault.sshprivkey[each.value].yaml)}
+        rsa_private: ${jsonencode(ansible_vault.sshprivkey[each.key].yaml)}
         rsa_public: ${jsonencode(file(format(
           "%s/keys/host/%s.%s-id_rsa.pub",
-          local.home, each.value, local.domain)))}
+          local.home, each.key, local.domain)))}
       write_files:
         - path: /etc/hosts
           owner: root:root

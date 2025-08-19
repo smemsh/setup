@@ -9,6 +9,7 @@
 #   - applies standard roles and those from types/$2.yml
 #   - uploads an incus_image via terraform var baketime=true
 #   - replaces any existing image
+#   - example: module.typeimgs["omnius"].incus_image.typeimgs["u22v_adm"]
 #
 # args:
 #   - arg1: bakehost:bakenode (incus_remote_name:bake_node_name)

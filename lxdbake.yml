@@ -31,6 +31,7 @@
           baketime: "{{false if item == 'absent' else true}}"
           bakehost: '{{lxdbake_plex}}'
           bakenode: '{{lxdbake_name}}'
+          bakebase: '{{lxdbake_base}}'
         binary_path: '{{lxdbake_tfbin}}'
         project_path: '{{playbook_dir}}/terraform'
         complex_vars: true
@@ -206,20 +207,24 @@
 
     - name: determine_terraform_target_address
       set_fact:
-        imgname: "\
-          incus_image.\
-          {{lxdbake_base}}v\
-          _{{lxdbake_type}}\
-          [\"{{lxdbake_plex}}\"]\
+        typeimgs_address: "\
+          module\
+          .typeimgs[\"{{lxdbake_plex}}\"]\
+          .incus_image\
+          .typeimgs[\"{{lxdbake_base}}_{{lxdbake_type}}\"]\
         "
+
     - name: prepare_operator_for_wait
       debug:
-        msg: "making image: {{imgname}}, eta 5m asof-20250120, please wait..."
+        msg: >-
+          upload: {{lxdbake_base}}_{{lxdbake_type}},
+          host: {{lxdbake_plex}},
+          wait several minutes...
 
     - name: create_or_replace_image_by_type
       cloud.terraform.terraform:
         state: '{{item}}'
-        targets: ['{{imgname}}']
+        targets: ['{{typeimgs_address}}']
         # TODO: try running=false in terraform imgbake resource
         # see also shutdown_bakenode
         refresh: false
@@ -227,6 +232,7 @@
           baketime: true
           bakehost: '{{lxdbake_plex}}'
           bakenode: '{{lxdbake_name}}'
+          bakebase: '{{lxdbake_base}}'
         binary_path: '{{lxdbake_tfbin}}'
         project_path: '{{playbook_dir}}/terraform'
         complex_vars: true

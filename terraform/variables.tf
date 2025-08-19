@@ -18,3 +18,16 @@ variable "bakenode" {
   type        = string
   default     = ""
 }
+
+variable "bakebase" {
+  description = "osimgs-base"
+  type        = string
+  default     = ""
+}
+
+# plexhost -> base -> type -> nodelist
+variable "plexhocs" {
+  description = "plexhoc-node-tree"
+  type        = map(map(map(list(number))))
+  default     = {}
+}
