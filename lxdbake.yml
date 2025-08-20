@@ -27,7 +27,7 @@
       cloud.terraform.terraform:
         state: '{{item}}'
         targets: ['incus_instance.imgbake["{{lxdbake_plex}}"]']
-        variables:
+        variables: &bakeparams
           baketime: "{{false if item == 'absent' else true}}"
           bakehost: '{{lxdbake_plex}}'
           bakenode: '{{lxdbake_name}}'
@@ -229,10 +229,8 @@
         # see also shutdown_bakenode
         refresh: false
         variables:
+          <<: *bakeparams
           baketime: true
-          bakehost: '{{lxdbake_plex}}'
-          bakenode: '{{lxdbake_name}}'
-          bakebase: '{{lxdbake_base}}'
         binary_path: '{{lxdbake_tfbin}}'
         project_path: '{{playbook_dir}}/terraform'
         complex_vars: true
