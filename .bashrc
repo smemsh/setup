@@ -42,6 +42,8 @@ alias j='jobs'
 alias f='fg'
 alias m='fg -'
 alias h=hostname
+
+alias tf='tofu -chdir=terraform'
 alias ansj=ANSIBLE_STDOUT_CALLBACK=json\ ansible
 alias ansdoc=ansible-doc
 
