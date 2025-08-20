@@ -29,7 +29,7 @@ module "osimgs" {
 }
 
 module "typeimgs" {
-  for_each = toset(["omnius"])
+  for_each = local.plexhosts
   source   = "./typeimgs"
   remote   = each.value
   allfimgs = local.allfimgs
