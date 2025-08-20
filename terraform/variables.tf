@@ -24,10 +24,3 @@ variable "bakebase" {
   type        = string
   default     = ""
 }
-
-# plexhost -> base -> type -> nodelist
-variable "plexhocs" {
-  description = "plexhoc-node-tree"
-  type        = map(map(map(list(number))))
-  default     = {}
-}

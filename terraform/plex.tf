@@ -1,11 +1,20 @@
 #
-# if only we could use a function in a terraform.tfvars
-# TODO maybe put this in a module and have it as an output
-#
 
 locals {
+
+  # master list of provisioned plexhocs, 3 dimensions: plexhost, base, type
+  # if only we could use expressions in terraform.tfvars, even just range()
+  #
+  plexhocs = {
+    "omnius" = {
+      "u22v" = {
+        "adm" = [1]
+      }
+    }
+  }
+
   plexhocnodes = toset(flatten([
-    for host, osimgs in var.plexhocs : [
+    for host, osimgs in local.plexhocs : [
       for base, types in osimgs : [
         for type, nodes in types : [
           for nodenum in nodes : {
