@@ -91,7 +91,7 @@
         enabled: false
         daemon_reload: true
 
-    - name: disable_ssh_socket_service_unit
+    - name: enable_ssh_service_unit
       systemd:
         name: ssh.service
         state: restarted
