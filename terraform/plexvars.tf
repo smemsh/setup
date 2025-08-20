@@ -26,7 +26,7 @@ locals {
             base = base # modules.osimgs key
             type = type
             fimg = "${base}_${type}" # modules.typeimgs key
-            virt = startswith(base, "v") ? "virtual-machine" : "container"
+            virt = endswith(base, "v") ? "virtual-machine" : "container"
             name = format("%s%d", replace(host, "/us$/", "plex"), nodenum)
           }
         ]
