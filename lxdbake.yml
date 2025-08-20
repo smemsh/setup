@@ -18,9 +18,8 @@
 ---
 
 - name: create_lxd_bakenode
-  hosts: '{{lxdbake_plex}}'
-  become_user: '{{setup_username}}'
-  become_flags: '-i'
+  hosts: localhost
+  become: false
   tasks:
 
     - name: create_or_replace_bakenode
@@ -179,9 +178,8 @@
 # this will destroy an existing image.
 #
 - name: upload_and_destroy
-  hosts: '{{lxdbake_plex}}'
-  become_user: '{{setup_username}}'
-  become_flags: '-i'
+  hosts: localhost
+  become: false
   tasks:
 
     # TODO: use running=false in the terraform imgbake resource
@@ -192,6 +190,8 @@
       register: r
       failed_when: r.rc == 1 and 'already' not in r.stderr
       changed_when: r.rc == 0
+      become: true
+      delegate_to: '{{lxdbake_plex}}'
 
     # TODO: getting weird error in incusd logs when trying this:
     #  time="2025-01-19T23:24:23-08:00" level=error msg="Failed to stop
