@@ -2,6 +2,10 @@
 
 locals {
 
+  plexhosts  = toset(["omnius", "vernius"])
+  plexgates  = [for h in local.plexhosts : replace(h, "/us$/", "plex")]
+  gatebyplex = zipmap(local.plexhosts, local.plexgates)
+
   # master list of provisioned plexhocs, 3 dimensions: plexhost, base, type
   # if only we could use expressions in terraform.tfvars, even just range()
   #
@@ -31,10 +35,6 @@ locals {
   ]))
 
   plexhocmap = tomap({for node in local.plexhocnodes : node.name => node})
-  imgtypes = toset(distinct([for node in local.plexhocnodes : node.type]))
-  allfimgs = toset(distinct([for node in local.plexhocnodes : node.fimg]))
-
-  plexhosts  = toset(["omnius", "vernius"])
-  plexgates  = [for h in local.plexhosts : replace(h, "/us$/", "plex")]
-  gatebyplex = zipmap(local.plexhosts, local.plexgates)
+  imgtypes   = toset(distinct([for node in local.plexhocnodes : node.type]))
+  allfimgs   = toset(distinct([for node in local.plexhocnodes : node.fimg]))
 }
