@@ -6,10 +6,6 @@ locals {
   domain  = "smemsh.net"
   masklen = 22
 
-  plexhosts  = toset(["omnius", "vernius"])
-  plexgates  = [for h in local.plexhosts : replace(h, "/us$/", "plex")]
-  gatebyplex = zipmap(local.plexhosts, local.plexgates)
-
   volsz_default = "10GiB"
   volsz_plex    = "32GiB"
 
