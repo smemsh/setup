@@ -22,6 +22,7 @@ this*
 
 /.bash_history
 /.python_history
+/.sqlite_history
 
 /.ansible/**
 !/.ansible/**/
