@@ -33,8 +33,5 @@ locals {
       ]
     ]
   ]))
-
   plexhocmap = tomap({for node in local.plexhocnodes : node.name => node})
-  imgtypes   = toset(distinct([for node in local.plexhocnodes : node.type]))
-  allfimgs   = toset(distinct([for node in local.plexhocnodes : node.fimg]))
 }

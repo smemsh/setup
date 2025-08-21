@@ -32,7 +32,6 @@ module "typeimgs" {
   for_each = local.plexhosts
   source   = "./typeimgs"
   remote   = each.value
-  allfimgs = local.allfimgs
 
   # only used at create-time, but we leave the image persistent, so
   # subsequent runs would depend on the bake-time instance that only
