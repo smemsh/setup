@@ -1,0 +1,56 @@
+#!/usr/bin/env bash
+#
+# tfapply
+#   terraform jpply wrapper: display concise plan, confirm, apply
+#
+# desc:
+#   - default terraform plan output is too noisy, no way to shut it off
+#   - makes plan into temporary file and uses json ui output
+#   - we display particular stuff we care about (changes, summary, starts)
+#   - ask for confirmation from user about whether they want to apply
+#   - applies from plan file if so, otherwise exits
+#
+# scott@smemsh.net
+# https://github.com/smemsh/setup/
+# https://spdx.org/licenses/GPL-2.0
+#
+
+tfbin=tofu
+tfdir=terraform
+[[ $PWD == $HOME ]] && test -d $tfdir && tfbin="$tfbin -chdir=$tfdir"
+planfile=`mktemp --suffix=.tfplan` || exit 120
+planjson=`mktemp --suffix=-tfplan.json` || exit 121
+applyjson=`mktemp --suffix=-tfapply.json` || exit 122
+
+runjq () { jq -r '
+(select(.type == "'$1'")
+ | "\(.'$2'.action): \(.'$2'.resource.addr)"),
+(select(.type == "change_summary")
+ | .changes
+ | with_entries(select(.value | type == "number" and . > 0))
+ | to_entries
+ | map("\(.key): \(.value)")
+ | if length > 0 then "'$3': " + join(", ") else empty end
+)';}
+
+echo planning...
+$tfbin plan -json -detailed-exitcode -out=$planfile \
+| tee $planjson \
+| runjq planned_change change proposed
+
+case ${PIPESTATUS[0]} in
+(0) echo unchanged; exit;;
+(1) echo error >&2; false; exit;;
+(2) ;; # apply
+(*) echo impossible >&2; false; exit;;
+esac
+
+read -n1 -p "implement? "; echo
+if [[ $REPLY != y ]]
+then echo aborted; false; exit
+else echo; echo applying...
+fi
+
+$tfbin apply -json $planfile \
+| tee $applyjson \
+| runjq apply_start hook implemented
