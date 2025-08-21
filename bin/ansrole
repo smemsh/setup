@@ -40,7 +40,7 @@
 anscfg=.ansible.cfg
 
 # pattern actually used when 'all' requested and default inventory in use
-allnodes="all:!pdsh_all_skip"
+allnodes="all:!pdsh_all_skip:!localhost"
 
 tmpdir=`mktemp -d /tmp/ansrole-XXXXXXXX` || exit 121
 #trap "rm -rf ${tmpdir:?}" EXIT
