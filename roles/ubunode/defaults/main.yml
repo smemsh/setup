@@ -142,7 +142,6 @@ pkgtool:
   #
   acl:
 
-  ack-grep:
   bc:
   bzip2:
   curl:
@@ -158,9 +157,7 @@ pkgtool:
   lynx:
   libterm-readline-gnu-perl:
   man:
-  mosh:
   patchutils:
-  pigz:
   pinfo:
   pv:
   python3:
@@ -168,7 +165,6 @@ pkgtool:
   python3-yaml:
   python3-apt:
   rsync:
-  screen:
   sysstat:
   tmux: # todo: we have our own build
   unzip:
