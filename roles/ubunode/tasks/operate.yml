@@ -101,6 +101,7 @@
 # newer kernels. the issue remains in u16 asof ~201710
 #
 - name: stop_errant_powersave_governor
+  when: not is_container
   block:
 
     - name: populate_service_facts
@@ -134,6 +135,7 @@
     name: systune
   vars:
     systune_now: true
+  when: not is_container
 
 - name: disable_ebpf_user_process
   copy:

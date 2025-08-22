@@ -92,6 +92,8 @@
       vars:         { phase: operate }
 
     - include_role: { name: boot }
+      when:         not ansible_virtualization_type == 'lxc'
+
     - include_role: { name: rootauth }
 
 

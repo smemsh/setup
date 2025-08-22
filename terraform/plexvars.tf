@@ -12,6 +12,9 @@ locals {
   plexhocs = {
     "omnius" = {
       "u22v" = {
+        "adm" = []
+      }
+      "u22c" = {
         "adm" = [1]
       }
     }

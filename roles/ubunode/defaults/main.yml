@@ -169,13 +169,19 @@ pkgtool:
   python3-apt:
   rsync:
   screen:
-  smartmontools:
   sysstat:
   tmux: # todo: we have our own build
   unzip:
   wget:
   xz-utils:
   zip:
+
+pkgphy:
+  lvm2:
+  pciutils:
+  smartmontools:
+  sysfsutils:
+  thin-provisioning-tools:
 
 pkgadmin:
   acct:
@@ -200,22 +206,17 @@ pkgadmin:
   logrotate:
   lsof:
   ltrace:
-  lvm2:
   mlocate:
   mtr-tiny:
   net-tools:
   nscd:
-  ntp:
   parted:
-  pciutils:
   pdsh:
   psmisc:
   strace:
-  sysfsutils:
   tcpdump:
   telnet:
   time:
-  thin-provisioning-tools:
   traceroute:
   uuid:
   whois:
@@ -242,7 +243,8 @@ ubunode_packages: '{{
     pkgmail,
     pkgedit,
     pkgtool,
-    pkgntp,
+    pkgphy if is_physical else {},
+    pkgntp if not is_container else {},
     pkgadmin,
     pkgdev,
     pkgarch,
