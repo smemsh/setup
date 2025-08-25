@@ -164,7 +164,7 @@
     - include_tasks: types/{{lxdbake_type}}-init.yml
       vars:
         instance_name: '{{lxdbake_name}}'
-      when: lxdbake_init | d(false)
+      when: lxdbake_init | default(false) | bool
 
 
 - name: reset_node_identity

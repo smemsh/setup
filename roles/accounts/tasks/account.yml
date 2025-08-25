@@ -3,7 +3,7 @@
 
 - name: verify_requested_users
   assert:
-    that: user | length
+    that: (user | length) > 0
     quiet: true
 
 - name: make_account
