@@ -34,7 +34,7 @@ runjq () { jq -r '
 )';}
 
 echo planning...
-$tfbin plan -json -detailed-exitcode -out=$planfile \
+$tfbin plan -json -detailed-exitcode -out=$planfile "$@" \
 | tee $planjson \
 | runjq planned_change change proposed
 
