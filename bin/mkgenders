@@ -76,6 +76,13 @@ def mkgenders():
     #
     del data['all']
 
+    # we add localhost to 'all' to give it ordinary host semantics, so
+    # it ends up being an ungrouped node that duplicates the real node
+    #
+    if data.get('ungrouped') == dict(hosts=['localhost']):
+        del data['ungrouped']
+    else: bomb("ungrouped hosts besides localhost are not handled")
+
     lines = []
     for group in data:
         hosts = gethosts(group)
