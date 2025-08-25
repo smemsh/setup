@@ -31,20 +31,19 @@
 #
 - name: create_install_list
   set_fact:
-    installs: |
-      {%- set merged = (
+    installs: |-
+      {% set merged = (
           pkginst_packages | default({}) |
           combine(pkginst_overrides | default({})))
       %}
-      {%- set installs = [] %}
-      {%- for key, val in merged.items() %}
-      {%-     if val is none %}
-      {%-         do installs.append(key) %}
-      {%-     else %}
-      {%-         do installs.append(key + '=' + val) %}
-      {%-     endif %}
-      {%- endfor %}
-      {{installs}}
+      {% set ns = namespace(installs=[]) %}
+      {% for key, val in merged.items() %}
+      {%     set ns.installs = ns.installs + [
+                  key if val is none else (key + '=' + val)
+             ]
+      %}
+      {% endfor %}
+      {{ns.installs}}
 
 - name: install_packages
   apt:

@@ -1,15 +1,6 @@
 #
 ---
 
-- name: derive_cloudinits_from_file_list
-  set_fact:
-    cloudinits: |
-      {%- set cloudinits = [] %}
-      {%- for path in query('fileglob', 'tmpl/*.j2') %}
-      {%-     do cloudinits.append(path | basename | splitext | first) %}
-      {%- endfor %}
-      {{cloudinits}}
-
 # TODO: look at "ansible-doc -t vars host_group_vars", it may be
 # possible to set "stage = all" in rcfile section [vars_host_group_vars]
 # and these will get instantiated without having to add_host? because
@@ -24,8 +15,11 @@
 
 - name: render_cloud_init_configs_to_yaml
   set_fact:
-    cloudinits_rendered: '{{lookup("template", "tmpl/" + item + ".j2")}}'
-  with_list: '{{cloudinits}}'
+    cloudinits_rendered: '{{lookup("template", item)}}'
+  loop_control:
+    # _ansible_item_label in json output for tfcloudinit
+    label: '{{item | basename | splitext | first}}'
+  with_fileglob: tmpl/*.j2
 
 #  template:
 #    src: tmpl/{{item}}.j2
