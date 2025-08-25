@@ -98,10 +98,6 @@ pkgmail: '{{
 
 #
 
-# todo: ntp role
-pkgntp:
-  ntp:
-  ntpdate:
 
 #
 
@@ -172,13 +168,6 @@ pkgtool:
   xz-utils:
   zip:
 
-pkgphy:
-  lvm2:
-  pciutils:
-  smartmontools:
-  sysfsutils:
-  thin-provisioning-tools:
-
 pkgadmin:
   acct:
   apt-file:
@@ -227,6 +216,17 @@ pkgdev:
   pkg-config:
   manpages-dev:
 
+pkgphy:
+  lvm2:
+  pciutils:
+  smartmontools:
+  thin-provisioning-tools:
+
+pkgkos:
+  ntp:
+  ntpdate:
+  sysfsutils:
+
 pkgarch: "{{
   (ansible_architecture == 'x86_64') |
   ternary({'latrace': none}, {})
@@ -240,7 +240,7 @@ ubunode_packages: '{{
     pkgedit,
     pkgtool,
     pkgphy if is_physical else {},
-    pkgntp if not is_container else {},
+    pkgkos if not is_container else {},
     pkgadmin,
     pkgdev,
     pkgarch,
