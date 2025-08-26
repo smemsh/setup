@@ -238,6 +238,11 @@ resource "incus_instance" "imgbake" {
     "cloud-init.network-config" = sensitive(local.cloudinits.network-config)
     "cloud-init.user-data"      = sensitive(local.cloudinits.user-data)
   }
+
+  # we'll only remove this manually in lxdbake.yml
+  lifecycle {
+    ignore_changes = all
+  }
 }
 
 ###
