@@ -185,7 +185,7 @@
   tasks:
 
     # TODO: use running=false in the terraform imgbake resource
-    # see also clobbered_create_image_by_type
+    # see also upload_replace_image_by_type
     #
     - name: shutdown_bakenode
       command: incus stop {{lxdbake_name}}
@@ -223,7 +223,7 @@
           host: {{lxdbake_plex}},
           wait several minutes...
 
-    - name: create_or_replace_image_by_type
+    - name: upload_replace_image_by_type
       cloud.terraform.terraform:
         state: '{{item}}'
         targets: ['{{typeimgs_address}}']
