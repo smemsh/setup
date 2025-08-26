@@ -227,15 +227,21 @@
       cloud.terraform.terraform:
         state: '{{item}}'
         targets: ['{{typeimgs_address}}']
-        # TODO: try running=false in terraform imgbake resource
-        # see also shutdown_bakenode
-        refresh: false
         variables:
           <<: *bakeparams
           baketime: true
         binary_path: '{{lxdbake_tfbin}}'
         project_path: '{{playbook_dir}}/terraform'
         complex_vars: true
+
+        # TODO: try running=false in terraform imgbake resource.  see
+        # also shutdown_bakenode.  terraform thinks it's awake but we
+        # shut it down out-of-band so it will awaken on refresh.  this
+        # uses a not yet upstreamed hack to the provider, see
+        # ansible-collections/cloud.terraform 168
+        #
+        refresh: false
+
       with_items:
         # todo: we should do something with old images rather than
         # delete, but atm this is how we refresh the type image
