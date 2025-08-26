@@ -247,3 +247,14 @@
         # delete, but atm this is how we refresh the type image
         - absent
         - present
+
+    - name: destroy_bakenode
+      cloud.terraform.terraform:
+        state: absent
+        targets: ['incus_instance.imgbake["{{lxdbake_plex}}"]']
+        variables:
+          <<: *bakeparams
+          baketime: false
+        binary_path: '{{lxdbake_tfbin}}'
+        project_path: '{{playbook_dir}}/terraform'
+        complex_vars: true
