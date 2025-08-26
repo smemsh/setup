@@ -3,7 +3,7 @@
 
 python3_major: 3
 python3_minor: 13
-python3_patch: 6
+python3_patch: 7
 python3_version: '{{python3_major}}.{{python3_minor}}.{{python3_patch}}'
 
 python3_sslver: 3.0.17
