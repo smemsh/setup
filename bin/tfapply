@@ -54,3 +54,9 @@ fi
 $tfbin apply -json $planfile \
 | tee $applyjson \
 | runjq apply_start hook implemented
+
+case ${PIPESTATUS[0]} in
+(0) echo success; exit;;
+(1) echo error >&2; false; exit;;
+(*) echo impossible >&2; false; exit;;
+esac
