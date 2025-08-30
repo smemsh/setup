@@ -195,7 +195,6 @@ pkgadmin:
   logrotate:
   lsof:
   ltrace:
-  mlocate:
   mtr-tiny:
   net-tools:
   nscd:
@@ -236,6 +235,10 @@ pkgarch: "{{
   ternary({'latrace': none}, {})
 }}"
 
+pkglocate: "{{
+  {('p' if u24plus else 'm') + 'locate': none},
+}}"
+
 #
 
 ubunode_packages: "{{
@@ -248,4 +251,5 @@ ubunode_packages: "{{
     pkgadmin,
     pkgdev,
     pkgarch,
+    pkglocate,
 )}}"
