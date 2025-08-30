@@ -71,7 +71,7 @@
     - iscsid
   when: ansible_facts.services[item] is defined
 
-- name: prefer_sshd_port_config
+- name: no_ssh_socket_activation
   block:
 
     - name: ensure_system_preset_dir
