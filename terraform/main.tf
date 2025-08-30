@@ -35,6 +35,11 @@ module "typeimgs" {
   bakename = var.bakenode
 }
 
+module "imgdata" {
+  for_each = local.plexhosts
+  source   = "./imgdata"
+  remote   = each.value
+}
 ###
 
 resource "incus_network" "br0" {
@@ -298,7 +303,7 @@ resource "incus_instance" "plexhocs" {
   description = "${each.value.plex}-plexhoc-${each.key}"
 
   type     = each.value.virt
-  image    = module.typeimgs[each.value.plex].imgs[each.value.fimg].fingerprint
+  image    = module.imgdata[each.value.plex].imgs[each.value.fimg].fingerprint
   running  = true
   profiles = ["default"]
 
