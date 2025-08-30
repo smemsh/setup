@@ -24,6 +24,14 @@ write_files:
     content: |
       port {{cloudinit_ssh_port}}
 
+  # work around socket activation race where we cannot seem to properly
+  # reconfigure for daemon-based listening if we don't at install-time
+  #
+  - path: /etc/systemd/system-preset/98-disable-ssh-socket.preset
+    content: |
+      disable ssh.socket
+      enable ssh.service
+
   # we just inject /etc/hosts and /etc/resolv.conf ourselves since we
   # have all information we need and these are very simple to make.
   # remember also, these are only for bootstrap until ansible takes over
@@ -120,6 +128,14 @@ runcmd:
   #
   - sed -r -i -e "/^[[:space:]]+-[[:space:]]+update_etc_hosts$/d"
     /etc/cloud/cloud.cfg
+
+  # we disabled socket activation in a preset, and the package install itself
+  # will not start it on u24+ because it assumes socket activation is
+  # configured, so we have to start it else cfmgmt cannot connect.  we are
+  # currently within the cloudinit systemd unit, so if we block we'll end up
+  # deadlocked, it has to start after cloudinit finishes, so we queue it
+  #
+  - systemctl --no-block start ssh.service
 
 ssh_keys:
 
