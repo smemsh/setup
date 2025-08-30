@@ -106,6 +106,9 @@
         enabled: true
         daemon_reload: true
 
+    - name: reset_ssh_connection
+      meta: reset_connection
+
 ## TODO resolvconf uninstall and /etc/resolv.conf removal seems
 ## to be duplicated in the bake play? commenting out for now
 ##
