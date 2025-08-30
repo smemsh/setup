@@ -141,6 +141,7 @@ pkgtool:
   #
   acl:
 
+  bsdextrautils:
   bc:
   bzip2:
   curl:
