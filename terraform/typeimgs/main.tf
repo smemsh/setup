@@ -3,7 +3,10 @@
 resource "incus_image" "typeimgs" {
   for_each = local.allfimgs
   remote   = var.remote
-  aliases  = [each.value]
+
+  alias {
+    name = each.value
+  }
 
   source_instance = {
     name = var.bakename
