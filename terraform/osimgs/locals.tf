@@ -1,8 +1,14 @@
 #
 
 locals {
-  osvers    = toset([["ubuntu", 22]]) # img[0]
-  virtypes  = toset(["virtual-machine", "container"]) # img[1]
+  osvers = toset([ # img[0]
+    ["ubuntu", 22],
+    ["ubuntu", 24],
+  ])
+  virtypes = toset([ # img[1]
+    "virtual-machine",
+    "container",
+  ])
   allimgs   = setproduct(local.osvers, local.virtypes)
 
   osimgstrs = {
