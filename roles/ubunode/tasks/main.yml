@@ -36,11 +36,20 @@
       ((ansible_distribution_major_version | int) >= 24)
     }}"
 
-# TODO: we should maybe be a leaf role and not call other roles?
+- name: implement_ssh_changes
+  block:
 
-- name: run_custom_ssh_role
-  include_role:
-    name: ssh
+    # TODO: we should maybe be a leaf role and not call other roles?
+    - name: write_custom_ssh_configs
+      include_role:
+        name: ssh
+
+    # have to reload ssh config prior to doing socket activation changes
+    # or we get quirks like systemd-orphaned procs on u24+ and restart
+    # fails, seems that only a reboot actually fixes it so we defer that
+    #
+    - name: perform_queued_ssh_reload
+      meta: flush_handlers
 
 - name: run_by_phase
   # todo: not sure why we need the full path, it doesn't seem to take
