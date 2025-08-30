@@ -98,12 +98,11 @@
         name: ssh.socket
         state: stopped
         enabled: false
-        daemon_reload: true
 
     - name: enable_ssh_service_unit
       systemd:
         name: ssh.service
-        state: restarted
+        state: started
         enabled: true
         daemon_reload: true
 
