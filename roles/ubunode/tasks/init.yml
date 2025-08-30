@@ -79,10 +79,19 @@
         path: /etc/systemd/system-preset
         state: directory
 
+    # systemd competes to define port.  we do this also in cloud-init
+    # because it's needed on the first provisioning boot and too late
+    # here because we needed a restart of ssh already before this point
+    #
     - name: disable_ssh_socket_service_preset
-      copy:
-        dest: /etc/systemd/system-preset/98-disable-ssh-socket.preset
-        content: disable ssh.socket # systemd competes to define port
+      lineinfile:
+        path: /etc/systemd/system-preset/98-disable-ssh-socket.preset
+        line: "{{item[1]}} {{item[0]}}"
+        regexp: "\s+{{item[0]}}$"
+        create: true
+      loop:
+        - [ssh.socket, disable]
+        - [ssh.service, enable]
 
     - name: disable_ssh_socket_service_unit
       systemd:
