@@ -86,6 +86,14 @@ resource "incus_project" "default" {
   }
 }
 
+data "incus_project" "default" {
+  for_each = local.plexhosts
+  remote   = each.value
+  name     = "default"
+}
+
+#
+
 resource "incus_project" "plex" {
   name        = "plex"
   for_each    = local.plexhosts
@@ -97,6 +105,12 @@ resource "incus_project" "plex" {
     [for ft in local.lxdfeatures : "features.${ft}"],
     [for _ in local.lxdfeatures : "false"]
   )
+}
+
+data "incus_project" "plex" {
+  for_each = local.plexhosts
+  remote   = each.value
+  name     = "plex"
 }
 
 ###
@@ -161,6 +175,14 @@ resource "incus_profile" "default" {
   }
 }
 
+data "incus_profile" "default" {
+  for_each = local.plexhosts
+  remote   = each.value
+  name     = "default"
+}
+
+#
+
 # systems that should be privileged and nest, ie k8s/podman/incus hosts
 resource "incus_profile" "nestpriv" {
   name        = "nestpriv"
@@ -184,6 +206,14 @@ resource "incus_profile" "nestpriv" {
   }
 }
 
+data "incus_profile" "nestpriv" {
+  for_each = local.plexhosts
+  remote   = each.value
+  name     = "nestpriv"
+}
+
+#
+
 resource "incus_profile" "protected" {
   name        = "protected"
   for_each    = local.plexhosts
@@ -193,6 +223,12 @@ resource "incus_profile" "protected" {
   config = {
     "security.protection.delete" = "true"
   }
+}
+
+data "incus_profile" "protected" {
+  for_each = local.plexhosts
+  remote   = each.value
+  name     = "protected"
 }
 
 ###
@@ -257,7 +293,7 @@ resource "ansible_vault" "sshprivkey" {
 resource "incus_instance" "plexhocs" {
   for_each    = local.plexhocmap
   name        = each.key
-  project     = incus_project.plex[each.value.plex].name
+  project     = data.incus_project.plex[each.value.plex].name
   remote      = each.value.plex
   description = "${each.value.plex}-plexhoc-${each.key}"
 
