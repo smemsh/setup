@@ -231,7 +231,7 @@ pkgkos:
   sysfsutils:
 
 pkgarch: "{{
-  (ansible_architecture == 'x86_64') |
+  (ansible_architecture == 'x86_64' and not u24plus) |
   ternary({'latrace': none}, {})
 }}"
 
