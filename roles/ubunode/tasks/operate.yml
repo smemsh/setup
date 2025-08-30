@@ -106,7 +106,7 @@
 
     - name: populate_service_facts
       service_facts:
-      when: (ansible_distribution | lower) == 'ubuntu'
+      when: is_ubuntu
 
     - name: disable_ondemand_service
       service:
@@ -146,9 +146,7 @@
       #
       install bpfilter /bin/true
     dest: /etc/modprobe.d/livm-blacklist-bpfilter.conf
-  when:
-    ((ansible_distribution | lower) == 'ubuntu') and
-    ((ansible_distribution_major_version | int) >= 20)
+  when: u20plus
 
 # logrotate waits until there is 1M of acct data, which takes a long time on
 # some machines, in the meantime this thing is running monthly and giving
@@ -170,9 +168,7 @@
 # useradd on u20 and below, see task 2aec2e78-bfbc-4a99-a87b-2407634cbb55
 #
 - name: disable_shadow_subuid_modification
-  when:
-    ((ansible_distribution | lower) == 'ubuntu') and
-    ((ansible_distribution_major_version | int) >= 24)
+  when: u24plus
 
   block:
     - name: shadow_subugid_remove_old
