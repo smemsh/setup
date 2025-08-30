@@ -87,7 +87,7 @@
       lineinfile:
         path: /etc/systemd/system-preset/98-disable-ssh-socket.preset
         line: "{{item[1]}} {{item[0]}}"
-        regexp: "\s+{{item[0]}}$"
+        regexp: "\\s+{{item[0]}}$"
         create: true
       loop:
         - [ssh.socket, disable]
