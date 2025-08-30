@@ -87,6 +87,7 @@ pkgmailx:
   focal:    { bsd-mailx: ~      }
   stretch:  { bsd-mailx: ~      }
   jammy:    { bsd-mailx: ~      }
+  noble:    { bsd-mailx: ~      }
 
 pkgpostfix:
   postfix:
@@ -110,6 +111,7 @@ pkgvim: # todo: we have our own build
   focal:    { vim-tiny: ~     } # ubuntu bug 1884583, -nox installs sound libraries!!
   stretch:  { vim-nox: ~      }
   jammy:    { vim-nox: ~      }
+  noble:    { vim-nox: ~      }
 
 pkgemacs:
   trusty:   { emacs24-nox: ~  }
@@ -118,6 +120,7 @@ pkgemacs:
   focal:    { emacs-nox: ~    }
   stretch:  { emacs-nox: ~    }
   jammy:    { emacs-nox: ~    }
+  noble:    { emacs-nox: ~    }
 
 pkgedit: '{{
   pkgvim[ansible_distribution_release] | combine(
