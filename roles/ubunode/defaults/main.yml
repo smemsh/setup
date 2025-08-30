@@ -92,10 +92,10 @@ pkgmailx:
 pkgpostfix:
   postfix:
 
-pkgmail: '{{
+pkgmail: "{{
   pkgpostfix | combine(
   pkgmailx[ansible_distribution_release]
-)}}'
+)}}"
 
 #
 
@@ -238,7 +238,7 @@ pkgarch: "{{
 
 #
 
-ubunode_packages: '{{
+ubunode_packages: "{{
   {} | combine(
     pkgmail,
     pkgedit,
@@ -248,4 +248,4 @@ ubunode_packages: '{{
     pkgadmin,
     pkgdev,
     pkgarch,
-)}}'
+)}}"
