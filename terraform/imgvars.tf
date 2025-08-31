@@ -1,20 +1,13 @@
 #
 
 locals {
-  osvers = toset([ # img[0]
-    ["ubuntu", 22],
-    ["ubuntu", 24],
-  ])
-  virtypes = toset([ # img[1]
-    "virtual-machine",
-    "container",
-  ])
-  allimgs   = setproduct(local.osvers, local.virtypes)
+
+  virtypes = ["virtual-machine", "container"]
+  allimgs  = setproduct(var.osvers, local.virtypes)
 
   osimgstrs = {
     ubuntu = { prefix = "ubuntu/", suffix = ".04/cloud" }
   }
-
   osimgs = {
     for img in local.allimgs : format("%s%d%s",
       substr(img[0][0], 0, 1),
@@ -29,4 +22,12 @@ locals {
       )
     }
   }
+
+  allfimgs = toset(flatten([
+    for base in keys(local.osimgs) : [
+      for type in var.imgtypes : [
+        format("%s_%s", base, type)
+      ]
+    ]
+  ]))
 }

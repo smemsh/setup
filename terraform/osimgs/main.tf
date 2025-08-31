@@ -1,7 +1,7 @@
 #
 
 resource "incus_image" "osimgs" {
-  for_each = local.osimgs
+  for_each = var.osimgs
   remote   = var.remote
 
   alias {

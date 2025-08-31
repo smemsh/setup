@@ -1,7 +1,7 @@
 #
 
 data "incus_image" "imgdata" {
-  for_each = local.allfimgs
+  for_each = var.allfimgs
   remote   = var.remote
   name     = each.value
 }

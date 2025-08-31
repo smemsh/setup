@@ -27,6 +27,7 @@ module "osimgs" {
   for_each = local.plexhosts
 
   remote = each.value
+  osimgs = local.osimgs
 }
 
 module "typeimgs" {
@@ -35,6 +36,7 @@ module "typeimgs" {
 
   remote   = each.value
   bakename = var.bakenode
+  allfimgs = local.allfimgs
 }
 
 module "imgdata" {
@@ -42,6 +44,7 @@ module "imgdata" {
   for_each = local.plexhosts
 
   remote   = each.value
+  allfimgs = local.allfimgs
 }
 
 ###

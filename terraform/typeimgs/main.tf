@@ -1,7 +1,7 @@
 #
 
 resource "incus_image" "typeimgs" {
-  for_each = local.allfimgs
+  for_each = var.allfimgs
   remote   = var.remote
 
   alias {

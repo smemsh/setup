@@ -24,3 +24,13 @@ variable "bakebase" {
   type        = string
   default     = ""
 }
+
+variable "imgtypes" {
+  type        = list(string)
+  description = "host-type-variants"
+}
+
+variable "osvers" {
+  type        = list(tuple([string, number]))
+  description = "os-base-versions"
+}
