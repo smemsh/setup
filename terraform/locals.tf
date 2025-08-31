@@ -2,6 +2,7 @@
 
 locals {
   home   = data.external.env.result.HOME
+  hostdb = data.external.hosts.result
 
   volsz_default = "10GiB"
   volsz_plex    = "32GiB"
@@ -20,8 +21,6 @@ locals {
       for ft in local.lxdfeatures: "features.${ft}" => boolval
     }
   }
-
-  hostdb = data.external.hosts.result
 
   cloudinits   = var.baketime ? data.external.cloudinits[0].result : null
   cloudinit_id = var.bakenode
