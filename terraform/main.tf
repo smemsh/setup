@@ -60,7 +60,7 @@ resource "incus_network" "br0" {
     "dns.mode"     = "none" # dnsmasq still starts, see upstream bug 1537
     "ipv6.address" = "none"
     "ipv4.address" = format(
-      "%s/${local.masklen}", local.hostdb[local.gatebyplex[each.value]]
+      "%s/%d", local.hostdb[local.gatebyplex[each.value]], var.masklen
     )
     "ipv6.nat"      = "false"
     "ipv4.nat"      = "false"
@@ -258,7 +258,7 @@ resource "incus_instance" "imgbake" {
 
 resource "ansible_vault" "sshprivkey" {
   for_each   = toset(keys(local.plexhocmap))
-  vault_file = "${local.home}/keys/host/${each.value}.${local.domain}-id_rsa"
+  vault_file = "${local.home}/keys/host/${each.value}.${var.domain}-id_rsa"
 
   vault_password_file = "${local.home}/bin/ansvault"
 }
@@ -266,7 +266,7 @@ resource "ansible_vault" "sshprivkey" {
 resource "incus_instance" "plexhocs" {
   for_each    = local.plexhocmap
   name        = each.key
-  project     = local.project
+  project     = var.project
   remote      = each.value.plex
   description = "${each.value.plex}-plexhoc-${each.key}"
 
@@ -291,7 +291,7 @@ resource "incus_instance" "plexhocs" {
       ethernets:
         eth0:
           addresses:
-            - ${format("%s/%s", local.hostdb[each.key], local.masklen)}
+            - ${local.hostdb[each.key]}/${var.masklen}
           routes:
             - to: 0.0.0.0/0
               via: ${local.hostdb[local.gatebyplex[each.value.plex]]}
@@ -307,7 +307,7 @@ resource "incus_instance" "plexhocs" {
     "cloud-init.user-data" = <<-HERE
       #cloud-config
       ---
-      fqdn: ${each.key}.${local.domain}
+      fqdn: ${each.key}.${var.domain}
       hostname: ${each.key}
       manage_etc_hosts: false
       manage_resolv_conf: false
@@ -318,7 +318,7 @@ resource "incus_instance" "plexhocs" {
         rsa_private: ${jsonencode(ansible_vault.sshprivkey[each.key].yaml)}
         rsa_public: ${jsonencode(file(format(
           "%s/keys/host/%s.%s-id_rsa.pub",
-          local.home, each.key, local.domain)))}
+          local.home, each.key, var.domain)))}
       write_files:
         - path: /etc/hosts
           owner: root:root

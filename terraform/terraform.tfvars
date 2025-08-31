@@ -2,6 +2,9 @@
 
 # main
 plexhosts = ["omnius", "vernius"]
+domain    = "smemsh.net"
+project   = "plex"
+masklen   = 22
 
 # module.osimgs
 osvers = [

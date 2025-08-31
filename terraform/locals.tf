@@ -1,11 +1,7 @@
 #
 
 locals {
-  home = data.external.env.result.HOME
-
-  domain  = "smemsh.net"
-  project = "plex"
-  masklen = 22
+  home   = data.external.env.result.HOME
 
   volsz_default = "10GiB"
   volsz_plex    = "32GiB"

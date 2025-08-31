@@ -39,3 +39,18 @@ variable "plexhosts" {
   description = "incus-plex-host-systems"
   type        = set(string)
 }
+
+variable "project" {
+  description = "plex-base-project"
+  type        = string
+}
+
+variable "domain" {
+  description = "plex-base-internet-domain"
+  type        = string
+}
+
+variable "masklen" {
+  description = "plex-subnet-masklen"
+  type        = number
+}
