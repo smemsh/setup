@@ -26,11 +26,11 @@ variable "bakebase" {
 }
 
 variable "imgtypes" {
-  type        = list(string)
   description = "host-type-variants"
+  type        = list(string)
 }
 
 variable "osvers" {
-  type        = list(tuple([string, number]))
   description = "os-base-versions"
+  type        = list(tuple([string, number]))
 }

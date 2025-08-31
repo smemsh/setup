@@ -1,14 +1,14 @@
 #
 
 variable "remote" {
-  type        = string
   description = "os-image-host-plex-name"
+  type        = string
 }
 
 variable "osimgs" {
+  description = "os-image-type-name-objects"
   type = map(object({
     virtype = string
     imgname = string
   }))
-  description = "os-image-type-name-objects"
 }
