@@ -24,7 +24,7 @@ data "external" "cloudinits" {
 
 module "osimgs" {
   source   = "./osimgs"
-  for_each = local.plexhosts
+  for_each = var.plexhosts
 
   remote = each.value
   osimgs = local.osimgs
@@ -32,7 +32,7 @@ module "osimgs" {
 
 module "typeimgs" {
   source   = "./typeimgs"
-  for_each = local.plexhosts
+  for_each = var.plexhosts
 
   remote   = each.value
   bakename = var.bakenode
@@ -41,7 +41,7 @@ module "typeimgs" {
 
 module "imgdata" {
   source   = "./imgdata"
-  for_each = local.plexhosts
+  for_each = var.plexhosts
 
   remote   = each.value
   allfimgs = local.allfimgs
@@ -51,7 +51,7 @@ module "imgdata" {
 
 resource "incus_network" "br0" {
   name        = "br0"
-  for_each    = local.plexhosts
+  for_each    = var.plexhosts
   remote      = each.value
   type        = "bridge"
   description = "host-bridged-br0"
@@ -74,7 +74,7 @@ resource "incus_network" "br0" {
 ###
 
 import {
-  for_each = local.plexhosts
+  for_each = var.plexhosts
 
   to = incus_project.default[each.value]
   id = "${each.value}:default"
@@ -83,7 +83,7 @@ import {
 # featured resources are shared by any projects that disable feature
 resource "incus_project" "default" {
   name        = "default"
-  for_each    = local.plexhosts
+  for_each    = var.plexhosts
   remote      = each.value
   config      = local.lxdfeatures_preset["true"]
   description = "root-project"
@@ -98,7 +98,7 @@ resource "incus_project" "default" {
 
 resource "incus_project" "plex" {
   name        = "plex"
-  for_each    = local.plexhosts
+  for_each    = var.plexhosts
   remote      = each.value
   config      = local.lxdfeatures_preset["false"]  # share with default
   description = "plex-project"
@@ -107,7 +107,7 @@ resource "incus_project" "plex" {
 ###
 
 resource "incus_storage_pool" "vpool" {
-  for_each = local.plexhosts
+  for_each = var.plexhosts
   remote   = each.value
 
   name   = "vpool"
@@ -125,7 +125,7 @@ resource "incus_storage_pool" "vpool" {
 ###
 
 import {
-  for_each = local.plexhosts
+  for_each = var.plexhosts
 
   id = "${each.value}:default"
   to = incus_profile.default[each.value]
@@ -133,7 +133,7 @@ import {
 
 resource "incus_profile" "default" {
   name        = "default"
-  for_each    = local.plexhosts
+  for_each    = var.plexhosts
   remote      = each.value
   description = "host-bridged-br0"
 
@@ -171,7 +171,7 @@ resource "incus_profile" "default" {
 # systems that should be privileged and nest, ie k8s/podman/incus hosts
 resource "incus_profile" "nestpriv" {
   name        = "nestpriv"
-  for_each    = local.plexhosts
+  for_each    = var.plexhosts
   remote      = each.value
   description = "privileged-nested"
 
@@ -195,7 +195,7 @@ resource "incus_profile" "nestpriv" {
 
 resource "incus_profile" "protected" {
   name        = "protected"
-  for_each    = local.plexhosts
+  for_each    = var.plexhosts
   remote      = each.value
   description = "deletion-blocked"
 

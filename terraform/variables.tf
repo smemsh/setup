@@ -34,3 +34,8 @@ variable "osvers" {
   description = "os-base-versions"
   type        = list(tuple([string, number]))
 }
+
+variable "plexhosts" {
+  description = "incus-plex-host-systems"
+  type        = set(string)
+}

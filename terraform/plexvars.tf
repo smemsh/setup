@@ -2,9 +2,8 @@
 
 locals {
 
-  plexhosts  = toset(["omnius", "vernius"])
-  plexgates  = [for h in local.plexhosts : replace(h, "/us$/", "plex")]
-  gatebyplex = zipmap(local.plexhosts, local.plexgates)
+  plexgates  = [for h in var.plexhosts : replace(h, "/us$/", "plex")]
+  gatebyplex = zipmap(var.plexhosts, local.plexgates)
 
   # master list of provisioned plexhocs, 3 dimensions: plexhost, base, type
   # if only we could use expressions in terraform.tfvars, even just range()

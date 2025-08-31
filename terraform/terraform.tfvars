@@ -1,5 +1,8 @@
 #
 
+# main
+plexhosts = ["omnius", "vernius"]
+
 # module.osimgs
 osvers = [
   ["ubuntu", 22],
