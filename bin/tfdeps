@@ -1,0 +1,28 @@
+#!/bin/sh
+
+cat terraform/terraform.tfstate \
+| jq -r '
+.resources[] |
+select(.mode == "managed") |
+select(.instances | any((.dependencies | length) > 0)) |
+(
+	"\(.type)" as $type |
+	.instances[] |
+	(
+		"\($type)/\(.index_key):",
+		(
+			.dependencies[] as $dep |
+			"\("\u0020" * 4)-\u0020\($dep)"
+		)
+	)
+)
+' \
+| awk '
+/^[[:alnum:]]/ {
+	if (in_instance) printf("\n")
+	print
+}
+/^[[:space:]]/ {
+	in_instance = 1
+	print
+}'
