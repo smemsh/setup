@@ -17,8 +17,8 @@ locals {
     "storage.volumes", "storage.buckets"
   ]
   lxdfeatures_preset = {
-    for boolval in ["true", "false"] : boolval => {
-      for ft in local.lxdfeatures: "features.${ft}" => boolval
+    for boolstr in ["true", "false"] : boolstr => {
+      for ft in local.lxdfeatures: "features.${ft}" => boolstr
     }
   }
 
