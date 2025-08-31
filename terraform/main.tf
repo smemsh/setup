@@ -23,23 +23,27 @@ data "external" "cloudinits" {
 ###
 
 module "osimgs" {
-  for_each = local.plexhosts
   source   = "./osimgs"
-  remote   = each.value
+  for_each = local.plexhosts
+
+  remote = each.value
 }
 
 module "typeimgs" {
-  for_each = local.plexhosts
   source   = "./typeimgs"
+  for_each = local.plexhosts
+
   remote   = each.value
   bakename = var.bakenode
 }
 
 module "imgdata" {
-  for_each = local.plexhosts
   source   = "./imgdata"
+  for_each = local.plexhosts
+
   remote   = each.value
 }
+
 ###
 
 resource "incus_network" "br0" {
