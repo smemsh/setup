@@ -15,8 +15,8 @@ locals {
   uidspace_nestpriv = local.uidspace_unpriv * 1024
 
   lxdfeatures = [
-    "networks", "networks.zones",
     "images", "profiles",
+    "networks", "networks.zones",
     "storage.volumes", "storage.buckets"
   ]
 
