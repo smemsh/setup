@@ -19,6 +19,11 @@ locals {
     "networks", "networks.zones",
     "storage.volumes", "storage.buckets"
   ]
+  lxdfeatures_preset = {
+    for boolval in ["true", "false"] : boolval => {
+      for ft in local.lxdfeatures: "features.${ft}" => boolval
+    }
+  }
 
   hostdb = data.external.hosts.result
 

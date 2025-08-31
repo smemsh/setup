@@ -85,12 +85,8 @@ resource "incus_project" "default" {
   name        = "default"
   for_each    = local.plexhosts
   remote      = each.value
+  config      = local.lxdfeatures_preset["true"]
   description = "root-project"
-
-  config = zipmap(
-    [for ft in local.lxdfeatures : "features.${ft}"],
-    [for _ in local.lxdfeatures : "true"]
-  )
 
   lifecycle {
     # default project always exists, but terraform tries to replace
@@ -104,13 +100,8 @@ resource "incus_project" "plex" {
   name        = "plex"
   for_each    = local.plexhosts
   remote      = each.value
+  config      = local.lxdfeatures_preset["false"]  # share with default
   description = "plex-project"
-
-  config = zipmap(
-    # share everything with the default project
-    [for ft in local.lxdfeatures : "features.${ft}"],
-    [for _ in local.lxdfeatures : "false"]
-  )
 }
 
 ###
