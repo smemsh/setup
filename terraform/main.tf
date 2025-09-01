@@ -69,6 +69,10 @@ resource "incus_network" "br0" {
     "ipv6.firewall" = "false"
     "ipv4.firewall" = "false"
   }
+
+  lifecycle {
+    prevent_destroy = true
+  }
 }
 
 ###
@@ -116,6 +120,10 @@ resource "incus_storage_pool" "vpool" {
     "lvm.thinpool_name" = "vthin"
     "lvm.vg_name"       = "vpool"
     "volume.size"       = local.volsz
+  }
+
+  lifecycle {
+    prevent_destroy = true
   }
 }
 
@@ -208,6 +216,10 @@ resource "incus_instance" "scytus" {
   remote      = "vernius"
   profiles    = ["default", "protected"]
   description = "pki-host"
+
+  lifecycle {
+    prevent_destroy = true
+  }
 }
 
 resource "incus_instance" "tekius" {
@@ -224,6 +236,10 @@ resource "incus_instance" "tekius" {
       "shift"  = "true"
       "source" = "/var/lib/incus/fs/tekius"
     }
+  }
+
+  lifecycle {
+    prevent_destroy = true
   }
 }
 
