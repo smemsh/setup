@@ -59,3 +59,18 @@ variable "volsz" {
   description = "instance-disk-size-gigabytes"
   type        = number
 }
+
+# <plexhost> = {<base> = {<type> = ["rangelist" | num | [num, ...], ...}}
+# note: all leaves must be same type to pass validation, have to choose.
+#
+#"vernius" = {
+#  "u24c" = { "adm" = 9 }
+#  "u24v" = { "adm" = [10, 12, 19] }
+#  "u22c" = { "adm" = "21" }
+#  "u22v" = { "adm" = "31-34, 37" }
+#}
+#
+variable "plexhocs" {
+  description = "plexhocs-definition-plexhost-osimg-type-rangeexpr"
+  type = map(map(map(any)))
+}
