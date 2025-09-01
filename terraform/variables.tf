@@ -54,3 +54,8 @@ variable "masklen" {
   description = "plex-subnet-masklen"
   type        = number
 }
+
+variable "volsz" {
+  description = "instance-disk-size-gigabytes"
+  type        = number
+}

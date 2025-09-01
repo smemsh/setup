@@ -4,8 +4,11 @@ locals {
   home   = data.external.env.result.HOME
   hostdb = data.external.hosts.result
 
-  volsz_default = "10GiB"
-  volsz_plex    = "32GiB"
+  # incus lvm uses image staging phase, configured by pool volume.size
+  # while profile device size is for deployed volume.  we match for now.
+  # https://discuss.linuxcontainers.org/t/15911
+  #
+  volsz = "${var.volsz}GiB"
 
   # posix systems need 64k uids, and let container hosts nest 1k such systems
   uidspace_unpriv   = 64 * 1024

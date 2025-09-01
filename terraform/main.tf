@@ -115,10 +115,7 @@ resource "incus_storage_pool" "vpool" {
   config = {
     "lvm.thinpool_name" = "vthin"
     "lvm.vg_name"       = "vpool"
-    # not sure why, but profile config on root device size= does not
-    # seem to override this, so we we have them match for now
-    "volume.size"       = local.volsz_plex
-    #"volume.size"       = local.volsz_default
+    "volume.size"       = local.volsz
   }
 }
 
@@ -161,7 +158,7 @@ resource "incus_profile" "default" {
     properties = {
       path = "/"
       pool = "vpool"
-      size = local.volsz_plex
+      size = local.volsz
     }
   }
 }
