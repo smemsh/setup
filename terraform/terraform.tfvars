@@ -4,8 +4,8 @@
 plexhosts = ["omnius", "vernius"]
 domain    = "smemsh.net"
 project   = "plex"
-masklen   = 22
-volsz     = 32
+masklen   = 22 # 2^(32-n) hosts
+volsz     = 32 # n * 2^30 bytes
 
 # module.osimgs
 osvers = [
