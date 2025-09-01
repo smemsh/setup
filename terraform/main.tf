@@ -181,7 +181,7 @@ resource "incus_profile" "nestpriv" {
     # won't ever be on a system with shadow-utils), incus defaults to
     # 1M:1B, but since outermost incus will have this same 1B, it should
     # be more restricted for inner container hosts (their total subuid
-    # range should correspond to idmap size). some applies to k8s/docker
+    # range should correspond to idmap size). same applies to k8s/docker
     # also.  note, changing /etc/sub[ug]id requires incus restart
     #
     "security.idmap.size" = local.uidspace_nestpriv
