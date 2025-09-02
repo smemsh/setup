@@ -30,7 +30,6 @@
   when: is_debian
   systemd:
     name: '{{item}}'
-    state: stopped
     masked: true
     enabled: false
   with_items:
