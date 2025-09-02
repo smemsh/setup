@@ -46,6 +46,7 @@ for ((i = 0; i < ${#varfiles[@]}; i++)); do
 # yaml dict merge+override
 export ANSIBLE_DUPLICATE_YAML_DICT_KEY=ignore
 
+set -x
 ansible-playbook "${cliopts[@]}" ${0##*/}.yml \
 	--become \
 	${varfiles[@]} \
