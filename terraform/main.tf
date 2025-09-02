@@ -326,6 +326,8 @@ resource "incus_instance" "plexhocs" {
       manage_resolv_conf: false
       create_hostname_file: true
       prefer_fqdn_over_hostname: true
+      package_update: false
+      package_upgrade: false
       apt: {preserve_sources_list: true}
       ssh_keys:
         rsa_private: ${jsonencode(ansible_vault.sshprivkey[each.key].yaml)}
