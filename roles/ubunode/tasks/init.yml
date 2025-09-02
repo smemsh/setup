@@ -180,7 +180,11 @@
 # can significantly speed up initial installs... by a lot
 - name: ubuntu_apt_mirror_localize
   replace:
-    path: /etc/apt/sources.list
+    path: "{{
+      '/etc/apt/sources.list' + (
+        '.d/ubuntu.sources' if u24plus else ''
+      )
+    }}"
     regexp: http://.*\.ubuntu\.com/
     replace: http://{{aptmirror}}/
   when: aptmirror is defined and is_debian
