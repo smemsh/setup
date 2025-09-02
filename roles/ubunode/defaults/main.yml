@@ -38,7 +38,7 @@ ubunode_comment_substrs:
 
 # note: these will be removed with --purge
 #
-ubunode_remove_packages:
+ubunode_remove_packages_pre24:
   - policykit-1 # causes ssh timeouts
   - accountsservice
   - landscape-client
@@ -61,6 +61,19 @@ ubunode_remove_packages:
 
   # incus server hard-requires installed, even if disabled on kcli
   #- apparmor
+
+ubunode_remove_packages_24plus:
+  - pcp
+  - pcp-conf
+  - packagekit
+  - polkitd
+
+ubunode_remove_packages: "{{
+  {} | combine(
+    ubunode_remove_packages_pre24,
+    u24plus | ternary(ubunode_remove_packages_24plus, {}),
+  )
+}}"
 
 ubunode_erase_paths:
   - /etc/update-notifier
