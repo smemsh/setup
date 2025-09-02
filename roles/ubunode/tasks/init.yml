@@ -34,7 +34,7 @@
     masked: true
     enabled: false
   with_items:
-    - systemd-timesyncd.service # note: this means we need to setup ntpd
+    - systemd-timesyncd.service  # note: this means we need to setup ntpd
 
 # irritating that so many services ship enabled to start, but maybe it
 # has to be that way for some considerations, better to get it
