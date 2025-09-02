@@ -69,9 +69,8 @@ ubunode_remove_packages_24plus:
   - polkitd
 
 ubunode_remove_packages: "{{
-  {} | combine(
-    ubunode_remove_packages_pre24,
-    u24plus | ternary(ubunode_remove_packages_24plus, {}),
+  ubunode_remove_packages_pre24 + (
+    u24plus | ternary(ubunode_remove_packages_24plus, [])
   )
 }}"
 
