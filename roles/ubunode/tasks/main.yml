@@ -20,7 +20,7 @@
 
 - name: set_node_facts
   set_fact:
-    is_debian: "{{(ansible_os_family | lower) == 'debian'}}"
+    is_debdist: "{{(ansible_os_family | lower) == 'debian'}}"
     is_ubuntu: "{{(ansible_distribution | lower) == 'ubuntu'}}"
     is_physical: "{{ansible_virtualization_role == 'host'}}"
     is_container: "{{

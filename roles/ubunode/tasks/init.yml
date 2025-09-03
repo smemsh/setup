@@ -15,7 +15,7 @@
 #
 - name: set_default_runlevel
   shell: systemctl set-default multi-user
-  when: is_debian
+  when: is_debdist
 
 # ubuntu systems do not even come with ifupdown on the standard cloud
 # image -- they use netplan to generate systemd-network configuration
@@ -27,7 +27,7 @@
 # ifupdown /etc/network/interface and hosts files
 #
 - name: quell_systemd_invasion_post14
-  when: is_debian
+  when: is_debdist
   systemd:
     name: '{{item}}'
     masked: true
@@ -52,7 +52,7 @@
     - apt-daily-upgrade.timer
     - apt-daily.timer
     - motd-news.timer
-  when: is_debian
+  when: is_debdist
 
 - name: determine_service_facts
   service_facts:
@@ -122,7 +122,7 @@
 #      state: absent
 #      purge: true
 #      update_cache: false   # dns may not work at this time
-#    when: is_debian
+#    when: is_debdist
 #
 #  # both systemd-networkd and resolvconf hijack this file, and we have now
 #  # removed them. remove the stale configs / symlinks
@@ -148,7 +148,7 @@
   apt:
     name: ifupdown
     state: present
-  when: is_debian
+  when: is_debdist
 
 ## TODO taking a different approach, we will rely on cloud-init for the
 ## deploy phase, it will get a different network-config and user-data.
@@ -165,7 +165,7 @@
 #    name: cloud-init
 #    state: absent
 #    purge: true
-#  when: is_debian
+#  when: is_debdist
 
 # TODO: we should maybe have a pattern here that's more specific than
 # the whole directory, although can't really think how it might be
@@ -187,7 +187,7 @@
     }}"
     regexp: http://.*\.ubuntu\.com/
     replace: http://{{aptmirror}}/
-  when: aptmirror is defined and is_debian
+  when: aptmirror is defined and is_debdist
 
 # if we don't do this step, it only works if the image is recent,
 # because we haven't done an apt update yet so the package won't be
@@ -199,7 +199,7 @@
 - name: update_apt_cache
   apt:
     update_cache: true
-  when: is_debian
+  when: is_debdist
 
 # stop the endless stream of errors when doing any manual package
 # installs.  never found an instance where we didn't want the defaults
@@ -213,4 +213,4 @@
     question: debconf/frontend
     value: Noninteractive
     vtype: string
-  when: is_debian
+  when: is_debdist
