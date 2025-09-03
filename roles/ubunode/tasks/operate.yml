@@ -179,5 +179,5 @@
     - name: shadow_subugid_disable
       lineinfile:
         line: SUB_{{item}}ID_COUNT 0
-        dest: '{{shadow_rcfile}}'
+        path: '{{shadow_rcfile}}'
       with_items: ['U', 'G']
