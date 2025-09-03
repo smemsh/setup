@@ -180,4 +180,4 @@
       lineinfile:
         line: SUB_{{item}}ID_COUNT 0
         path: '{{shadow_rcfile}}'
-      with_items: ['U', 'G']
+      loop: ['U', 'G']
