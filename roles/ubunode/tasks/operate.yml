@@ -164,20 +164,28 @@
   changed_when: r.rc == 1
   failed_when: r.rc == 2
 
-# make sure useradd does not alter /etc/sub[ug]id, but workaround breaks
-# useradd on u22 and below, see task 2aec2e78-bfbc-4a99-a87b-2407634cbb55
-#
-- name: disable_shadow_subuid_modification
-  when: u24plus
-
+- name: modify_shadow_defaults
   block:
     - name: shadow_subugid_remove_old
       replace:
         regexp: '^\s*SUB_.ID_COUNT\s+[^0]+.*$'
         dest: '{{shadow_rcfile}}'
+      when: u24plus
 
-    - name: shadow_subugid_disable
+    # this helps useradd -r not to complain that there's no mail spool
+    - name: enable_useradd_create_mail_spool
+      lineinfile:
+        regexp: "^\\s*CREATE_MAIL_SPOOL=.*$"
+        line: CREATE_MAIL_SPOOL=yes
+        path: '{{useradd_defaults_file}}'
+      when: u22plus
+
+    # make sure useradd does not alter /etc/sub[ug]id, but workaround
+    # breaks useradd on u22 and below, see task 2aec2e78
+    #
+    - name: disable_shadow_subuid_modification
       lineinfile:
         line: SUB_{{item}}ID_COUNT 0
         path: '{{shadow_rcfile}}'
       loop: ['U', 'G']
+      when: u24plus

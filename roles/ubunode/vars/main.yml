@@ -2,3 +2,4 @@
 ---
 
 shadow_rcfile: /etc/login.defs
+useradd_defaults_file: /etc/default/useradd
