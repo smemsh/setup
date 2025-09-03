@@ -18,15 +18,18 @@
   debug:
     var: phase
 
-- name: set_node_facts
+- name: set_facts_morphology
   set_fact:
-    is_debdist: "{{(ansible_os_family | lower) == 'debian'}}"
-    is_ubuntu: "{{(ansible_distribution | lower) == 'ubuntu'}}"
     is_physical: "{{ansible_virtualization_role == 'host'}}"
     is_container: "{{
       ansible_virtualization_role == 'guest' and
       ansible_virtualization_type == 'lxc'
     }}"
+
+- name: set_facts_distro
+  set_fact:
+    is_debdist: "{{(ansible_os_family | lower) == 'debian'}}"
+    is_ubuntu: "{{(ansible_distribution | lower) == 'ubuntu'}}"
     u20plus: "{{
       ((ansible_distribution | lower) == 'ubuntu') and
       ((ansible_distribution_major_version | int) >= 20)
