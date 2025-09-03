@@ -166,11 +166,6 @@
 
 - name: modify_shadow_defaults
   block:
-    - name: shadow_subugid_remove_old
-      replace:
-        regexp: '^\s*SUB_.ID_COUNT\s+[^0]+.*$'
-        dest: '{{shadow_rcfile}}'
-      when: u24plus
 
     # this helps useradd -r not to complain that there's no mail spool
     - name: enable_useradd_create_mail_spool
@@ -185,6 +180,7 @@
     #
     - name: disable_shadow_subuid_modification
       lineinfile:
+        regexp: "^\\s*SUB_{{item}}ID_COUNT\\s+.*$"
         line: SUB_{{item}}ID_COUNT 0
         path: '{{shadow_rcfile}}'
       loop: ['U', 'G']
