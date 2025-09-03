@@ -165,7 +165,7 @@
   failed_when: r.rc == 2
 
 # make sure useradd does not alter /etc/sub[ug]id, but workaround breaks
-# useradd on u20 and below, see task 2aec2e78-bfbc-4a99-a87b-2407634cbb55
+# useradd on u22 and below, see task 2aec2e78-bfbc-4a99-a87b-2407634cbb55
 #
 - name: disable_shadow_subuid_modification
   when: u24plus
