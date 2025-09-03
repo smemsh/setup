@@ -180,11 +180,20 @@
 # can significantly speed up initial installs... by a lot
 - name: ubuntu_apt_mirror_localize
   replace:
-    path: "{{
-      '/etc/apt/sources.list' + (
-        '.d/ubuntu.sources' if u24plus else ''
-      )
-    }}"
+    # we may need to support this new location at some point but the
+    # distrobuilder images from incus do still use the old format and
+    # apt on u24 does still support it.  if we do not set
+    # "apt: {preserve_sources_list: true}" in user-data, cloud-init
+    # writes the new format (to the new location) on u24, but we do set
+    # that right now, so the files from distrobuilder are preserved.  so
+    # we'll save this bit of code for later when apt and/or incus images
+    # no longer support the old format.
+    #path: "{{
+    #  '/etc/apt/sources.list' + (
+    #    '.d/ubuntu.sources' if u24plus else ''
+    #  )
+    #}}"
+    path: /etc/apt/sources.list
     regexp: http://.*\.ubuntu\.com/
     replace: http://{{aptmirror}}/
   when: aptmirror is defined and is_debdist
