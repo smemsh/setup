@@ -264,4 +264,5 @@ ubunode_packages: "{{
     pkgdev,
     pkgarch,
     pkglocate,
+    {'tzdata-legacy': none} if u24plus else {},
 )}}"
