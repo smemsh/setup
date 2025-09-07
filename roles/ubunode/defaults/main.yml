@@ -120,7 +120,7 @@ pkgvim: # todo: we have our own build
   trusty:   { vim-nox: ~      }
   xenial:   { vim-nox: ~      }
   bionic:   { vim-nox: ~      }
-  focal:    { vim-tiny: ~     } # ubuntu bug 1884583, -nox installs sound libraries!!
+  focal:    { vim-tiny: ~     }  # ubuntu bug 1884583, -nox installs sound libs
   stretch:  { vim-nox: ~      }
   jammy:    { vim-nox: ~      }
   noble:    { vim-nox: ~      }
