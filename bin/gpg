@@ -21,12 +21,19 @@ import os, pty, sys, tty
 from os.path import basename
 
 stdinfd = sys.stdin.fileno()
-if not os.isatty(stdinfd):
-    exit("this gpg wrapper does not support stdin") # todo: make it work
-
-spawnv = ['/usr/bin/gpg']
+exepath = '/usr/bin/gpg'
+spawnv  = [basename(exepath)]
 spawnv += ['--no-permission-warning'] # support setgid homedirs
 spawnv += sys.argv[1:]
+
+# at the moment we just pass through the stdin case without a pty.
+# we have to support it because gpg -v uses it and that means
+# git-reltag requires it.  this works for our use case because gpg
+# verify does not require passphrases to be entered, it uses public
+# key only.  eventually we'll fix our wrapper to handle stdin TODO
+#
+if not os.isatty(stdinfd):
+    os.execv(exepath, spawnv)
 
 # we could just use pty.spawn() but then we have no chance to set
 # environment or get ttyname, which needs to be communicated to gpg
@@ -39,7 +46,7 @@ pid, masterfd = pty.fork()
 if pid == pty.CHILD:
     slavetty = os.ttyname(stdinfd)
     os.putenv("GPG_TTY", slavetty)
-    os.execv(spawnv[0], [basename(spawnv[0])] + spawnv[1:])
+    os.execv(exepath, spawnv)
 
 try:
     ttymode = tty.tcgetattr(stdinfd)
