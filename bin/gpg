@@ -1,4 +1,57 @@
-#!/usr/bin/env bash
+#!/usr/bin/env python3
+#
+# gpg
+#   wrapper that allocates a pty prior to invoking gpg
+#
+# desc:
+#   we have to make sure gpg has read access to the tty, so that caching
+#   works, and we don't need loopback mode (which breaks caching, as
+#   agent never sees the password).  $GPG_TTY needs to be set to the
+#   allocated pseudo-terminal slave when invoking gpg.  this is mostly
+#   an issue when becoming the invoking user via "sudo su -" and sudoers
+#   has "use_pty" set in defaults (which it usually is), the tty is
+#   then owned by root and not otherwise readable.
+#
+# scott@smemsh.net
+# https://github.com/smemsh/setup/
+# https://spdx.org/licenses/GPL-2
+#
 
-# we have a setgid directory usage paradigm
-command -p gpg --no-permission-warning "$@"
+import os, pty, sys, tty
+
+stdinfd = sys.stdin.fileno()
+if not os.isatty(stdinfd):
+    exit("this gpg wrapper does not support stdin") # todo: make it work
+
+spawnv = ['/usr/bin/gpg']
+spawnv += ['--no-permission-warning'] # support setgid homedirs
+spawnv += sys.argv[1:]
+
+# we could just use pty.spawn() but then we have no chance to set
+# environment or get ttyname, which needs to be communicated to gpg
+# agent via $GPG_TTY.  so we use private methods to avoid reinvention.
+# basically this just copies pty.spawn() but sets this env var to the
+# slave end's terminal upon forking gpg.
+#
+pid, masterfd = pty.fork()
+
+if pid == pty.CHILD:
+    slavetty = os.ttyname(stdinfd)
+    os.putenv("GPG_TTY", slavetty)
+    os.execv(spawnv[0], spawnv[1:])
+
+try:
+    ttymode = tty.tcgetattr(stdinfd)
+    tty.setraw(stdinfd)
+    restore = True
+except tty.error:
+    restore = False
+
+try:
+    pty._copy(masterfd, pty._read, pty._read)
+finally:
+    if restore:
+        tty.tcsetattr(stdinfd, tty.TCSAFLUSH, ttymode)
+
+os.close(masterfd)
+os.waitpid(pid, 0)[1]
