@@ -18,6 +18,7 @@
 #
 
 import os, pty, sys, tty
+from os.path import basename
 
 stdinfd = sys.stdin.fileno()
 if not os.isatty(stdinfd):
@@ -38,7 +39,7 @@ pid, masterfd = pty.fork()
 if pid == pty.CHILD:
     slavetty = os.ttyname(stdinfd)
     os.putenv("GPG_TTY", slavetty)
-    os.execv(spawnv[0], spawnv[1:])
+    os.execv(spawnv[0], [basename(spawnv[0])] + spawnv[1:])
 
 try:
     ttymode = tty.tcgetattr(stdinfd)
