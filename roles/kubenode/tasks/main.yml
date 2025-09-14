@@ -1,0 +1,50 @@
+#
+---
+
+- name: install_keys
+  copy:
+    src: files/{{item}}.asc
+    dest: '{{knode_keydir}}/'
+  loop: '{{knode_repos.keys()}}'
+
+- name: install_repos
+  apt_repository:
+    repo: >
+      deb
+      [arch=amd64 signed-by={{knode_keydir}}/{{item}}.asc]
+      https://{{knode_repos[item]}}:/v{{knode_kversion | string}}/deb/
+      /
+    filename: '{{item}}'
+  loop: '{{knode_repos.keys()}}'
+
+- name: install_packages
+  include_role:
+    name: pkginst
+  vars:
+    pkginst_packages: "{{
+      dict(knode_packages | zip([none] * (knode_packages | length)))
+    }}"
+
+- name: run_systune_role_as_brouter
+  include_role:
+    name: systune
+  vars:
+    systune_brouter: true
+    systune_now: true
+
+- name: sanity_checks
+  block:
+
+    - name: verify_bridge_module_loaded
+      stat:
+        path: /proc/sys/net/bridge
+      register: r
+      failed_when: not r.stat.exists
+
+    - name: verify_bridge_iptables_enabled
+      lineinfile:
+        path: /proc/sys/net/bridge/bridge-nf-call-iptables
+        line: 1
+      register: r
+      check_mode: true
+      failed_when: r.changed

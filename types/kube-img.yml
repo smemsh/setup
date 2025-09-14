@@ -1,0 +1,11 @@
+#
+# see imgbake.yml for why this can't be done with a variable
+#
+---
+
+- name: display_node_type_image
+  debug:
+    msg: building kubernetes node
+
+- include_role:
+    name: knode
