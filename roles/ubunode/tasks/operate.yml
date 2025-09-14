@@ -130,6 +130,15 @@
     owner: root
     mode: '0644' # keep as string to avoid bugs
 
+- name: configure_apt_nophased
+  copy:
+    content: |
+      //
+      apt::get::always-include-phased-updates "true";
+    dest: /etc/apt/apt.conf.d/99nophased
+    owner: root
+    mode: '0644' # keep as string to avoid bugs
+
 - name: run_sysctl_role
   include_role:
     name: systune
