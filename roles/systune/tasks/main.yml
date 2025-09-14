@@ -18,7 +18,7 @@
     - name: set_transparent_hugepage_madvise
       copy:
         content: |
-          # ansible-managed
+          # {{ansible_managed}}
           kernel/mm/transparent_hugepage/enabled = madvise
           kernel/mm/transparent_hugepage/defrag = defer+madvise
           kernel/mm/transparent_hugepage/khugepaged/pages_to_scan = 65536
@@ -61,7 +61,7 @@
 - name: configure_routing_on_routers
   copy:
     content: |
-      {{ansible_managed}}
+      # {{ansible_managed}}
       net.ipv4.ip_forward = 1
     dest: /etc/sysctl.d/98-ip-forwarding.conf
   when: "'router' in group_names"

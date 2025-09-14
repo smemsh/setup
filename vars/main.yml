@@ -28,4 +28,4 @@ ssh_port:                 22022
 
 aptmirror:                mirrors.xtom.com
 
-ansible_managed:          '# ansible-managed'
+ansible_managed:          ansible-managed
