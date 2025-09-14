@@ -2,7 +2,7 @@
 ---
 
 cloudinit_vm_locale: en_US.UTF-8
-cloudinit_vm_timezone: US/Pacific
+cloudinit_vm_timezone: America/Los_Angeles
 
 # this.domain is put into /etc/hosts by cloud-init with the
 # incoming addr of ansible connects, to form the gateway entry,
