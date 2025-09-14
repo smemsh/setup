@@ -1,7 +1,6 @@
 #
 ---
 
-
 - name: invocation_check
   assert:
     that: [host is defined or (host_by_inventory and host_init)]
