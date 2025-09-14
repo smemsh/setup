@@ -1,0 +1,20 @@
+#
+---
+
+is_physical: "{{ansible_virtualization_role == 'host'}}"
+is_container: "{{
+  ansible_virtualization_role == 'guest' and
+  ansible_virtualization_type == 'lxc'
+}}"
+
+is_ubuntu: "{{(ansible_distribution | lower) == 'ubuntu'}}"
+is_debian: "{{(ansible_distribution | lower) == 'debian'}}"
+is_debdist: "{{(ansible_os_family | lower) == 'debian'}}"
+distro_ver: '{{ansible_distribution_major_version | int}}'
+
+u20plus: "{{(is_ubuntu and distro_ver >= 20) or
+	    (is_debian and distro_ver >= 11)}}"
+u22plus: "{{(is_ubuntu and distro_ver >= 22) or
+	    (is_debian and distro_ver >= 12)}}"
+u24plus: "{{(is_ubuntu and distro_ver >= 24) or
+	    (is_debian and distro_ver >= 13)}}"
