@@ -196,6 +196,19 @@ resource "incus_profile" "nestpriv" {
   }
 }
 
+resource "incus_profile" "knode" {
+  name        = "knode"
+  for_each    = var.plexhosts
+  remote      = each.value
+  description = "kubernetes-node"
+
+  config = {
+    "limits.cpu"            = "2"
+    "limits.memory"         = "4GiB"
+    "limits.memory.enforce" = "hard"
+  }
+}
+
 #
 
 resource "incus_profile" "protected" {
@@ -286,7 +299,7 @@ resource "incus_instance" "plexhocs" {
   type     = each.value.virt
   image    = module.imgdata[each.value.plex].imgs[each.value.fimg].fingerprint
   running  = true
-  profiles = ["default"]
+  profiles = local.plexhocmaps_profiles[each.key]
 
   lifecycle {
     ignore_changes = [image]

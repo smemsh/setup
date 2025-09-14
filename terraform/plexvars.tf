@@ -77,11 +77,30 @@ locals {
               fimg = "${base}_${type}" # modules.typeimgs key
               virt = endswith(base, "v") ? "virtual-machine" : "container"
               name = format("%s%d", replace(host, "/us$/", "plex"), nodenum)
+              num  = nodenum
             }
           ]
         ]
       ]
     ]
   ]))
-  plexhocmap = tomap({for node in local.plexhocnodes : node.name => node})
+  plexhocmap = {
+    for node in local.plexhocnodes : node.name => node
+  }
+  plexhocmaps_is_knode = {
+    for node in local.plexhocnodes : node.name =>
+      node.num >= 64 ? true : false
+  }
+  plexhocmaps_is_vos = {
+    for node in local.plexhocnodes : node.name =>
+      node.virt == "container" ? true : false
+  }
+  plexhocmaps_profiles = {
+    for node in local.plexhocnodes : node.name => concat(
+      ["default"],
+      local.plexhocmaps_is_knode[node.name] ? ["knode"] : [],
+      (local.plexhocmaps_is_knode[node.name]
+       && local.plexhocmaps_is_vos[node.name]) ? ["nestpriv"] : []
+    )
+  }
 }
