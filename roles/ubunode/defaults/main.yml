@@ -125,18 +125,21 @@ pkgvim: # todo: we have our own build
   jammy:    { vim-nox: ~      }
   noble:    { vim-nox: ~      }
 
-pkgemacs:
-  trusty:   { emacs24-nox: ~  }
-  xenial:   { emacs-nox: ~    }
-  bionic:   { emacs-nox: ~    }
-  focal:    { emacs-nox: ~    }
-  stretch:  { emacs-nox: ~    }
-  jammy:    { emacs-nox: ~    }
-  noble:    { emacs-nox: ~    }
+# disabled for now, the nox version is only in universe which does not
+# get security updates --smemsh-20250912
+#
+#pkgemacs:
+#  trusty:   { emacs24-nox: ~  }
+#  xenial:   { emacs-nox: ~    }
+#  bionic:   { emacs-nox: ~    }
+#  focal:    { emacs-nox: ~    }
+#  stretch:  { emacs-nox: ~    }
+#  jammy:    { emacs-nox: ~    }
+#  noble:    { emacs-nox: ~    }
 
 pkgedit: '{{
   pkgvim[ansible_distribution_release] | combine(
-  pkgemacs[ansible_distribution_release]
+  pkgemacs[ansible_distribution_release] | default({})
 )}}'
 
 #
