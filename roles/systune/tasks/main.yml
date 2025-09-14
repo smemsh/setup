@@ -11,8 +11,12 @@
 # fits better in like a /proc/sys/mm/, but alas, it's not)
 #
 - name: configure_sysfs_tunables
-  when: groups[systune_sysfs_exclude_group] is not defined
-        or ansible_host not in groups[systune_sysfs_exclude_group]
+  when: >
+    not is_container
+    and (
+      groups[systune_sysfs_exclude_group] is not defined
+      or ansible_host not in groups[systune_sysfs_exclude_group]
+    )
   block:
 
     - name: set_transparent_hugepage_madvise

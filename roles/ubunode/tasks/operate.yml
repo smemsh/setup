@@ -135,7 +135,6 @@
     name: systune
   vars:
     systune_now: true
-  when: not is_container
 
 - name: disable_ebpf_user_process
   copy:
