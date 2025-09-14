@@ -74,19 +74,31 @@
 # persistent connections were invented...
 # (be nice if loops supported blocks but still no: #13262 and #46203)
 #
-- name: delete_non_rsa_hostkeys
-  file:
-    path: /etc/ssh/ssh_host_{{item}}_key
-    state: absent
-  with_items: [dsa, ecdsa, ed25519]
-#
+
 - name: disable_non_rsa_hostkeys
-  notify: ssh_handler_reload
-  replace:
-    regexp: '^(HostKey./etc/ssh/ssh_host_{{item}}_key)'
-    replace: '#\1'
+  block:
+
+    - name: delete_non_rsa_hostkey_files
+      file:
+        path: /etc/ssh/ssh_host_{{item}}_key
+        state: absent
+      loop: '{{ssh_disable_key_types}}'
+
+    - name: comment_out_non_rsa_hostkeys
+      replace:
+        regexp: '^(HostKey./etc/ssh/ssh_host_{{item}}_key)'
+        replace: '#\1'
+        dest: '{{ssh_daemon_rcfile}}'
+      loop: '{{ssh_disable_key_types}}'
+      notify: ssh_handler_reload
+
+# we need one set, or the install script does ssh-keygen for all algorithms
+- name: ensure_rsa_hostkey_explicit_config
+  lineinfile:
+    regexp: '^\s*HostKey\s+/etc/ssh/ssh_host_\S+_key'
+    line: 'HostKey /etc/ssh/ssh_host_rsa_key'
     dest: '{{ssh_daemon_rcfile}}'
-  with_items: [dsa, ecdsa, ed25519]
+  notify: ssh_handler_reload
 
 - name: disable_dns_pointer_lookups
   block:
