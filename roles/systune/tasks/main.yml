@@ -62,17 +62,48 @@
     dest: /etc/sysctl.conf
   register: r_designated
 
+- name: configure_bridge_iptables_kmod
+  when: systune_brouter | bool
+  block:
+
+    - name: persist_bridge_iptables_kmod
+      when: not is_container
+      copy:
+        content: |
+          # {{ansible_managed}}
+          br_netfilter
+        dest: /etc/modules-load.d/brtables.conf
+
+    - name: load_bridge_iptables_kmod
+      when: not is_container
+      command: modprobe -v br_netfilter
+      register: r
+      changed_when: r.rc == 0 and (r.stdout_lines | length) > 0
+
+    - name: configure_iptables_on_bridges
+      copy:
+        content: |
+          # {{ansible_managed}}
+          net.bridge.bridge-nf-call-iptables = 1
+        dest: /etc/sysctl.d/98-brtables.conf
+      register: r_brtables
+
 - name: configure_routing_on_routers
   copy:
     content: |
       # {{ansible_managed}}
       net.ipv4.ip_forward = 1
     dest: /etc/sysctl.d/98-ip-forwarding.conf
-  when: "'router' in group_names"
+  when: systune_router | bool
   register: r_routers
 
 - name: maybe_set_sysctls
   systemd:
     name: systemd-sysctl.service
     state: restarted
-  when: (systune_now | bool) and (r_designated.changed or r_routers.changed)
+  when: >
+    (systune_now | bool) and (
+      r_designated.changed or
+      r_routers.changed or
+      r_brtables.changed
+    )

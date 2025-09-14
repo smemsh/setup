@@ -3,6 +3,21 @@
 # set the tunables after configuring them
 systune_now: false
 
+# configure as bridge-router (pass L2 packets to iptables and forward L3)
+# (needed if hosting kubernetes nodes or pods)
+#
+systune_brouter: "{{
+  ('brouter' in group_names) or
+  ('plexhost' in group_names) or
+  false
+}}"
+
+# configure as a router (forward L3 packets)
+systune_router: "{{
+  (systune_brouter | bool) or
+  ('router' in group_names)
+}}"
+
 # we set some tunables in /sys, except for machines in this group
 #
 systune_sysfs_exclude_group: vmh
