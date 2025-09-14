@@ -20,19 +20,20 @@
 import os, pty, sys, tty
 from os.path import basename
 
-stdinfd = sys.stdin.fileno()
 exepath = '/usr/bin/gpg'
 spawnv  = [basename(exepath)]
 spawnv += ['--no-permission-warning'] # support setgid homedirs
 spawnv += sys.argv[1:]
 
-# at the moment we just pass through the stdin case without a pty.
-# we have to support it because gpg -v uses it and that means
-# git-reltag requires it.  this works for our use case because gpg
-# verify does not require passphrases to be entered, it uses public
-# key only.  eventually we'll fix our wrapper to handle stdin TODO
+# at the moment we just pass through to the real gpg without a pty if
+# there is stdin available, or if stdin is closed (which happens if we
+# already got wrapped by a script that itself got stdin and reopened it,
+# like we do in tfcloudinit).  stdin is also used by gpg -v, and that
+# means git-reltag requires it.  this works for our use case because gpg
+# verify does not require passphrases to be entered, it uses public key
+# only.  eventually we'll fix our wrapper to handle stdin properly TODO
 #
-if not os.isatty(stdinfd):
+if sys.stdin is None or not os.isatty(stdinfd := sys.stdin.fileno()):
     os.execv(exepath, spawnv)
 
 # we could just use pty.spawn() but then we have no chance to set
