@@ -39,6 +39,7 @@
         - present
 
     - name: wait_for_ssh_availability
+      delegate_to: '{{lxdbake_plex}}'  # in case of proxyjump
       wait_for:
         host: '{{lxdbake_name}}'
         delay: 0
