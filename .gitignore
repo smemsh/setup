@@ -18,6 +18,7 @@
 tags
 
 test.*
+test?.*
 this*
 
 /.bash_history
