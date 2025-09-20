@@ -302,7 +302,10 @@ resource "incus_instance" "plexhocs" {
   profiles = local.plexhocmaps_profiles[each.key]
 
   lifecycle {
-    ignore_changes = [image]
+    ignore_changes = [
+      image,  # so backing image can be updated without rebuild unless explicit
+      config["cloud-init.user-data"],  # only used during initial deploy boot
+    ]
   }
 
   wait_for {
