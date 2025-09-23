@@ -1,4 +1,6 @@
 #
+# {{ansible_managed}}
+#
 {# #}
 {% set h = inventory_hostname_short %}
 {% set is_plexhost = true if h in groups['plexhost'] else false %}
