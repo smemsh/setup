@@ -5,7 +5,8 @@
 {% set is_plexnode = true if h in groups['plexnode'] else false %}
 {% set is_plexhost = true if h in groups['plexhost'] else false %}
 {# #}
-{% set address = ansible_eth0.ipv4.address + '/' + ansible_eth0.ipv4.prefix %}
+{% set address = ansible_default_ipv4.address + '/' +
+                 ansible_default_ipv4.prefix %}
 {% set network = address | ansible.utils.ipaddr('1') %}
 {% set gateway = network | ansible.utils.ipaddr('address') %}
 {% set relayhost = gateway if is_plexnode else postfix_grelay_host %}
@@ -21,6 +22,10 @@
 
 #
 inet_protocols		= ipv4
+{% if is_plexhost %}
+smtp_bind_address	= {{(h + '.' + domainx) | addrof}}
+inet_interfaces		= {{ansible_facts[bridge].ipv4.address}}
+{% endif %}
 
 # defaults that changed with compatibility
 respectful_logging	= no

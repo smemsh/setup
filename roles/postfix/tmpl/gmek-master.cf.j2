@@ -34,7 +34,6 @@ retry     unix  -       -       y       -       -       error
 # to have a route to meklar, and should already be canonicalized
 #
 smtp      inet  n       -       y       -       -       smtpd
-  -o inet_interfaces={{ansible_br0.ipv4.address}}
   -o recipient_canonical_maps=
   -o cleanup_service_name=nocanon
 
