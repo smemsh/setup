@@ -26,3 +26,8 @@
 
 - include_role:
     name: rsyslog
+
+- include_role:
+    name: smemsh
+  vars:
+    skel_init: true
