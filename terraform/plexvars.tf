@@ -35,9 +35,9 @@ locals {
             # type.  we cannot use an object since we don't know all the keys.
             #
             #
-            join(",", nodespec),
+            [join(",", nodespec)],
             split(",", nodespec),
-            tostring(nodespec),
+            [tostring(nodespec)],
           ) : [
             #
             # in any of the three cases that took, result will be a string we
