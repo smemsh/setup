@@ -19,7 +19,7 @@
 - name: deploy_dnsroute
   when:
     (postfix_do_dnsroute | bool)
-    and inventory_hostname_short in groups['plex']
+    and inventory_hostname_short in groups['plexhost']
 
   block:
     - name: install_gmail_relay_route_script
