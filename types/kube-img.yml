@@ -8,4 +8,4 @@
     msg: building kubernetes node
 
 - include_role:
-    name: knode
+    name: kubenode
