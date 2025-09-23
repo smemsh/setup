@@ -88,8 +88,7 @@ locals {
     for node in local.plexhocnodes : node.name => node
   }
   plexhocmaps_is_knode = {
-    for node in local.plexhocnodes : node.name =>
-      node.num >= 64 ? true : false
+    for node in local.plexhocnodes : node.name => node.type == "kube"
   }
   plexhocmaps_is_vos = {
     for node in local.plexhocnodes : node.name =>
