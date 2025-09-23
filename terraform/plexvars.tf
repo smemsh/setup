@@ -87,12 +87,11 @@ locals {
   plexhocmap = {
     for node in local.plexhocnodes : node.name => node
   }
+  plexhocmaps_is_vos = {
+    for node in local.plexhocnodes : node.name => node.virt == "container"
+  }
   plexhocmaps_is_knode = {
     for node in local.plexhocnodes : node.name => node.type == "kube"
-  }
-  plexhocmaps_is_vos = {
-    for node in local.plexhocnodes : node.name =>
-      node.virt == "container" ? true : false
   }
   plexhocmaps_profiles = {
     for node in local.plexhocnodes : node.name => concat(
