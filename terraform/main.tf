@@ -7,9 +7,6 @@ data "external" "env" {
 data "external" "hosts" {
   program = ["${local.home}/bin/tfhosts"]
 }
-#output "debug_print" {
-#  value = data.external.hosts
-#}
 
 data "external" "cloudinits" {
   count = var.baketime ? 1 : 0
