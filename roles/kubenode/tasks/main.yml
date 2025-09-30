@@ -17,6 +17,23 @@
     filename: '{{item}}'
   loop: '{{knode_repos.keys()}}'
 
+# in case gcloud ever gets installed on these, we want the native repo
+# to always take priority.
+#
+# TODO probably we should do this in ubunode also, it's harmless if repo
+# is not installed, based only on an origin domain that will never match
+#
+- name: set_repo_as_priority
+  copy:
+    content: |
+      # {{ansible_managed}}
+      Package: *
+      Pin: origin pkgs.k8s.io
+      Pin-Priority: 1000
+    dest: /etc/apt/prefereces.d/kubernetes
+    owner: root
+    mode: '0644' # keep as string to avoid bugs
+
 - name: install_packages
   include_role:
     name: pkginst
