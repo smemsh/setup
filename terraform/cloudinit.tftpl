@@ -1,0 +1,54 @@
+#cloud-config
+---
+fqdn: ${tmpl_node}.${tmpl_domain}
+hostname: ${tmpl_node}
+manage_etc_hosts: false
+manage_resolv_conf: false
+create_hostname_file: true
+prefer_fqdn_over_hostname: true
+package_update: false
+package_upgrade: false
+apt: {preserve_sources_list: true}
+ssh_keys:
+  rsa_private: ${jsonencode(tmpl_rsakey)}
+  rsa_public: ${jsonencode(tmpl_rsapub)}
+runcmd:
+  - ${tmpl_is_knode ? tmpl_kubeadm : "/bin/true"}
+  - ${tmpl_is_kctl ? tmpl_kubeattrs.cnicmd : "/bin/true"}
+write_files:
+  - path: /etc/hosts
+    owner: root:root
+    permissions: '0644'
+    content: ${jsonencode(file(tmpl_hosts))}
+
+  %{~ if tmpl_is_knode ~}
+  - path: ${tmpl_kubeattrs.admrc}
+    owner: root:root
+    permissions: '0644'
+    content: |
+      %{~ if tmpl_is_kctl ~}
+      ---
+      ${tmpl_kubeattrs.apiver}
+      kind: InitConfiguration
+      bootstrapTokens:
+        - token: ${tmpl_kubeattrs.token}
+          usages: [signing, authentication]
+          groups: [system:bootstrappers:kubeadm:default-node-token]
+          ttl: 0s
+      ---
+      ${tmpl_kubeattrs.apiver}
+      kind: ClusterConfiguration
+      networking:
+        podSubnet: ${tmpl_kubenet}
+
+      %{~ else ~}
+      ---
+      ${tmpl_kubeattrs.apiver}
+      kind: JoinConfiguration
+      discovery:
+        bootstrapToken:
+          token: ${tmpl_kubeattrs.token}
+          apiServerEndpoint: ${tmpl_endpoint}
+          unsafeSkipCAVerification: true
+      %{~ endif ~}
+  %{~ endif ~}

@@ -93,6 +93,23 @@ locals {
   plexhocmaps_is_knode = {
     for node in local.plexhocnodes : node.name => node.type == "kube"
   }
+  plexhocmaps_is_kctl = {
+    for node in local.plexhocnodes : node.name =>
+      local.plexhocmaps_is_knode[node.name] && node.num == 1
+  }
+  plexhocmaps_is_kwrk = {
+    for node in local.plexhocnodes : node.name =>
+      local.plexhocmaps_is_knode[node.name] && node.num != 1
+  }
+  plexhocmaps_kubeadm = {
+    for node in local.plexhocnodes : node.name =>
+      local.plexhocmaps_is_knode[node.name] ? join(" ", [
+          "kubeadm",
+          local.plexhocmaps_is_kctl[node.name] ? "init" : "join",
+          "--config",
+          local.kubeattrs.admrc,
+      ]) : null
+  }
   plexhocmaps_profiles = {
     for node in local.plexhocnodes : node.name => concat(
       ["default"],

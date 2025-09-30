@@ -60,6 +60,11 @@ variable "volsz" {
   type        = number
 }
 
+variable "kubenet" {
+  description = "kubernetes-pod-network"
+  type        = string
+}
+
 variable "sshport" {
   description = "ssh-connect-to-port"
   type        = number
