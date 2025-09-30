@@ -88,6 +88,21 @@
         dest: /etc/sysctl.d/98-brtables.conf
       register: r_brtables
 
+    - name: configure_nf_conntrack_max
+      when: "'plexhost' in group_names"
+      copy:
+        content: |
+          # {{ansible_managed}}
+          # required exact value.  kube-proxy will try and fail to set this in
+          # a system container if different, even if already set to a greater
+          # value.  however only root namespace can set. so the plex host must
+          # do it on vos systems.  kube-proxy is able to set it on kos, so it
+          # needn't be here thereon.
+          #
+          net.netfilter.nf_conntrack_max = 131072
+        dest: /etc/sysctl.d/98-nfctmax.conf
+      register: r_nfctmax
+
 - name: configure_routing_on_routers
   copy:
     content: |
@@ -104,6 +119,8 @@
   when: >
     (systune_now | bool) and (
       r_designated.changed or
+      r_nfctmax.changed or
       r_routers.changed or
-      r_brtables.changed
+      r_brtables.changed or
+      false
     )
