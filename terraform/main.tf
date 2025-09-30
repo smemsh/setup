@@ -242,9 +242,9 @@ resource "incus_instance" "tekius" {
     name = "imgdata"
     type = "disk"
     properties = {
-      "path"   = "/data"
-      "shift"  = "true"
-      "source" = "/var/lib/incus/fs/tekius"
+      path   = "/data"
+      shift  = "true"
+      source = "/var/lib/incus/fs/tekius"
     }
   }
 
