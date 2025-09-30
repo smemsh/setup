@@ -300,8 +300,9 @@ resource "incus_instance" "plexhocs" {
 
   lifecycle {
     ignore_changes = [
-      image,  # so backing image can be updated without rebuild unless explicit
+      image,  # so backing image can be updated without auto-replace
       config["cloud-init.user-data"],  # only used during initial deploy boot
+      config["cloud-init.network-config"],
     ]
   }
 
