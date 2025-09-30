@@ -395,3 +395,19 @@ resource "incus_instance" "plexhocs" {
     })
   }
 }
+
+# maintain each kube's master config in ~/.kube/<plex>.yml automatically
+resource "terraform_data" "kubeconfig" {
+  for_each = local.kubemasters
+
+  provisioner "local-exec" {
+    working_dir = local.home
+    command     = format(
+      "ssh %s sudo cat %s > .kube/%s.yml",
+      each.value.name,
+      local.kuberc,
+      local.gatebyplex[local.plexhocmap[each.value.name].plex],
+    )
+  }
+  triggers_replace = [incus_instance.plexhocs[each.value.name]]
+}
