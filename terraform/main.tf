@@ -310,6 +310,17 @@ resource "incus_instance" "plexhocs" {
     type = "ipv4"
   }
 
+  # smaller number of simultaneous node spawns don't need this but 15 did
+  provisioner "local-exec" {
+    command = join(" ", [
+      "ansible -m wait_for -a '",
+        "host=${each.value.name} port=${var.sshport}",
+        "timeout=${local.sshtimeout}",
+        "search_regex=SSH",
+      "'",
+      "localhost",
+    ])
+  }
   config = {
     "cloud-init.network-config" = <<-HERE
       #

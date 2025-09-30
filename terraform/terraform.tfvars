@@ -22,6 +22,7 @@ domain    = "smemsh.net"
 project   = "plex"
 masklen   = 22  # 2^(32-n) hosts
 volsz     = 32  # n * 2^30 bytes
+sshport   = 22022
 
 # module.osimgs
 osvers = [

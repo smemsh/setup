@@ -60,6 +60,11 @@ variable "volsz" {
   type        = number
 }
 
+variable "sshport" {
+  description = "ssh-connect-to-port"
+  type        = number
+}
+
 # <plexhost> = {<base> = {<type> = ["rangelist" | num | [num, ...], ...}}
 # note: all leaves must be same type to pass validation, have to choose.
 #
