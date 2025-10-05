@@ -22,10 +22,6 @@
 
 #
 inet_protocols		= ipv4
-{% if is_plexhost %}
-smtp_bind_address	= {{(h + '.' + domainx) | addrof}}
-inet_interfaces		= {{ansible_facts[bridge].ipv4.address}}
-{% endif %}
 
 # defaults that changed with compatibility
 respectful_logging	= no
