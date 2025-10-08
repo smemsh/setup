@@ -30,7 +30,7 @@
       Package: *
       Pin: origin pkgs.k8s.io
       Pin-Priority: 1000
-    dest: /etc/apt/prefereces.d/kubernetes
+    dest: /etc/apt/preferences.d/kubernetes
     owner: root
     mode: '0644' # keep as string to avoid bugs
 
