@@ -35,4 +35,4 @@ osvers = [
 ]
 
 # module.typeimgs
-imgtypes = ["adm"]
+imgtypes = ["adm", "kube"]
