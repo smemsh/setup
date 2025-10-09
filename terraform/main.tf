@@ -333,26 +333,14 @@ resource "incus_instance" "plexhocs" {
     type = "ipv4"
   }
 
-  # smaller number of simultaneous node spawns don't need this but 15 did
   provisioner "local-exec" {
-    command = join(" ", [
-      "ansible -m wait_for -a '",
-        "host=${each.value.name} port=${var.sshport}",
-        "timeout=${local.sshtimeout}",
-        "search_regex=SSH",
-      "'",
-      "localhost",
-    ])
+    command = format("ansible-playbook -e '%#v' ${local.kubeplay}", {
+      nodename   = each.key
+      plexhost   = each.value.plex
+      kubemaster = lookup(local.kubemasters, each.value.name, null)
+    })
   }
 
-  # allow kube init/join to finish, etc
-  provisioner "local-exec" {
-    command = join(" ", [
-      "ssh ${each.value.name}",
-        "timeout ${local.kubeattrs.init_join_timeout}",
-          "cloud-init status --wait",
-    ])
-  }
 
   config = {
     "cloud-init.network-config" = <<-HERE
@@ -378,8 +366,9 @@ resource "incus_instance" "plexhocs" {
     #
     #
     "cloud-init.user-data" = templatefile("cloudinit.tftpl", {
-      tmpl_node   = each.key
-      tmpl_domain = var.domain
+      tmpl_node     = each.key
+      tmpl_domain   = var.domain
+      tmpl_hostdata = local.hostdb
 
       tmpl_hosts  = "${local.home}/crypt/hostfiles/hosts"
       tmpl_rsakey = ansible_vault.sshprivkey[each.key].yaml
@@ -389,25 +378,10 @@ resource "incus_instance" "plexhocs" {
       tmpl_is_knode  = local.plexhocmaps_is_knode[each.key]
       tmpl_is_kctl   = local.plexhocmaps_is_kctl[each.key]
       tmpl_kubeadm   = local.plexhocmaps_kubeadm[each.key]
-      tmpl_kubenet   = var.kubenet
+      tmpl_plexname  = local.gatebyplex[local.plexhocmap[each.key].plex]
       tmpl_kubeattrs = local.kubeattrs
-      tmpl_endpoint  = "${local.gatebyplex[local.plexhocmap[each.key].plex]}1:6443"
     })
   }
 }
 
 # maintain each kube's master config in ~/.kube/<plex>.yml automatically
-resource "terraform_data" "kubeconfig" {
-  for_each = local.kubemasters
-
-  provisioner "local-exec" {
-    working_dir = local.home
-    command     = format(
-      "ssh %s sudo cat %s > .kube/%s.yml",
-      each.value.name,
-      local.kuberc,
-      local.gatebyplex[local.plexhocmap[each.value.name].plex],
-    )
-  }
-  triggers_replace = [incus_instance.plexhocs[each.value.name]]
-}

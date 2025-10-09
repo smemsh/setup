@@ -23,7 +23,6 @@ plexhocs = {
 plexhosts = ["omnius", "vernius"]
 domain    = "smemsh.net"
 project   = "plex"
-kubenet   = "10.244.0.0/16"  # flannel
 masklen   = 22  # 2^(32-n) hosts
 volsz     = 32  # n * 2^30 bytes
 sshport   = 22022

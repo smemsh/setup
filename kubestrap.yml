@@ -1,0 +1,56 @@
+#
+---
+# master: nodename=verniplex1 kubemaster=verniplex1 plexhost=vernius
+# slave: nodename=verniplex2 kubemaster=null plexhost=vernius
+
+- name: wait_for_node_ready
+  hosts: '{{nodename}}'
+  vars_files:
+    - vars/networks.yml
+  vars:
+    plexname: "{{kubemaster.name | regex_findall('^[^\\d]+') | first}}"
+    kubeconfig: "{{lookup('env', 'HOME') + '/.kube/' + plexname + '.yml'}}"
+    ssh_open_timeout: 60
+    init_join_timeout: 120
+
+    # n = third octet from the plex net's /22 base address
+    # pod cidr = 10.(n).0.0/16
+    # service cidr = 10.(n+1).0.0/16
+    #plexnet: "{{nets_plex[plexname] |}}"
+    #octet3: "{{(plexnet | split('.'))[2]}}"
+    #podnet: "{{'10.' + octet3 + '.0.0/16'}}"
+    #srvnet: "{{'10.' + (((octet3 | int) + 1) | string) + '.0.0/16'}}"
+
+  tasks:
+    # smaller number of simultaneous node spawns don't need this but 15 did
+    #- name: wait_for_ssh
+    #  wait_for:
+    #    host: '{{kubemaster}}'
+    #    port: '{{ssh_port}}'
+    #    timeout: '{{ssh_open_timeout}}'
+    #    search_regex: SSH
+    #  delegate_to: '{{plexhost}}'
+
+    # allow kubeadm init/join to finish
+    - name: wait_for_cloudinit_completion
+      command: timeout {{init_join_timeout}} cloud-init status --wait
+      changed_when: false
+
+    - name: kubemaster_tasks
+      when: kubemaster is not none
+      block:
+
+        - name: copy_master_kubeconfig_to_controller
+          synchronize:
+            mode: pull
+            dest: "{{kubeconfig}}"
+            src: /etc/kubernetes/admin.conf
+            use_ssh_args: true
+          become: true
+
+        # sysadmins are in setup group, so symlinks to ~setup/.kube/*.yml work
+        - name: make_kubeconfig_group_readwrite
+          file:
+            mode: '0660' # keep as string to avoid bugs
+            path: "{{kubeconfig}}"
+          delegate_to: localhost

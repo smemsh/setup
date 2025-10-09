@@ -1,7 +1,6 @@
 #
 
 locals {
-  kuberc = "/etc/kubernetes/admin.conf"
   kubevers = {
     api = "v1beta4",
     cni = "v0.27.3",  # flannel
@@ -10,13 +9,9 @@ locals {
     token  = "${file("${local.home}/crypt/kube/bootstrap.key")}"
     admrc  = "/etc/kubernetes/kubeadm-config.yml"
     apiver = "apiVersion: kubeadm.k8s.io/${local.kubevers.api}"
-    cnicmd = format(
-      "kubectl --kubeconfig %s apply -f %s/%s",
-        local.kuberc,
-        "https://github.com/flannel-io/flannel",
-          "releases/download/${local.kubevers.cni}/kube-flannel.yml",
-    )
+    mask   = 16  # pod and service net overlays
     init_join_timeout = 120
   }
   kubemasters = { for k, v in local.plexhocmap : k => v if v.num == 1 }
+  kubeplay = format("%s/%s", local.home, "kubestrap.yml")
 }

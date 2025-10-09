@@ -14,7 +14,6 @@ ssh_keys:
   rsa_public: ${jsonencode(tmpl_rsapub)}
 runcmd:
   - ${tmpl_is_knode ? tmpl_kubeadm : "/bin/true"}
-  - ${tmpl_is_kctl ? tmpl_kubeattrs.cnicmd : "/bin/true"}
 write_files:
   - path: /etc/hosts
     owner: root:root
@@ -39,7 +38,10 @@ write_files:
       ${tmpl_kubeattrs.apiver}
       kind: ClusterConfiguration
       networking:
-        podSubnet: ${tmpl_kubenet}
+        podSubnet: ${format("10.%d.0.0/%d",
+          split(".", tmpl_hostdata[tmpl_plexname])[2],
+          tmpl_kubeattrs.mask
+        )}
 
       %{~ else ~}
       ---
@@ -48,7 +50,7 @@ write_files:
       discovery:
         bootstrapToken:
           token: ${tmpl_kubeattrs.token}
-          apiServerEndpoint: ${tmpl_endpoint}
+          apiServerEndpoint: ${tmpl_plexname}1:6443
           unsafeSkipCAVerification: true
       %{~ endif ~}
   %{~ endif ~}
