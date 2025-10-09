@@ -378,20 +378,20 @@ resource "incus_instance" "plexhocs" {
     #
     #
     "cloud-init.user-data" = templatefile("cloudinit.tftpl", {
-      tmpl_node   = each.key,
-      tmpl_domain = var.domain,
+      tmpl_node   = each.key
+      tmpl_domain = var.domain
 
-      tmpl_hosts  = "${local.home}/crypt/hostfiles/hosts",
-      tmpl_rsakey = ansible_vault.sshprivkey[each.key].yaml,
+      tmpl_hosts  = "${local.home}/crypt/hostfiles/hosts"
+      tmpl_rsakey = ansible_vault.sshprivkey[each.key].yaml
       tmpl_rsapub = file(format("%s/keys/host/%s.%s-id_rsa.pub",
-                                local.home, each.key, var.domain)),
+                                local.home, each.key, var.domain))
 
-      tmpl_is_knode  = local.plexhocmaps_is_knode[each.key],
-      tmpl_is_kctl   = local.plexhocmaps_is_kctl[each.key],
-      tmpl_kubeadm   = local.plexhocmaps_kubeadm[each.key],
-      tmpl_kubenet   = var.kubenet,
-      tmpl_kubeattrs = local.kubeattrs,
-      tmpl_endpoint  = "${local.gatebyplex[local.plexhocmap[each.key].plex]}1:6443",
+      tmpl_is_knode  = local.plexhocmaps_is_knode[each.key]
+      tmpl_is_kctl   = local.plexhocmaps_is_kctl[each.key]
+      tmpl_kubeadm   = local.plexhocmaps_kubeadm[each.key]
+      tmpl_kubenet   = var.kubenet
+      tmpl_kubeattrs = local.kubeattrs
+      tmpl_endpoint  = "${local.gatebyplex[local.plexhocmap[each.key].plex]}1:6443"
     })
   }
 }
