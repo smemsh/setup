@@ -42,3 +42,6 @@
 [submodule "collections/general"]
 	path = collections/general
 	url = https://github.com/ansible-collections/community.general
+[submodule "collections/kubernetes"]
+	path = collections/kubernetes
+	url = https://github.com/ansible-collections/kubernetes.core
