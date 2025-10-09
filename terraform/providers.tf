@@ -11,7 +11,7 @@ provider "incus" {
   remote {
     name    = "omnius"
     scheme  = "https"
-    address = "omnius.proxima"
+    address = "omnius.smemsh.net"
   }
   remote {
     name    = "vernius"
