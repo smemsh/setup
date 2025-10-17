@@ -22,16 +22,19 @@ planfile=`mktemp --suffix=.tfplan` || exit 120
 planjson=`mktemp --suffix=-tfplan.json` || exit 121
 applyjson=`mktemp --suffix=-tfapply.json` || exit 122
 
-runjq () { jq -r '
-(select(.type == "'$1'")
- | "\(.'$2'.action): \(.'$2'.resource.addr)"),
-(select(.type == "change_summary")
- | .changes
- | with_entries(select(.value | type == "number" and . > 0))
- | to_entries
- | map("\(.key): \(.value)")
- | if length > 0 then "'$3': " + join(", ") else empty end
-)';}
+runjq ()
+{
+	jq -r '
+	(select(.type == "'$1'")
+	 | "\(.'$2'.action): \(.'$2'.resource.addr)"),
+	(select(.type == "change_summary")
+	 | .changes
+	 | with_entries(select(.value | type == "number" and . > 0))
+	 | to_entries
+	 | map("\(.key): \(.value)")
+	 | if length > 0 then "'$3': " + join(", ") else empty end
+	)'
+}
 
 echo planning...
 $tfbin plan -json -detailed-exitcode -out=$planfile "$@" \
