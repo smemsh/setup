@@ -21,6 +21,7 @@ tags
 test.*
 test?.*
 this*
+todo*
 
 /.bash_history
 /.python_history
