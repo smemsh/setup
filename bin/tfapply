@@ -22,6 +22,22 @@ planfile=`mktemp --suffix=.tfplan` || exit 120
 planjson=`mktemp --suffix=-tfplan.json` || exit 121
 applyjson=`mktemp --suffix=-tfapply.json` || exit 122
 
+trap exit_handler EXIT
+exit_handler ()
+{
+	local errfile status=$?
+
+	trap - EXIT
+	((status == 0)) && exit
+
+	if ! for errfile in $applyjson $planjson
+	do test -s $errfile && break; done
+	then echo "error files empty" >&2; false; exit; fi
+	jq -Cr 'select(.type == "diagnostic") | .diagnostic.detail' < $errfile
+
+	false
+}
+
 runjq ()
 {
 	jq -r '
