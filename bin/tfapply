@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 #
 # tfapply
-#   terraform jpply wrapper: display concise plan, confirm, apply
+#   terraform apply wrapper: display concise plan, confirm, apply
 #
 # desc:
 #   - default terraform plan output is too noisy, no way to shut it off
