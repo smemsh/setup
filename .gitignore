@@ -8,20 +8,20 @@
 !.vimrc
 /var/**
 
-.config
-.cache
-.gsutil
-.lesshst
-.terminfo
-.rnd
-.kube
+/.config
+/.cache
+/.gsutil
+/.lesshst
+/.terminfo
+/.rnd
+/.kube
 
 tags
 
-test.*
-test?.*
-this*
-todo*
+/test.*
+/test?.*
+/this*
+/todo*
 
 /.bash_history
 /.python_history
