@@ -23,7 +23,7 @@ args:
   5: api key / access token (optional) for github lookup  [filter arg4]
 
 """
-__url__     = 'https://github.com/smemsh/devskel/'
+__url__     = 'https://github.com/smemsh/setup/'
 __author__  = 'Scott Mcdermott <scott@smemsh.net>'
 __license__ = ['GPL-2.0', 'Apache-2.0'] # latter for getlinks() only
 __devskel__ = '0.8.1'
