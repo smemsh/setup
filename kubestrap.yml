@@ -10,7 +10,6 @@
   vars:
     plexname: "{{kubemaster.name | regex_findall('^[^\\d]+') | first}}"
     kubeconfig: "{{lookup('env', 'HOME') + '/.kube/' + plexname + '.yml'}}"
-    ssh_open_timeout: 60
     init_join_timeout: 120
 
     # n = third octet from the plex net's /22 base address
