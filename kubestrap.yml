@@ -36,19 +36,21 @@
       command: timeout {{init_join_timeout}} cloud-init status --wait
       changed_when: false
 
+    - name: copy_master_kubeconfig_to_controller
+      synchronize:
+        mode: pull
+        perms: false
+        dest: "{{kubeconfig}}"
+        src: /etc/kubernetes/admin.conf
+        use_ssh_args: true
+      become: true
+      when: kubemaster is not none
+
     - name: kubemaster_tasks
       when: kubemaster is not none
       block:
 
-        - name: copy_master_kubeconfig_to_controller
-          synchronize:
-            mode: pull
-            dest: "{{kubeconfig}}"
-            src: /etc/kubernetes/admin.conf
-            use_ssh_args: true
-          become: true
-
-        # sysadmins are in setup group, so symlinks to ~setup/.kube/*.yml work
+        # make symlinks to ~setup/.kube/*.yml work for setup group
         - name: make_kubeconfig_group_readwrite
           file:
             mode: '0660' # keep as string to avoid bugs
