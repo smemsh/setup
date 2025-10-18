@@ -18,8 +18,8 @@ args:
          - else are tag prefixes if non empty
              - if empty, get defaulted from filter arg2
   2: github username reponames are relative to (required) [filter arg1]
-  3: default prefix for empty keys (required)             [filter arg2]
-  4: cache key str, eg ansible_date_time.epoch (required) [filter arg3]
+  3: default empty key prefix (required if empty keys)    [filter arg2]
+  4: cache key str, eg ansible_date_time.epoch (optional) [filter arg3]
   5: api key / access token (optional) for github lookup  [filter arg4]
 
 """
@@ -178,10 +178,12 @@ class FilterModule(object):
     def filters(self):
         return {'ghreltags': self.ghreltags}
 
-    def ghreltags(self, repodict, ghuser, prefix, cachekey, apikey=None):
+    def ghreltags(self, repodict, ghuser,
+                  prefix=None, cachekey=None, apikey=None):
 
         cache = RelTagsCache()
-        cachedict = cache.tagshelf.get(cachekey) or {}
+        if cachekey is None: cachedict = {}
+        else: cachedict = cache.tagshelf.get(cachekey) or {}
         cache.runid = cachekey  # destructor removes other keys
 
         headers = copy(self.apiheaders)
@@ -192,6 +194,8 @@ class FilterModule(object):
 
             exact = False
             if peg == '' or peg is None:
+                if prefix is None:
+                    bomb("must provide peg in input dictionary or prefix")
                 peg = prefix
             if not isinstance(peg, str):
                 raise AnsibleFilterError('only accepts string value pegs')
@@ -232,7 +236,8 @@ class FilterModule(object):
             repodict.update({project: tag})
 
         # persist anything new we've learned to the shelf
-        cache.tagshelf[cache.runid] = cachedict
+        if cache.runid is not None:
+            cache.tagshelf[cache.runid] = cachedict
 
         return repodict
 
@@ -282,8 +287,8 @@ def process_args():
         formatter_class = argparse.RawTextHelpFormatter,
     )
     addarg  (p, 'user', 'github username housing repositories to look up')
-    addarg  (p, 'prefix', 'filter out tags not matching this prefix')
-    addarg  (p, 'playid', 'cache key unique to play, reduces api lookups')
+    addnarg (p, 'prefix', 'filter out tags not matching this prefix')
+    addnarg (p, 'playid', 'cache key unique to play, reduces api lookups')
     addnarg (p, 'apitok', 'github access token or api key')
 
     args = p.parse_args(args)
@@ -297,7 +302,9 @@ def ghreltags():
         bomb("cannot retrieve eponymous filter function from cli")
 
     repodict = json.load(infile)
-    parms = (repodict, args.user, args.prefix)
+    parms = (repodict, args.user)
+    if (pfx := args.prefix) is not None: parms += (pfx,)
+    if (key := args.playid) is not None: parms += (key,)
     if (tok := args.apitok) is not None: parms += (tok,)
 
     for k, v in func(*parms).items():
