@@ -45,8 +45,35 @@
       become: true
       when: kubemaster is not none
 
+    # normally controlled nodes use ~config/venv/bin/python3, but
+    # kubernetes installation tasks will run on the controller itself as
+    # the setup user, needing extra python libraries installed from
+    # requirements.txt.  so we directly specify the python interpreter
+    # as the one that setup would execute by PATH lookup.  we could use
+    # ~/bin/python3 as interpreter_python, but this has implications for
+    # different remote_user and become_user situations, so we'll use a
+    # lookup based on setup user PATH for the few cases we need this.
+    #
+    - name: determine_local_python3_interpreter
+      command: which python3
+      delegate_to: localhost
+      failed_when: r.rc != 0 or 'python3' not in r.stdout
+      changed_when: false
+      register: r
+
+    - name: set_ansible_python_interpreter_fact
+      changed_when: false
+      delegate_to: localhost
+      delegate_facts: true
+      set_fact:
+        py3bin: "{{r.stdout}}"
+
     - name: kubemaster_tasks
       when: kubemaster is not none
+      become: false
+      delegate_to: localhost
+      vars:
+        ansible_python_interpreter: "{{hostvars.localhost.py3bin}}"
       block:
 
         # make symlinks to ~setup/.kube/*.yml work for setup group
@@ -54,4 +81,3 @@
           file:
             mode: '0660' # keep as string to avoid bugs
             path: "{{kubeconfig}}"
-          delegate_to: localhost
