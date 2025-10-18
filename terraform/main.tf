@@ -341,7 +341,6 @@ resource "incus_instance" "plexhocs" {
     })
   }
 
-
   config = {
     "cloud-init.network-config" = <<-HERE
       #
@@ -383,5 +382,3 @@ resource "incus_instance" "plexhocs" {
     })
   }
 }
-
-# maintain each kube's master config in ~/.kube/<plex>.yml automatically

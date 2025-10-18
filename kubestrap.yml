@@ -24,15 +24,6 @@
 
   tasks:
 
-    # smaller number of simultaneous node spawns don't need this but 15 did
-    #- name: wait_for_ssh
-    #  wait_for:
-    #    host: '{{kubemaster}}'
-    #    port: '{{ssh_port}}'
-    #    timeout: '{{ssh_open_timeout}}'
-    #    search_regex: SSH
-    #  delegate_to: '{{plexhost}}'
-
     # allow kubeadm init/join to finish
     - name: wait_for_cloudinit_completion
       command: timeout {{init_join_timeout}} cloud-init status --wait

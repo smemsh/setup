@@ -124,3 +124,43 @@ variable "bakevirtype" {
   type        = string
   default     = ""
 }
+
+
+  #provisioner "local-exec" {
+  #  command = join(" ", [
+  #    "ansible -m wait_for -a '",
+  #      "host=${each.value.name} port=${var.sshport}",
+  #      "timeout=${local.sshtimeout}",
+  #      "search_regex=SSH",
+  #    "'",
+  #    "${each.value.plex}",
+  #  ])
+  #}
+
+  ## allow kube init/join to finish, etc
+  #provisioner "local-exec" {
+  #  command = join(" ", [
+  #    "ssh ${each.value.name}",
+  #      "timeout ${local.kubeattrs.init_join_timeout}",
+  #        "cloud-init status --wait",
+  #  ])
+  #}
+
+# maintain each kube's master config in ~/.kube/<plex>.yml automatically
+#resource "terraform_data" "kubeconfig" {
+#  for_each = local.kubemasters
+#
+#  provisioner "local-exec" {
+#    working_dir = local.home
+#    command     = format(
+#      "ssh %s sudo cat %s > .kube/%s.yml",
+#      each.value.name,
+#      local.kuberc,
+#      local.gatebyplex[local.plexhocmap[each.value.name].plex],
+#    )
+#  }
+#  triggers_replace = [incus_instance.plexhocs[each.value.name]]
+#  lifecycle {
+#    ignore_changes = all
+#  }
+#}
