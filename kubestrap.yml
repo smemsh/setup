@@ -3,7 +3,7 @@
 # master: nodename=verniplex1 kubemaster=verniplex1 plexhost=vernius
 # slave: nodename=verniplex2 kubemaster=null plexhost=vernius
 
-- name: wait_for_node_ready
+- name: prepare_kube
   hosts: '{{nodename}}'
   vars_files:
     - vars/networks.yml
@@ -181,3 +181,7 @@
               #    clusters:
               #      - name: cluster2
               #        secretName: cilium-clustermesh
+
+        - name: wait_for_cni_up
+          command: cilium --kubeconfig {{kubeconfig}} status --wait
+          changed_when: false
