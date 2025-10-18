@@ -13,5 +13,5 @@ locals {
     init_join_timeout = 120
   }
   kubemasters = { for k, v in local.plexhocmap : k => v if v.num == 1 }
-  kubeplay = format("%s/%s", local.home, "kubestrap.yml")
+  kubeplay = "${local.home}/kubestrap.yml"
 }
