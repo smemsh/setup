@@ -34,12 +34,18 @@ write_files:
           usages: [signing, authentication]
           groups: [system:bootstrappers:kubeadm:default-node-token]
           ttl: 0s
+      skipPhases:
+        - addon/kube-proxy  # we will go straight to cilium eBPF
       ---
       ${tmpl_kubeattrs.apiver}
       kind: ClusterConfiguration
       networking:
         podSubnet: ${format("10.%d.0.0/%d",
           split(".", tmpl_hostdata[tmpl_plexname])[2],
+          tmpl_kubeattrs.mask
+        )}
+        serviceSubnet: ${format("10.%d.0.0/%d",
+          split(".", tmpl_hostdata[tmpl_plexname])[2] + 1,
           tmpl_kubeattrs.mask
         )}
 

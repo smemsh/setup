@@ -15,12 +15,15 @@
     # n = third octet from the plex net's /22 base address
     # pod cidr = 10.(n).0.0/16
     # service cidr = 10.(n+1).0.0/16
-    #plexnet: "{{nets_plex[plexname] |}}"
-    #octet3: "{{(plexnet | split('.'))[2]}}"
-    #podnet: "{{'10.' + octet3 + '.0.0/16'}}"
-    #srvnet: "{{'10.' + (((octet3 | int) + 1) | string) + '.0.0/16'}}"
+    # todo: this logic is duplicated in cloudinit.tftpl
+    #
+    plexnet: "{{nets_plex[plexname]}}"
+    octet3: "{{(plexnet | split('.'))[2] | int}}"
+    podnet: "{{'10.' + (octet3 | string) + '.0.0/16'}}"
+    srvnet: "{{'10.' + ((octet3 + 1) | string) + '.0.0/16'}}"
 
   tasks:
+
     # smaller number of simultaneous node spawns don't need this but 15 did
     #- name: wait_for_ssh
     #  wait_for:
@@ -81,3 +84,100 @@
           file:
             mode: '0660' # keep as string to avoid bugs
             path: "{{kubeconfig}}"
+
+        - name: helm_install_cilium_repo
+          kubernetes.core.helm_repository:
+            #atomic: true
+            name: cilium
+            repo_url: https://helm.cilium.io/
+            kubeconfig: "{{kubeconfig}}"
+
+        - name: helm_install_cilium
+          kubernetes.core.helm:
+            #atomic: true
+            kubeconfig: "{{kubeconfig}}"
+            release_name: cilium
+            chart_ref: cilium/cilium
+            release_namespace: kube-system
+            release_values:
+
+              # in future, we might use clustermesh, so these should be unique
+              cluster:
+                name: "{{plexname}}"
+                id: "{{octet3}}"
+
+              # explicitly configure access to kube control plane via local
+              k8sServiceHost: '{{ansible_default_ipv4.address}}'
+              k8sServicePort: 6443
+
+              # we have used skipPhases kube-proxy in ClusterConfiguration, so
+              # network doesn't work until cilium is installed.
+              #
+              kubeProxyReplacement: true
+
+              # this can be inferred from podSubnet, but the auto-detection is
+              # inappropriate for advanced scenarios like multiple subnets.
+              # since we already have the information, we'll just use it here.
+              #
+              ipam: {operator: {clusterPoolIPv4PodCIDRList: "{{podnet}}"}}
+
+              # even though we run everything on one physical system, in
+              # theory we can survive failed cilium pod upgrades better if we
+              # have a standby replica.  todo: this should be researched more.
+              # UPDATE: using 1 for now, let's make it work first TODO
+              #
+              #operator: {replicas: 2}
+              operator: {replicas: 1}
+
+              # enable full Layer 7 feature set
+              envoy: {enabled: true}
+              loadBalancer: {l7: {backend: envoy}}
+
+              # features that use layer 7 functionality (envoy)
+              gatewayAPI: {enabled: true}
+              egressGateway: {enabled: true}
+              ingressController:  # pending status until MetalLB is active
+                enabled: true
+                default: true
+                loadbalancerMode: dedicated
+
+              # directly inject kernel routes on each node to reach all
+              # cluster pods, while masquerading extranode traffic.  only
+              # possible because our cluster nodes all share a subnet.  TODO
+              # does this make clustermesh impossible, have to use vxlan?
+              #
+              routingMode: native
+              autoDirectNodeRoutes: true
+              directRoutingSkipUnreachable: true
+              ipv4NativeRoutingCIDR: '{{podnet}}'  # PodCIDR, see issue 12186
+              bpf: {masquerade: true}
+
+              # we'll use the built-in cilium LoadBalancer for now, consider
+              # MetalLB later, it should be unnecessary as cilium can perform
+              # this function instead with its l2announcements helm key and
+              # CiliumLoadBalancerIPPool/CiliumL2AnnouncementPolicy resources
+              #
+              l2announcements: {enabled: true}
+
+              # during bootstrap, disable hubble, it requires dataplane pods
+              # to be online, which they are not during bootstrap.  we'll
+              # helm-upgrade later.  we could also add a toleration to let it
+              # run on control-plane tainted nodes.  without one of these,
+              # cilium status --wait would hang indefinitely.
+              #
+              hubble:
+                relay: {enabled: false}
+                ui: {enabled: false}
+              #
+              #hubble:
+              #  relay: {enabled: true}
+              #  ui: {enabled: true, frontend: {server: {ipv6: {enabled: false}}}}
+
+              # TODO later
+              #clustermesh:
+              #  useAPIServer: true
+              #  config:
+              #    domain: cluster.local
+              #    clusters:
+              #      - name: cluster2
+              #        secretName: cilium-clustermesh
