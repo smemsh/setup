@@ -5,13 +5,13 @@ data "external" "env" {
 }
 
 data "external" "hosts" {
-  program = ["${local.home}/bin/tfhosts"]
+  program = [pathexpand("~/bin/tfhosts")]
 }
 
 data "external" "cloudinits" {
   count = var.baketime ? 1 : 0
 
-  program = ["${local.home}/bin/tfcloudinit"]
+  program = [pathexpand("~/bin/tfcloudinit")]
   query = {
     host = local.cloudinit_id
   }
@@ -304,9 +304,9 @@ resource "incus_instance" "imgbake" {
 
 resource "ansible_vault" "sshprivkey" {
   for_each   = toset(keys(local.plexhocmap))
-  vault_file = "${local.home}/keys/host/${each.value}.${var.domain}-id_rsa"
+  vault_file = pathexpand("~/keys/host/${each.value}.${var.domain}-id_rsa")
 
-  vault_password_file = "${local.home}/bin/ansvault"
+  vault_password_file = pathexpand("~/bin/ansvault")
 }
 
 resource "incus_instance" "plexhocs" {
@@ -363,10 +363,10 @@ resource "incus_instance" "plexhocs" {
       tmpl_domain   = var.domain
       tmpl_hostdata = local.hostdb
 
-      tmpl_hosts  = "${local.home}/crypt/hostfiles/hosts"
+      tmpl_hosts  = pathexpand("~/crypt/hostfiles/hosts")
       tmpl_rsakey = ansible_vault.sshprivkey[each.key].yaml
       tmpl_rsapub = file(format("%s/keys/host/%s.%s-id_rsa.pub",
-                                local.home, each.key, var.domain))
+                                pathexpand("~"), each.key, var.domain))
 
       tmpl_is_knode  = local.plexhocmaps_is_knode[each.key]
       tmpl_is_kctl   = local.plexhocmaps_is_kctl[each.key]

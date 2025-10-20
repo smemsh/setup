@@ -1,7 +1,6 @@
 #
 
 locals {
-  home   = data.external.env.result.HOME
   hostdb = data.external.hosts.result
 
   # incus lvm uses image staging phase, configured by pool volume.size
