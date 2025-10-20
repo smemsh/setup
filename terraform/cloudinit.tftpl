@@ -11,14 +11,17 @@ package_upgrade: false
 apt: {preserve_sources_list: true}
 ssh_keys:
   rsa_private: ${jsonencode(tmpl_rsakey)}
-  rsa_public: ${jsonencode(tmpl_rsapub)}
+  rsa_public: ${
+    jsonencode(file(format("%s/keys/host/%s.%s-id_rsa.pub",
+                           pathexpand("~"), tmpl_node, tmpl_domain)))
+  }
 runcmd:
   - ${tmpl_is_knode ? tmpl_kubeadm : "/bin/true"}
 write_files:
   - path: /etc/hosts
     owner: root:root
     permissions: '0644'
-    content: ${jsonencode(file(tmpl_hosts))}
+    content: ${jsonencode(file(pathexpand("~/crypt/hostfiles/hosts")))}
 
   %{~ if tmpl_is_knode ~}
   - path: ${tmpl_kubeattrs.admrc}

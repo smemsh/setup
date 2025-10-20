@@ -359,15 +359,10 @@ resource "incus_instance" "plexhocs" {
     # kubernetes nodes, which do a kubeadm init or join depending on node plane
     #
     "cloud-init.user-data" = templatefile("cloudinit.tftpl", {
-      tmpl_node     = each.key
-      tmpl_domain   = var.domain
-      tmpl_hostdata = local.hostdb
-
-      tmpl_hosts  = pathexpand("~/crypt/hostfiles/hosts")
-      tmpl_rsakey = ansible_vault.sshprivkey[each.key].yaml
-      tmpl_rsapub = file(format("%s/keys/host/%s.%s-id_rsa.pub",
-                                pathexpand("~"), each.key, var.domain))
-
+      tmpl_node      = each.key
+      tmpl_domain    = var.domain
+      tmpl_hostdata  = local.hostdb
+      tmpl_rsakey    = ansible_vault.sshprivkey[each.key].yaml
       tmpl_is_knode  = local.plexhocmaps_is_knode[each.key]
       tmpl_is_kctl   = local.plexhocmaps_is_kctl[each.key]
       tmpl_kubeadm   = local.plexhocmaps_kubeadm[each.key]
