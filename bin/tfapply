@@ -20,7 +20,8 @@ tfdir=terraform
 [[ $PWD == $HOME ]] && test -d $tfdir && tfbin="$tfbin -chdir=$tfdir"
 planfile=`mktemp --suffix=.tfplan` || exit 120
 planjson=`mktemp --suffix=-tfplan.json` || exit 121
-applyjson=`mktemp --suffix=-tfapply.json` || exit 122
+validout=`mktemp --suffix=-tfvalidate.out` || exit 122
+applyjson=`mktemp --suffix=-tfapply.json` || exit 123
 
 trap exit_handler EXIT
 exit_handler ()
@@ -30,10 +31,15 @@ exit_handler ()
 	trap - EXIT
 	((status == 0)) && exit
 
-	if ! for errfile in $applyjson $planjson
+	if ! for errfile in $validout $applyjson $planjson
 	do test -s $errfile && break; done
 	then echo "error files empty" >&2; false; exit; fi
-	jq -Cr 'select(.type == "diagnostic") | .diagnostic.detail' < $errfile
+
+	if [[ $errfile == $validout ]]
+	then cat $validout
+	else jq -Cr 'select(.type == "diagnostic") | .diagnostic.detail
+	' < $errfile
+	fi
 
 	false
 }
@@ -51,6 +57,9 @@ runjq ()
 	 | if length > 0 then "'$3': " + join(", ") else empty end
 	)'
 }
+
+echo validating...
+$tfbin validate &>$validout || exit
 
 echo planning...
 $tfbin plan -json -detailed-exitcode -out=$planfile "$@" \
