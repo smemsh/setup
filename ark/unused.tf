@@ -164,3 +164,57 @@ variable "bakevirtype" {
 #    ignore_changes = all
 #  }
 #}
+
+#resource "terraform_data" "kmasters" {
+#  for_each = local.kubemasters
+#
+#  #lifecycle {
+#  #  replace_triggered_by = [incus_instance.plexhocs[each.key]]
+#  #}
+#
+#  input = {
+#    dependency_trigger = incus_instance.plexhocs[each.key]
+#
+#    # lookup(local.kubemasters, each.value.name, null) == null
+#    #? incus_instance.plexhocs[local.plexhocmap[ each.key == var.primary_node_key ? "primary" : terraform_data.node_order[var.primary_node_key].id
+#  }
+#}
+
+  #input = {
+  #  kubemaster_trigger = "test"
+  #}
+
+  #lifecycle {
+  #  ignore_changes = all
+  #}
+  #depends_on = [
+  #  incus_instance.plexhocs[
+  #    local.plexhocmaps_kubemasters["verniplex1"]
+  #  ]
+  #]
+  #  #    lookup(local.kubemasters, each.value.name, null) == null
+  #  #  ? incus_instance.plexhocs[local.plexhocmap[
+
+  # artificial dependency on the master so it always gets created first.
+  # we cannot use depends_on because it needs a reference, not expression
+  #
+  #tags = {
+  #  master = terraform_data.kubemaster[local.plexhocmaps_kubemasters[each.key]]
+  #}
+  #depends_on = [terraform_data.kubemasters]
+
+  #  incus_instance.plexhocs[
+  #    local.plexhocmaps_kubemasters["verniplex1"]
+  #  ]
+  #]
+  #  #    lookup(local.kubemasters, each.value.name, null) == null
+  #  #  ? incus_instance.plexhocs[local.plexhocmap[
+
+  #description = join("-", [
+  #  each.value.plex, "plexhoc", each.key,
+  #  local.plexhocmaps_is_kctl[each.key] ? "master" : "slave-of",
+  #  local.plexhocmaps_is_kwrk[each.key]  # artificial dependency on master
+  #    ? terraform_data.kmasters[local.plexhocmaps_kubemasters[each.key]].id
+  #    : "0"
+  #  ]
+  #)
