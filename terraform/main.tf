@@ -337,7 +337,7 @@ resource "incus_instance" "plexhocs" {
   provisioner "local-exec" {
     command = format("ansible-playbook -e '%#v' ${local.kubeplay}", {
       nodename   = each.key
-      kubemaster = lookup(local.kubemasters, each.value.name, null)
+      kubemaster = each.value.num == 1 ? each.value : null
     })
   }
 
