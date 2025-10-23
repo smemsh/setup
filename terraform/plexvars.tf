@@ -101,15 +101,6 @@ locals {
     for node in local.plexhocnodes : node.name =>
       local.plexhocmaps_is_knode[node.name] && node.num != 1
   }
-  plexhocmaps_kubeadm = {
-    for node in local.plexhocnodes : node.name =>
-      local.plexhocmaps_is_knode[node.name] ? join(" ", [
-          "kubeadm",
-          local.plexhocmaps_is_kctl[node.name] ? "init" : "join",
-          "--config",
-          local.kubeattrs.admrc,
-      ]) : null
-  }
   plexhocmaps_profiles = {
     for node in local.plexhocnodes : node.name => concat(
       ["default"],
