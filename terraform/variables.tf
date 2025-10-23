@@ -77,5 +77,5 @@ variable "sshport" {
 #
 variable "plexhocs" {
   description = "plexhocs-definition-plexhost-osimg-type-rangeexpr"
-  type = map(map(map(any)))
+  type        = map(map(map(any)))
 }

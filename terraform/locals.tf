@@ -26,7 +26,7 @@ locals {
   ]
   lxdfeatures_preset = {
     for boolstr in ["true", "false"] : boolstr => {
-      for ft in local.lxdfeatures: "features.${ft}" => boolstr
+      for ft in local.lxdfeatures : "features.${ft}" => boolstr
     }
   }
 

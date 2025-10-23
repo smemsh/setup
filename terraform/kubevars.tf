@@ -11,5 +11,5 @@ locals {
     mask   = 16  # pod and service net overlays
   }
   kubemasters = { for k, v in local.plexhocmap : k => v if v.num == 1 }
-  kubeplay = pathexpand("~/kubestrap.yml")
+  kubeplay    = pathexpand("~/kubestrap.yml")
 }
