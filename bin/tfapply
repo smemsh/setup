@@ -27,11 +27,15 @@ trap exit_handler EXIT
 exit_handler ()
 {
 	local errfile status=$?
+	local errfiles=()
 
 	trap - EXIT
 	((status == 0)) && exit
 
-	if ! for errfile in $validout $applyjson $planjson
+	((validated)) || errfiles+=($validout)
+	errfiles+=($applyjson $planjson)
+
+	if ! for errfile in ${errfiles[@]}
 	do test -s $errfile && break; done
 	then echo "error files empty" >&2; false; exit; fi
 
@@ -60,6 +64,7 @@ runjq ()
 
 echo validating...
 $tfbin validate &>$validout || exit
+validated=1
 
 echo planning...
 $tfbin plan -json -detailed-exitcode -out=$planfile "$@" \
