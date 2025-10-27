@@ -20,21 +20,7 @@
   vars_files:
     - vars/networks.yml
     - vars/pysetup.yml
-  vars:
-    plexname: "{{nodename | regex_findall('^[^\\d]+') | first}}"
-    kubeconfig: "{{playbook_dir}}/.kube/{{plexname}}.yml"
-    init_join_timeout: 120
-
-    # n = third octet from the plex net's /22 base address
-    # pod cidr = 10.(n).0.0/16
-    # service cidr = 10.(n+1).0.0/16
-    # todo: this logic is duplicated in cloudinit.tftpl
-    #
-    plexnet: "{{nets_plex[plexname]}}"
-    octet3: "{{(plexnet | split('.'))[2] | int}}"
-    podnet: "{{'10.' + (octet3 | string) + '.0.0/16'}}"
-    srvnet: "{{'10.' + ((octet3 + 1) | string) + '.0.0/16'}}"
-
+    - vars/kube.yml
   tasks:
 
     # allow kubeadm init/join to finish
