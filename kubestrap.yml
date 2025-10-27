@@ -9,7 +9,7 @@
     - vars/networks.yml
     - vars/pysetup.yml
   vars:
-    plexname: "{{kubemaster.name | regex_findall('^[^\\d]+') | first}}"
+    plexname: "{{nodename | regex_findall('^[^\\d]+') | first}}"
     kubeconfig: "{{playbook_dir}}/.kube/{{plexname}}.yml"
     init_join_timeout: 120
 
