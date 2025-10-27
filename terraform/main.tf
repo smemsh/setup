@@ -323,7 +323,6 @@ resource "incus_instance" "plexhocs" {
 
   type     = each.value.virt
   image    = module.imgdata[each.value.plex].imgs[each.value.fimg].fingerprint
-  running  = true
   profiles = local.plexhocmaps_profiles[each.key]
 
   lifecycle {
