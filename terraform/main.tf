@@ -325,13 +325,8 @@ resource "incus_instance" "plexhocs" {
   image    = module.imgdata[each.value.plex].imgs[each.value.fimg].fingerprint
   profiles = local.plexhocmaps_profiles[each.key]
 
-  lifecycle {
-    ignore_changes = [image, config]
-  }
-
-  wait_for {
-    type = "ipv4"
-  }
+  wait_for  { type = "ipv4" }
+  lifecycle { ignore_changes = [image, config] }
 
   provisioner "local-exec" {
     command = format("ansible-playbook -e '%#v' ${local.kubeplay}", {
