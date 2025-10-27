@@ -1,0 +1,7 @@
+#
+---
+
+# for occasions where we need setup user's python rather than config's,
+# mostly for the extra libraries, when running delegate_to: localhost
+#
+py3bin_setup: '{{playbook_dir}}/venv/bin/python3'
