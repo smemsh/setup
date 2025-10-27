@@ -1,9 +1,21 @@
 #
+# kubestrap
+#   prepare a newly-provisioned node for service before returning to terraform
+#
+# desc:
+#   - called as provisioner on all plexhoc nodes
+#   - works on kubemasters, kubeslaves, and standalone plexhocs
+#   - waits for cloudinit completion
+#   - if has kube-apiserver process:
+#       - copy kubeconfig to controller (todo: masters > 1)
+#       - install and wait for CNI
+#   - else if has kubelet process:
+#       - wait for kubectl node-ready status
+#   - else noop (ie, non-kubenode)
+#
 ---
-# master: nodename=verniplex1 kubemaster=verniplex1
-# slave: nodename=verniplex2 kubemaster=null
 
-- name: prepare_kube
+- name: prepare_node
   hosts: '{{nodename}}'
   vars_files:
     - vars/networks.yml
@@ -30,6 +42,31 @@
       command: timeout {{init_join_timeout}} cloud-init status --wait
       changed_when: false
 
+    # use presence of kubernetes processes to determine node type
+    - name: determine_node_type
+      block:
+
+        - name: determine_if_kubenode
+          command: pgrep -x kubelet
+          register: r_kubelet
+          failed_when: false
+          changed_when: false
+
+        - name: determine_if_kubectl
+          command: pgrep -x kube-apiserver
+          register: r_kubectl
+          failed_when: false
+          changed_when: false
+          when: r_kubelet.rc == 0
+
+        - name: set_kfacts
+          set_fact:
+            is_knode: '{{r_kubelet.rc == 0}}'
+            is_kctl:  '{{r_kubectl.rc == 0}}'
+            is_kwrk:  '{{r_kubelet.rc == 0 and r_kubectl.rc != 0}}'
+            is_knone: '{{r_kubelet.rc != 0 and r_kubectl.rc != 0}}'
+          changed_when: false
+
     - name: copy_master_kubeconfig_to_controller
       synchronize:
         mode: pull
@@ -38,10 +75,10 @@
         src: /etc/kubernetes/admin.conf
         use_ssh_args: true
       become: true
-      when: kubemaster is not none
+      when: is_kctl
 
     - name: kubemaster_tasks
-      when: kubemaster is not none
+      when: is_kctl
       become: false
       delegate_to: localhost
       vars:

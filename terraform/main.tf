@@ -329,10 +329,7 @@ resource "incus_instance" "plexhocs" {
   lifecycle { ignore_changes = [image, config] }
 
   provisioner "local-exec" {
-    command = format("ansible-playbook -e '%#v' ${local.kubeplay}", {
-      nodename   = each.key
-      kubemaster = each.value.num == 1 ? each.value : null
-    })
+    command = "ansible-playbook -e nodename=${each.key} ${local.kubeplay}"
   }
 
   config = {
