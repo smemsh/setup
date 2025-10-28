@@ -362,8 +362,14 @@ resource "incus_instance" "kubeslaves" {
   profiles   = local.plexhocmaps_profiles[each.key]
   depends_on = [incus_instance.kubemasters]
 
-  wait_for  { type = "ipv4" }
-  lifecycle { ignore_changes = [image, config] }
+  wait_for {
+    type = "ipv4"
+  }
+
+  lifecycle {
+    ignore_changes       = [image, config]
+    replace_triggered_by = [incus_instance.kubemasters]  # todo: multi-master
+  }
 
   provisioner "local-exec" {
     command = "tfpvn create ${each.key}"
