@@ -65,7 +65,6 @@
 
     - name: kubemaster_tasks
       when: is_kctl
-      become: false
       delegate_to: localhost
       vars:
         ansible_python_interpreter: "{{py3bin_setup}}"
