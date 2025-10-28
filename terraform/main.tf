@@ -290,6 +290,11 @@ resource "incus_instance" "tekius" {
 
 ###
 
+# todo: this should be in its own root module with separate state.  likewise,
+# the separate cloudinits baketime data source that comes running ansrole
+# cloudinit, vs cloudinits module that comes from terraform templatefile(),
+# will likely cause confusion if we haven't looked at this in a while.
+#
 resource "incus_instance" "imgbake" {
   name        = var.bakenode
   for_each    = toset(var.baketime ? [var.bakehost] : [])
