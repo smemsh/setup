@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+#
+# tfplan
+#   work around terraform not supporting locals in destroy-time provisioner
+#
+# apparently is an accepted proposal but not implemented yet:
+#   opentofu/opentofu/issues/1258
+#
+
+case ${1:?} in
+(create) play=kubestrap;;
+(destroy) play=kwrkdel;;
+esac
+
+ansible-playbook -e nodename=${2:?} ~/${play:?}.yml

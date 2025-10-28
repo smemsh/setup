@@ -318,13 +318,22 @@ resource "incus_instance" "imgbake" {
 }
 
 ###
+# sadly, we have to triple this block to have appropriate dependencies:
+# plexwrks depend on plexctls, and plexnons depend on neither. after much
+# research and testing, there was no way found to do this with depends_on
+# because invariably it resulted in self-referential dependencies or required
+# an evaluative expression, which is disallowed in that context.  furthermore,
+# terraform does not add specific instances to the dependency tree.  probably
+# the best we can do is try to make this into a module and "call" with
+# different arguments TODO
+#
 
-resource "incus_instance" "plexhocs" {
-  for_each    = local.plexhocmap
+resource "incus_instance" "kubemasters" {
+  for_each    = local.plexctlmap
   name        = each.key
   project     = var.project
   remote      = each.value.plex
-  description = "${each.value.plex}-plexhoc-${each.key}"
+  description = "${each.value.plex}-kubemaster-${each.key}"
 
   type     = each.value.virt
   image    = module.imgdata[each.value.plex].imgs[each.value.fimg].fingerprint
@@ -333,9 +342,56 @@ resource "incus_instance" "plexhocs" {
   wait_for  { type = "ipv4" }
   lifecycle { ignore_changes = [image, config] }
 
-  provisioner "local-exec" {
-    command = "ansible-playbook -e nodename=${each.key} ${local.kubeplay}"
+  provisioner "local-exec" { command = "tfpvn create ${each.key}" }
+
+  config = {
+    "cloud-init.network-config" = module.cloudinit.netconfig[each.key]
+    "cloud-init.user-data"      = module.cloudinit.userdata[each.key]
   }
+}
+
+resource "incus_instance" "kubeslaves" {
+  for_each    = local.plexwrkmap
+  name        = each.key
+  project     = var.project
+  remote      = each.value.plex
+  description = "${each.value.plex}-kubeslave-${each.key}"
+
+  type       = each.value.virt
+  image      = module.imgdata[each.value.plex].imgs[each.value.fimg].fingerprint
+  profiles   = local.plexhocmaps_profiles[each.key]
+  depends_on = [incus_instance.kubemasters]
+
+  wait_for  { type = "ipv4" }
+  lifecycle { ignore_changes = [image, config] }
+
+  provisioner "local-exec" {
+    command = "tfpvn create ${each.key}"
+  }
+  provisioner "local-exec" {
+    when    = destroy
+    command = "tfpvn destroy ${each.key}"
+  }
+
+  config = {
+    "cloud-init.network-config" = module.cloudinit.netconfig[each.key]
+    "cloud-init.user-data"      = module.cloudinit.userdata[each.key]
+  }
+}
+
+resource "incus_instance" "plexnons" {
+  for_each    = local.plexnonmap
+  name        = each.key
+  project     = var.project
+  remote      = each.value.plex
+  description = "${each.value.plex}-plexnon-${each.key}"
+
+  type     = each.value.virt
+  image    = module.imgdata[each.value.plex].imgs[each.value.fimg].fingerprint
+  profiles = local.plexhocmaps_profiles[each.key]
+
+  wait_for  { type = "ipv4" }
+  lifecycle { ignore_changes = [image, config] }
 
   config = {
     "cloud-init.network-config" = module.cloudinit.netconfig[each.key]

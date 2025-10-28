@@ -19,9 +19,6 @@ locals {
   uidspace_unpriv   = 64 * 1024
   uidspace_nestpriv = local.uidspace_unpriv * 1024
 
-  # ansible play to run as post-provisioner for kubernetes nodes
-  kubeplay = pathexpand("~/kubestrap.yml")
-
   lxdfeatures = [
     "images", "profiles",
     "networks", "networks.zones",

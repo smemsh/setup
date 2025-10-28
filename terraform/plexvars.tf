@@ -84,9 +84,27 @@ locals {
       ]
     ]
   ]))
+
+  #
   plexhocmap = {
     for node in local.plexhocnodes : node.name => node
   }
+
+  #
+  plexctlmap = {
+    for node in local.plexhocnodes : node.name => node
+      if local.plexhocmaps_is_kctl[node.name]
+  }
+  plexwrkmap = {
+    for node in local.plexhocnodes : node.name => node
+      if local.plexhocmaps_is_kwrk[node.name]
+  }
+  plexnonmap = {
+    for node in local.plexhocnodes : node.name => node
+      if ! local.plexhocmaps_is_knode[node.name]
+  }
+
+  #
   plexhocmaps_is_vos = {
     for node in local.plexhocnodes : node.name => node.virt == "container"
   }
@@ -101,6 +119,8 @@ locals {
     for node in local.plexhocnodes : node.name =>
       local.plexhocmaps_is_knode[node.name] && node.num != 1
   }
+
+  #
   plexhocmaps_profiles = {
     for node in local.plexhocnodes : node.name => concat(
       ["default"],

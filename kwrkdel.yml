@@ -1,0 +1,50 @@
+#
+---
+
+- name: delete_kubernetes_node
+  hosts: '{{nodename}}'
+  vars_files:
+    - vars/networks.yml
+    - vars/pysetup.yml
+    - vars/kube.yml
+  tasks:
+
+    - name: deletion_tasks
+      delegate_to: localhost
+      vars:
+        ansible_python_interpreter: "{{py3bin_setup}}"
+        fqname: "{{nodename}}.{{domain}}"
+      block:
+
+        - name: drain_node_pods
+          kubernetes.core.k8s_drain:
+            name: '{{fqname}}'
+            kubeconfig: '{{kubeconfig}}'
+            delete_options:
+              ignore_daemonsets: true
+              delete_emptydir_data: true
+
+        - name: delete_node_object
+          #
+          # [WARNING]: Deleting Pods with local storage:
+          # kube-system/cilium-xnr5k.
+          # [WARNING]: Ignoring DaemonSet-managed Pods:
+          # kube-system/cilium-envoy-wcpd6.
+          # [WARNING]: Deprecation warnings can be disabled by setting
+          # `deprecation_warnings=False` in ansible.cfg.
+          # [DEPRECATION WARNING]: Passing `warnings` to `exit_json` or
+          # `fail_json` is deprecated. This feature will be removed from
+          # ansible-core version 2.23. Use `AnsibleModule.warn` instead.
+          #
+          # for the deprecation warning, fix is queued, see upstream
+          # bug: ansible-collections/kubernetes.core/issues/1031
+          #
+          # for the tautological action warnings, see
+          # ansible-collections/kubernetes.core/issues/1037
+          #
+          kubernetes.core.k8s:
+            name: '{{fqname}}'
+            kind: Node
+            wait: true
+            state: absent
+            kubeconfig: '{{kubeconfig}}'
