@@ -100,11 +100,6 @@ resource "incus_project" "default" {
   remote      = each.value
   config      = local.lxdfeatures_preset["true"]
   description = "root-project"
-
-  lifecycle {
-    # default project always exists, but terraform tries to replace
-    ignore_changes = [remote]
-  }
 }
 
 #

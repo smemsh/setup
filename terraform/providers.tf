@@ -1,21 +1,21 @@
 #
 
 provider "incus" {
+
+  default_remote = "local"
+
   remote {
     name    = "local"
-    scheme  = "unix"
-    default = true
+    address = "unix://"
   }
 
   # :8443
   remote {
     name    = "omnius"
-    scheme  = "https"
-    address = "omnius.smemsh.net"
+    address = "https://omnius.smemsh.net:8443"
   }
   remote {
     name    = "vernius"
-    scheme  = "https"
-    address = "vernius.proxima"
+    address = "https://vernius.proxima:8443"
   }
 }
