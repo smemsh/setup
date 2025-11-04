@@ -26,6 +26,7 @@
     # allow kubeadm init/join to finish
     - name: wait_for_cloudinit_completion
       command: timeout {{init_join_timeout}} cloud-init status --wait
+      timeout: 9999
       changed_when: false
 
     # use presence of kubernetes processes to determine node type
