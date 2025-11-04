@@ -218,3 +218,16 @@ variable "bakevirtype" {
   #    : "0"
   #  ]
   #)
+
+#resource "local_file" "autodev_hook" {
+#  content  = <<-HERE
+#    #!/bin/bash
+#    # so privileged container udev won't inject device add events to host
+#    set -x
+#    for path in /sys/{class/{drm,graphics,input},devices/pci*/*/drm/card?}
+#    do mount -t tmpfs tmpfs $${path%drm/card?} -o ro,nosuid,nodev; done
+#  HERE
+#  filename        = pathexpand("~/.terraform.d/lxc-hook-autodev-headless.sh")
+#  file_permission = "0755"
+#}
+
