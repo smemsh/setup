@@ -211,13 +211,14 @@ resource "incus_profile" "knode" {
     "limits.memory"         = "4GiB"
     "limits.memory.enforce" = "hard"
     "raw.lxc"               = <<-HERE
-      lxc.cgroup.devices.allow = a
-      lxc.apparmor.profile     = unconfined
-      lxc.mount.entry          = /dev/kmsg dev/kmsg none defaults,bind,create=file
-      lxc.mount.auto           = proc:rw sys:rw
-      lxc.cap.drop             =
+      lxc.cgroup2.devices.allow = a
+      lxc.apparmor.profile      = unconfined
+      lxc.mount.entry           = /dev/kmsg dev/kmsg none defaults,bind,create=file
+      lxc.mount.auto            = proc:rw sys:rw
+      lxc.cap.drop              =
     HERE
   }
+
   device {
     name = "boot"
     type = "disk"
