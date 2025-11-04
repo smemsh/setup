@@ -17,7 +17,18 @@
 #   - arg3: incus_image base to bake as <base>_<type> (ie "u22v")
 #
 # todo:
-#   - currently only one image at a time can be baked
+#   - currently only one image at a time can be baked, hardcoded to use plex0
+#       - to fix, all need adjust: script wrappers, ansible, terraform
+#   - # convert to devskel and give args for this kind of invoke:
+#     time \
+#     for os in u24
+#     do for bakehost in vernius
+#     do for typec in c
+#     do for nodetype in kube adm
+#     do time lxdbake $bakehost:${bakehost%us}plex0 $nodetype ${os}${typec} || break 4
+#     done; done; done; done \
+#     && echo done \
+#     || echo "failed, os:$os, bakehost:$bakehost, typec:$typec, nodetype:$nodetype"
 #
 # scott@smemsh.net
 # https://github.com/smemsh/setup/
