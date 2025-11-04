@@ -4,9 +4,12 @@
 #
 ---
 
+#
+init_join_timeout: 420
+
+#
 plexname: "{{nodename | regex_findall('^[^\\d]+') | first}}"
 kubeconfig: "{{playbook_dir}}/.kube/{{plexname}}.yml"
-init_join_timeout: 120
 
 # n = third octet from the plex net's /22 base address
 # pod cidr = 10.(n).0.0/16
