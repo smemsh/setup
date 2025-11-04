@@ -49,6 +49,41 @@
     systune_brouter: true
     systune_now: true
 
+- name: systemd_headless_sysfs_overlay_unit_file
+  copy:
+    # we could do these in config -> raw.lxc -> lxc.mount.entry, but the one
+    # with the pci address is dynamic, the address differs on each system, and
+    # has to be done in situ.  globs are not available in systemd.mount unit
+    # paths, so we had to mount our own inline, it's a hack but works for now
+    #
+    content: |
+      #
+
+      [Unit]
+      Description=sysfs-headless-overmount-sys-device-drm
+      DefaultDependencies=false
+      Before=sysinit.target
+
+      [Service]
+      Type=oneshot
+      RemainAfterExit=true
+      ExecStart=/bin/bash -c '\
+      set -x; \
+      for path in /sys/{class/{drm,graphics,input},devices/pci*/*/drm/card?}; \
+      do mount -t tmpfs tmpfs $${path%%drm/card?} -o ro,nosuid,nodev; done \
+      '
+
+      [Install]
+      WantedBy=sysinit.target
+    dest: /etc/systemd/system/sysfs-headless.service
+    owner: root
+    mode: '0644' # keep as string to avoid bugs
+
+- name: enable_systemd_headless_overlay_service
+  systemd:
+    enabled: true
+    name: sysfs-headless.service
+
 - name: sanity_checks
   block:
 
