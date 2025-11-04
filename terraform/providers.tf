@@ -16,6 +16,6 @@ provider "incus" {
   }
   remote {
     name    = "vernius"
-    address = "https://vernius.proxima:8443"
+    address = "https://vernius.terra:8443"
   }
 }
