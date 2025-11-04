@@ -215,6 +215,7 @@ resource "incus_profile" "knode" {
       lxc.apparmor.profile      = unconfined
       lxc.mount.entry           = /dev/kmsg dev/kmsg none defaults,bind,create=file
       lxc.mount.auto            = proc:rw sys:rw
+      lxc.log.level             = 1
       lxc.cap.drop              =
     HERE
   }
