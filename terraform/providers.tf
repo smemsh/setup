@@ -1,7 +1,6 @@
 #
 
 provider "incus" {
-
   default_remote = "local"
 
   remote {

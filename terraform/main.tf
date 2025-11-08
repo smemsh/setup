@@ -352,7 +352,9 @@ resource "incus_instance" "kubeslaves" {
   name        = each.key
   project     = var.project
   remote      = each.value.plex
-  description = "${each.value.plex}-kubeslave-${each.key}"
+  description = "${each.value.plex}-kubeslave-${each.key}-master-${
+    incus_instance.kubemasters[local.plexhocmaps_kubemasters[each.key]].name
+  }"
 
   type       = each.value.virt
   image      = module.imgdata[each.value.plex].imgs[each.value.fimg].fingerprint
@@ -365,7 +367,7 @@ resource "incus_instance" "kubeslaves" {
 
   lifecycle {
     ignore_changes       = [image, config]
-    replace_triggered_by = [incus_instance.kubemasters]  # todo: multi-master
+    #replace_triggered_by = [incus_instance.kubemasters]  # todo: multi-master
   }
 
   provisioner "local-exec" {

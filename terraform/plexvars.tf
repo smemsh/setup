@@ -121,6 +121,12 @@ locals {
   }
 
   #
+  plexhocmaps_kubemasters = {
+    for node in local.plexhocnodes : node.name =>
+      "${local.gatebyplex[node.plex]}1"
+  }
+
+  #
   plexhocmaps_profiles = {
     for node in local.plexhocnodes : node.name => concat(
       ["default"],
