@@ -45,8 +45,7 @@ module "imgdata" {
 }
 
 module "cloudinit" {
-  source = "./cloudinit"
-
+  source   = "./cloudinit"
   nodemap  = local.plexhocmap
   gatemap  = local.gatebyplex
   hostdb   = local.hostdb
