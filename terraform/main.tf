@@ -52,6 +52,7 @@ module "cloudinit" {
   hostdb   = local.hostdb
   domain   = var.domain
   masklen  = var.masklen
+  nslist   = var.resolvers
   is_knode = local.plexhocmaps_is_knode
   is_kctl  = local.plexhocmaps_is_kctl
 }

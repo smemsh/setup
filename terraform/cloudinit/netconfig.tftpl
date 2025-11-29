@@ -9,6 +9,4 @@ ethernets:
       - to: 0.0.0.0/0
         via: ${tmpl_gateway}
     nameservers:
-      addresses:
-        - 8.8.8.8
-        - 8.8.4.4
+      addresses: [${join(", ", tmpl_nslist)}]

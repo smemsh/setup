@@ -40,6 +40,11 @@ variable "plexhosts" {
   type        = set(string)
 }
 
+variable "resolvers" {
+  description = "upstream-dns-resolvers"
+  type        = list(string)
+}
+
 variable "project" {
   description = "plex-base-project"
   type        = string

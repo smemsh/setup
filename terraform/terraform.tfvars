@@ -21,6 +21,7 @@ plexhocs = {
 
 # main
 plexhosts = ["omnius", "vernius"]
+resolvers = ["8.8.8.8", "8.8.4.4"]
 domain    = "smemsh.net"
 project   = "plex"
 masklen   = 22  # 2^(32-n) hosts

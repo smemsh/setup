@@ -6,6 +6,7 @@ output "netconfig" {
       "${path.module}/netconfig.tftpl", {
         tmpl_hostcidr = "${var.hostdb[name]}/${var.masklen}"
         tmpl_gateway  = "${var.hostdb[var.gatemap[attrs.plex]]}"
+        tmpl_nslist   = var.nslist
       }
     )
   }

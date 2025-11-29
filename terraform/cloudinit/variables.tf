@@ -20,6 +20,11 @@ variable "domain"  {
   type        = string
 }
 
+variable "nslist" {
+  description = "resolvconf-nameserver-addresses"
+  type        = list(string)
+}
+
 variable "masklen" {
   description = "root-var-masklen"
   type        = number
