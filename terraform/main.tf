@@ -175,8 +175,6 @@ resource "incus_profile" "default" {
   }
 }
 
-#
-
 # systems that should be privileged and nest, ie k8s/podman/incus hosts
 resource "incus_profile" "nestpriv" {
   name        = "nestpriv"
