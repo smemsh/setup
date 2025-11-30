@@ -392,6 +392,43 @@ resource "incus_instance" "kubeslaves" {
   }
 }
 
+###
+
+# each plexhost-oci:5000 is an oci registry pull-through cache for k8s.io
+resource "incus_instance" "plexocireg" {
+  for_each    = var.plexhosts
+  name        = "${local.gatebyplex[each.key]}-oci"
+  description = "${local.gatebyplex[each.key]}-oci-registry-cache"
+
+  profiles = ["default"]
+  project  = incus_project.default[each.key].name
+  remote   = each.key
+  image    = incus_image.registryimg[each.key].fingerprint
+  config = {
+    "environment.REGISTRY_PROXY_REMOTEURL" = "https://registry.k8s.io"
+    "environment.OTEL_TRACES_EXPORTER"     = "none"
+    "raw.lxc" = <<-HERE
+      lxc.log.level = 1
+      lxc.net.0.ipv4.gateway = ${local.hostdb[local.gatebyplex[each.key]]}
+      lxc.net.0.ipv4.address = ${format("%s/%d",
+        local.hostdb["${local.gatebyplex[each.value]}-oci"], var.masklen
+      )}
+      # lxc.mount.entry has no way to subtract.
+      # todo: /var/lib/incus/containers/*/network/ files should not mount.
+      # this has something to do with incus forknet.
+      #
+      lxc.hook.mount = /bin/sh -c '${join("; ", concat(
+        ["root=$LXC_ROOTFS_MOUNT"],
+        ["umount -l $root/etc/resolv.conf"],
+        [for ns in var.resolvers :
+          "echo nameserver ${ns} >> $root/tmp/resolv.conf"],
+        ["mv $root/tmp/resolv.conf $root/etc/"],
+      ))}'
+    HERE
+  }
+  lifecycle { ignore_changes = [image, config] }
+}
+
 resource "incus_instance" "plexnons" {
   for_each    = local.plexnonmap
   name        = each.key
