@@ -20,3 +20,8 @@ plexnet: "{{nets_plex[plexname]}}"
 octet3: "{{(plexnet | split('.'))[2] | int}}"
 podnet: "{{'10.' + (octet3 | string) + '.0.0/16'}}"
 srvnet: "{{'10.' + ((octet3 + 1) | string) + '.0.0/16'}}"
+
+# temporary caching oci registry proxy to test how it affects speed
+# single binary at https://github.com/distribution/distribution/releases/
+#
+ociurl: "{{plexname}}-oci:5000"

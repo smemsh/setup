@@ -84,6 +84,22 @@
     enabled: true
     name: sysfs-headless.service
 
+- name: localize_oci_registry_upstream
+  vars:
+    # vars/kube.yml needs nodename set, normally used via tfvpn, but not here
+    nodename: '{{inventory_hostname_short}}'
+  copy:
+    dest: /etc/containers/registries.conf.d/{{setup_prefix}}_caching-oci-proxy.conf
+    content: |
+      # {{ansible_managed}}
+
+      [[registry]]
+      location = "registry.k8s.io"
+
+      [[registry.mirror]]
+      location = "{{ociurl}}"
+      insecure = true
+
 - name: sanity_checks
   block:
 
