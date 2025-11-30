@@ -9,7 +9,7 @@
 
 case ${1:?} in
 (create) play=kubestrap;;
-(destroy) play=kwrkdel;;
+(destroy) play=kubedel;;
 esac
 
 ansible-playbook -e nodename=${2:?} ~/${play:?}.yml
