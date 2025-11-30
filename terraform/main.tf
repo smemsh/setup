@@ -345,6 +345,16 @@ resource "incus_instance" "kubemasters" {
   }
 }
 
+resource "incus_image" "registryimg" {
+  for_each = var.plexhosts
+  project  = incus_project.default[each.key].name
+  remote   = each.key
+  source_image = {
+    remote = "docker"
+    name   = "registry"
+  }
+}
+
 resource "incus_instance" "kubeslaves" {
   for_each    = local.plexwrkmap
   name        = each.key

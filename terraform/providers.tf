@@ -17,4 +17,11 @@ provider "incus" {
     name    = "vernius"
     address = "https://vernius.terra:8443"
   }
+
+  remote {
+    name     = "docker"
+    #address  = "https://docker.io"
+    #protocol = "oci"
+    #public   = true
+  }
 }
