@@ -1,0 +1,26 @@
+#
+# use presence of kubernetes processes to determine node type and set
+# facts for later.  TODO maybe there we should use k8s_info
+#
+---
+
+- name: determine_if_kubenode
+  command: pgrep -x kubelet
+  register: r_kubelet
+  failed_when: false
+  changed_when: false
+
+- name: determine_if_kubectl
+  command: pgrep -x kube-apiserver
+  register: r_kubectl
+  failed_when: false
+  changed_when: false
+  when: r_kubelet.rc == 0
+
+- name: set_kfacts
+  set_fact:
+    is_knode: '{{r_kubelet.rc == 0}}'
+    is_kctl:  '{{r_kubectl.rc == 0}}'
+    is_kwrk:  '{{r_kubelet.rc == 0 and r_kubectl.rc != 0}}'
+    is_knone: '{{r_kubelet.rc != 0 and r_kubectl.rc != 0}}'
+  changed_when: false
