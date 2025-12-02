@@ -231,3 +231,47 @@ variable "bakevirtype" {
 #  file_permission = "0755"
 #}
 
+  #file {
+  #  target_path = "/etc/resolv.conf"
+  #  content     = format("nameserver %s\n", "8.8.8.8")
+  #}
+  #device {
+  #  name = "ociregfwd"
+  #  type = "proxy"
+  #  properties = {
+  #    connect = "tcp:127.0.0.1:5000"
+  #    listen = "tcp:${local.hostdb[local.gatebyplex[each.key]]}:5000"
+  #  }
+  #}
+
+
+#resource "incus_storage_bucket" "oci_cache_bucket" {
+#  for_each = var.plexhosts
+#  name     = "ociblobs"
+#  pool     = incus_storage_pool.vpool[each.key].name
+#  project  = incus_project.default[each.key].name
+#  remote   = each.key
+#  config = {
+#    size = local.ocisz
+#  }
+#  description = "kube-oci-cache-s3"
+#}
+#
+#resource "incus_storage_bucket_key" "oci_bucket_key" {
+#  for_each       = var.plexhosts
+#  name           = "ocikey"
+#  role           = "admin"
+#  remote         = each.key
+#  pool           = incus_storage_pool.vpool[each.key].name
+#  project        = incus_project.default[each.key].name
+#  storage_bucket = incus_storage_bucket.oci_cache_bucket[each.key].name
+#  description    = "kube-oci-bucket-key"
+#}
+
+#resource "incus_server" "plexes" {
+#  for_each = toset(["omnius", "vernius"])
+#  remote = each.key
+#  #config = {
+#  #  "images.auto_update_interval" = "0"
+#  #}
+#}
