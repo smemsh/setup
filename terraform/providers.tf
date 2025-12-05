@@ -9,7 +9,6 @@ provider "incus" {
     address = "unix://"
   }
 
-  # :8443
   remote {
     name    = "omnius"
     address = "https://omnius.smemsh.net:8443"
