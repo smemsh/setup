@@ -391,7 +391,7 @@ resource "incus_instance" "plexocireg" {
       lxc.log.level = 1
       lxc.net.0.ipv4.gateway = ${local.hostdb[local.gatebyplex[each.key]]}
       lxc.net.0.ipv4.address = ${format("%s/%d",
-        local.hostdb["${local.gatebyplex[each.value]}-oci"], var.masklen
+        local.hostdb["${local.gatebyplex[each.key]}-oci"], var.masklen
       )}
       #
       # lxc.mount.entry has no way to subtract.
