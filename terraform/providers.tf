@@ -2,6 +2,7 @@
 
 provider "incus" {
   default_remote = "local"
+  #accept_remote_certificate = true
 
   remote {
     name    = "local"
