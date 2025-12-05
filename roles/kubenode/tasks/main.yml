@@ -92,13 +92,15 @@
     dest: /etc/containers/registries.conf.d/{{setup_prefix}}_caching-oci-proxy.conf
     content: |
       # {{ansible_managed}}
+      {% for depot in ocidepots %}
 
+      #
       [[registry]]
-      location = "registry.k8s.io"
-
+      location = "{{depot}}.io"
       [[registry.mirror]]
-      location = "{{ociurl}}"
+      location = "{{ociurl}}/{{depot}}"
       insecure = true
+      {% endfor %}
 
 - name: sanity_checks
   block:

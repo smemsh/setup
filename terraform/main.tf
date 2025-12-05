@@ -345,54 +345,36 @@ resource "incus_instance" "kubemasters" {
   }
 }
 
-resource "incus_image" "registryimg" {
+resource "incus_image" "zot_oci" {
   for_each = var.plexhosts
   project  = incus_project.default[each.key].name
   remote   = each.key
   source_image = {
-    remote = "docker"
-    name   = "registry"
+    remote = "ghcr"
+    name   = "project-zot/zot-linux-amd64"
   }
 }
 
-resource "incus_instance" "kubeslaves" {
-  for_each    = local.plexwrkmap
-  name        = each.key
-  project     = var.project
-  remote      = each.value.plex
-  description = "${each.value.plex}-kubeslave-${each.key}-master-${
-    incus_instance.kubemasters[local.plexhocmaps_kubemasters[each.key]].name
-  }"
-
-  type       = each.value.virt
-  image      = module.imgdata[each.value.plex].imgs[each.value.fimg].fingerprint
-  profiles   = local.plexhocmaps_profiles[each.key]
-  depends_on = [incus_instance.kubemasters]
-
-  wait_for {
-    type = "ipv4"
-  }
-
-  lifecycle {
-    ignore_changes       = [image, config]
-    #replace_triggered_by = [incus_instance.kubemasters]  # todo: multi-master
-  }
-
-  provisioner "local-exec" {
-    command = "tfpvn create ${each.key}"
-  }
-  provisioner "local-exec" {
-    when    = destroy
-    command = "tfpvn destroy ${each.key}"
-  }
-
-  config = {
-    "cloud-init.network-config" = module.cloudinit.netconfig[each.key]
-    "cloud-init.user-data"      = module.cloudinit.userdata[each.key]
+locals {
+  zotrc_json = {
+    log     = { level = "debug" }
+    http    = { address = "0.0.0.0", port = 5000, compat = ["docker2s2"] }
+    storage = { rootDirectory = "/var/lib/registry", gc = false }
+    extensions = {
+      sync = {
+        enable     = true
+        registries = [
+          for d in local.oci_domains : {
+            urls      = ["https://${d}.io"]
+            content   = [{ prefix = "**", destination = "/${d}" }]
+            onDemand  = true
+            tlsVerify = false
+          }
+        ]
+      }
+    }
   }
 }
-
-###
 
 # each plexhost-oci:5000 is an oci registry pull-through cache for k8s.io
 resource "incus_instance" "plexocireg" {
@@ -403,16 +385,15 @@ resource "incus_instance" "plexocireg" {
   profiles = ["default"]
   project  = incus_project.default[each.key].name
   remote   = each.key
-  image    = incus_image.registryimg[each.key].fingerprint
+  image    = incus_image.zot_oci[each.key].fingerprint
   config = {
-    "environment.REGISTRY_PROXY_REMOTEURL" = "https://registry.k8s.io"
-    "environment.OTEL_TRACES_EXPORTER"     = "none"
     "raw.lxc" = <<-HERE
       lxc.log.level = 1
       lxc.net.0.ipv4.gateway = ${local.hostdb[local.gatebyplex[each.key]]}
       lxc.net.0.ipv4.address = ${format("%s/%d",
         local.hostdb["${local.gatebyplex[each.value]}-oci"], var.masklen
       )}
+      #
       # lxc.mount.entry has no way to subtract.
       # todo: /var/lib/incus/containers/*/network/ files should not mount.
       # this has something to do with incus forknet.
@@ -424,6 +405,17 @@ resource "incus_instance" "plexocireg" {
           "echo nameserver ${ns} >> $root/tmp/resolv.conf"],
         ["mv $root/tmp/resolv.conf $root/etc/"],
       ))}'
+      #
+      # have to write the rcfile, upload into container is too late
+      # (entrypoint already run), start hook has no shell tools,
+      # and start-host hook apparently has no mounts.  autodev has
+      # both, as does mount hook, but already that one is complicated.
+      #
+      lxc.hook.autodev = ${format(
+        "bash -c 'printf %%s \"$1\" > %s' bash '%s'",
+        "$LXC_ROOTFS_MOUNT/etc/zot/config.json",
+        jsonencode(local.zotrc_json)
+      )}
     HERE
   }
   lifecycle { ignore_changes = [image, config] }

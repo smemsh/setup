@@ -26,4 +26,9 @@ locals {
 
   cloudinits   = var.baketime ? data.external.cloudinits[0].result : null
   cloudinit_id = var.bakenode
+
+  # we configure crio-d to use a zot oci registry cache for these domains
+  # todo: this is currently duplicated in vars/kube.yml
+  #
+  oci_domains = ["ghcr", "docker", "gcr", "registry.k8s", "quay"]
 }

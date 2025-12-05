@@ -25,3 +25,11 @@ srvnet: "{{'10.' + ((octet3 + 1) | string) + '.0.0/16'}}"
 # single binary at https://github.com/distribution/distribution/releases/
 #
 ociurl: "{{plexname}}-oci:5000"
+
+# todo: this is currently duplicated in terraform/
+ocidepots:
+  - ghcr
+  - docker
+  - gcr
+  - registry.k8s
+  - quay

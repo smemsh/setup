@@ -19,8 +19,8 @@ provider "incus" {
   }
 
   remote {
-    name     = "docker"
-    #address  = "https://docker.io"
+    name     = "ghcr"
+    #address  = "https://ghcr.io"
     #protocol = "oci"
     #public   = true
   }
