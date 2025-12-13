@@ -41,7 +41,23 @@ exit_handler ()
 
 	if [[ $errfile == $validout ]]
 	then cat $validout
-	else jq -Cr 'select(.type == "diagnostic") | .diagnostic.detail
+	else jq -r \
+		--argjson remove '[
+			"highlight_start_offset",
+			"highlight_end_offset",
+			"start_line"
+		]' \
+		'select(.type == "diagnostic")
+		| .diagnostic
+		| .summary
+		, .detail
+		, "\(.range.filename)@\(.range.start.line):\(.range.start.column)"
+		, .snippet | (
+			if type == "object"
+			then delpaths($remove | map([.]))
+			else .
+			end
+		)
 	' < $errfile
 	fi
 
