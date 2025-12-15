@@ -50,8 +50,11 @@ exit_handler ()
 		'select(.type == "diagnostic")
 		| .diagnostic
 		| .summary
-		, .detail
-		, "\(.range.filename)@\(.range.start.line):\(.range.start.column)"
+		, .detail // ""
+		, if .range != null
+		  then .range | "\(.filename)@\(.start.line):\(.start.column)"
+		  else ""
+		  end
 		, .snippet | (
 			if type == "object"
 			then delpaths($remove | map([.]))
