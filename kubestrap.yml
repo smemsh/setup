@@ -169,4 +169,5 @@
         name: "{{nodename}}.{{domain}}"
         kind: Node
         wait: true
+        wait_timeout: 360
         wait_condition: {type: Ready}
