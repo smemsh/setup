@@ -85,25 +85,30 @@ locals {
     ]
   ]))
 
-  #
+  # all plexhoc nodes
   plexhocmap = {
     for node in local.plexhocnodes : node.name => node
   }
 
-  #
+  # kube masters
   plexctlmap = {
     for node in local.plexhocnodes : node.name => node
       if local.plexhocmaps_is_kctl[node.name]
   }
+
+  # kube slaves
   plexwrkmap = {
     for node in local.plexhocnodes : node.name => node
       if local.plexhocmaps_is_kwrk[node.name]
   }
+
+  # global non-kube nodes
   plexnonmap = {
     for node in local.plexhocnodes : node.name => node
       if ! local.plexhocmaps_is_knode[node.name]
   }
 
+  # node attr bools indexed by nodename
   #
   plexhocmaps_is_vos = {
     for node in local.plexhocnodes : node.name => node.virt == "container"
