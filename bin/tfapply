@@ -41,7 +41,7 @@ exit_handler ()
 
 	if [[ $errfile == $validout ]]
 	then cat $validout
-	else jq -r \
+	else jq -Cr \
 		--argjson remove '[
 			"highlight_start_offset",
 			"highlight_end_offset",
@@ -60,8 +60,9 @@ exit_handler ()
 			then delpaths($remove | map([.]))
 			else .
 			end
-		)
-	' < $errfile
+		) // ""
+	' < $errfile \
+	| sed -r '/^$/d'
 	fi
 
 	false
