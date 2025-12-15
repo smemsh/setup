@@ -365,10 +365,10 @@ locals {
         enable     = true
         registries = [
           for d in local.oci_domains : {
-            urls      = ["https://${d}.io"]
-            content   = [{ prefix = "**", destination = "/${d}" }]
-            onDemand  = true
-            tlsVerify = false
+            urls           = ["https://${d}.io"]
+            content        = [{ prefix = "**", destination = "/${d}" }]
+            onDemand       = true
+            tlsVerify      = false
             preserveDigest = true
           }
         ]
