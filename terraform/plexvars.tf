@@ -90,16 +90,20 @@ locals {
     for node in local.plexhocnodes : node.name => node
   }
 
-  # kube masters
+  # kube masters, by plex
   plexctlmap = {
-    for node in local.plexhocnodes : node.name => node
-      if local.plexhocmaps_is_kctl[node.name]
+    for plexhost in var.plexhosts : plexhost => {
+      for node in local.plexhocnodes : node.name => node
+        if local.plexhocmaps_is_kctl[node.name] && node.plex == plexhost
+    }
   }
 
-  # kube slaves
+  # kube slaves, by plex
   plexwrkmap = {
-    for node in local.plexhocnodes : node.name => node
-      if local.plexhocmaps_is_kwrk[node.name]
+    for plexhost in var.plexhosts : plexhost => {
+      for node in local.plexhocnodes : node.name => node
+        if local.plexhocmaps_is_kwrk[node.name] && node.plex == plexhost
+    }
   }
 
   # global non-kube nodes

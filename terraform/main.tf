@@ -56,6 +56,32 @@ module "cloudinit" {
   is_kctl  = local.plexhocmaps_is_kctl
 }
 
+#
+
+module "kubemasters" {
+  source    = "./knodes"
+  for_each  = var.plexhosts
+  project   = var.project
+  nodemap   = local.plexctlmap[each.key] #
+  profiles  = local.plexhocmaps_profiles
+  imgdata   = module.imgdata[each.key]
+  userdata  = module.cloudinit.userdata
+  netconfig = module.cloudinit.netconfig
+}
+
+module "kubeslaves" {
+  source     = "./knodes"
+  for_each   = var.plexhosts
+  project    = var.project
+  nodemap    = local.plexwrkmap[each.key] #
+  profiles   = local.plexhocmaps_profiles
+  imgdata    = module.imgdata[each.key]
+  userdata   = module.cloudinit.userdata
+  netconfig  = module.cloudinit.netconfig
+  depends_on = [module.kubemasters]  # forces ordering only
+  master     = module.kubemasters[each.key].master  # slaves
+}
+
 ###
 
 resource "incus_network" "br0" {
@@ -313,37 +339,6 @@ resource "incus_instance" "imgbake" {
 }
 
 ###
-# sadly, we have to triple this block to have appropriate dependencies:
-# plexwrks depend on plexctls, and plexnons depend on neither. after much
-# research and testing, there was no way found to do this with depends_on
-# because invariably it resulted in self-referential dependencies or required
-# an evaluative expression, which is disallowed in that context.  furthermore,
-# terraform does not add specific instances to the dependency tree.  probably
-# the best we can do is try to make this into a module and "call" with
-# different arguments TODO
-#
-
-resource "incus_instance" "kubemasters" {
-  for_each    = local.plexctlmap
-  name        = each.key
-  project     = var.project
-  remote      = each.value.plex
-  description = "${each.value.plex}-kubemaster-${each.key}"
-
-  type     = each.value.virt
-  image    = module.imgdata[each.value.plex].imgs[each.value.fimg].fingerprint
-  profiles = local.plexhocmaps_profiles[each.key]
-
-  wait_for  { type = "ipv4" }
-  lifecycle { ignore_changes = [image, config] }
-
-  provisioner "local-exec" { command = "tfpvn create ${each.key}" }
-
-  config = {
-    "cloud-init.network-config" = module.cloudinit.netconfig[each.key]
-    "cloud-init.user-data"      = module.cloudinit.userdata[each.key]
-  }
-}
 
 resource "incus_image" "zot_oci" {
   for_each = var.plexhosts
@@ -422,6 +417,11 @@ resource "incus_instance" "plexocireg" {
   lifecycle { ignore_changes = [image, config] }
 }
 
+###
+
+# one block for all on any plex, for the non-kubes
+# TODO use knodes module like masters and slaves do already?
+#
 resource "incus_instance" "plexnons" {
   for_each    = local.plexnonmap
   name        = each.key
