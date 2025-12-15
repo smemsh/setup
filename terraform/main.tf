@@ -369,6 +369,7 @@ locals {
             content   = [{ prefix = "**", destination = "/${d}" }]
             onDemand  = true
             tlsVerify = false
+            preserveDigest = true
           }
         ]
       }
