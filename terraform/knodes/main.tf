@@ -55,11 +55,6 @@ locals {
 # resource could be used to hold other state for some later purpose
 #
 resource "terraform_data" "master" {
-
-  # todo: after deleting one of the slaves, having this count results in:
-  # no change found for terraform_data.kubedata in module.kubemasters["omnius"]
-  #count = (var.master == null ? 0 : 1)
-
   # todo: for volatile.id, resubmit issue 326
   input = local.is_slave ? var.master.mac_address : null
 }
