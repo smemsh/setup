@@ -25,7 +25,7 @@ resource "incus_instance" "knode" {
 
   lifecycle {
     ignore_changes       = [image, config]
-    replace_triggered_by = [terraform_data.kubedata]
+    replace_triggered_by = [terraform_data.master]
   }
 
   provisioner "local-exec" {
@@ -54,7 +54,7 @@ locals {
 # null output (see note about attempts to use count), but potentially this
 # resource could be used to hold other state for some later purpose
 #
-resource "terraform_data" "kubedata" {
+resource "terraform_data" "master" {
 
   # todo: after deleting one of the slaves, having this count results in:
   # no change found for terraform_data.kubedata in module.kubemasters["omnius"]
