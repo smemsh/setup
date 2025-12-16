@@ -42,6 +42,11 @@ resource "incus_instance" "knode" {
   }
 }
 
+locals {
+  is_slave  = var.master != null
+  is_master = !local.is_slave
+}
+
 # for slaves, the indirect dependency on master node allows an evaluative
 # expression to work in replace_triggered_by context.  coupled with depends_on
 # in the module for ordering dependency.  todo: this means we have a useless
@@ -55,10 +60,6 @@ resource "terraform_data" "kubedata" {
   # no change found for terraform_data.kubedata in module.kubemasters["omnius"]
   #count = (var.master == null ? 0 : 1)
 
-  input = {
-    # todo: really should have access to volatile.id of the incus instance,
-    # need to reopen/resubmit my terraform-provider-incus issue 326
-    #
-    hwaddr = (var.master != null ? var.master.mac_address : null)
-  }
+  # todo: for volatile.id, resubmit issue 326
+  input = local.is_slave ? var.master.mac_address : null
 }
