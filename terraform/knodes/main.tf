@@ -43,7 +43,7 @@ resource "incus_instance" "knode" {
 }
 
 locals {
-  is_slave  = var.master != null
+  is_slave  = nonsensitive(var.master) != null
   is_master = !local.is_slave
 }
 
@@ -57,4 +57,13 @@ locals {
 resource "terraform_data" "master" {
   # todo: for volatile.id, resubmit issue 326
   input = local.is_slave ? var.master.mac_address : null
+}
+
+# so we don't bootstrap a workload until least two slaves.  see notes on
+# terraform_data.master, which also apply here (map count is heuristic only).
+#
+resource "terraform_data" "ready" {
+  input      = length(var.nodemap) >= 2
+  depends_on = [incus_instance.knode]
+  lifecycle { enabled = local.is_slave ? true: false }
 }
