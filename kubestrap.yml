@@ -1,10 +1,10 @@
 #
 # kubestrap
-#   prepare a newly-provisioned node for service before returning to terraform
+#   prepare newly-provisioned knode for service before returning to terraform
 #
 # desc:
-#   - called as provisioner on all plexhoc nodes
-#   - works on kubemasters, kubeslaves, and standalone plexhocs
+#   - called as provisioner on all knodes module instances
+#   - works on kubemasters, kubeslaves, plexnons (noop)
 #   - waits for cloudinit completion
 #   - if has kube-apiserver process:
 #       - copy kubeconfig to controller (todo: masters > 1)
