@@ -55,8 +55,17 @@ locals {
 # resource could be used to hold other state for some later purpose
 #
 resource "terraform_data" "master" {
+
   # todo: for volatile.id, resubmit issue 326
   input = local.is_slave ? var.master.mac_address : null
+
+  # after deleting a slave node, using either of these expressions results in:
+  # no change found for terraform_data.master in module.kubemasters[<plexhost>]
+  # so until this is solved, we have to keep a stubbed resource even if unused.
+  #
+  # count = local.is_slave ? 1 : 0
+  # lifecycle { enabled = local.is_slave ? true: false }
+  # lifecycle { enabled = length(var.nodemap) > 1 }
 }
 
 # so we don't bootstrap a workload until least two slaves.  see notes on
