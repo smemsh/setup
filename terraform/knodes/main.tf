@@ -74,5 +74,8 @@ resource "terraform_data" "master" {
 resource "terraform_data" "ready" {
   input      = length(var.nodemap) >= 2
   depends_on = [incus_instance.knode]
-  lifecycle { enabled = local.is_slave ? true: false }
+  lifecycle {
+    replace_triggered_by = [terraform_data.master]
+    enabled              = local.is_slave ? true: false
+  }
 }
