@@ -46,6 +46,7 @@ module "imgdata" {
 
 module "cloudinit" {
   source   = "./cloudinit"
+
   nodemap  = local.plexhocmap
   gatemap  = local.gatebyplex
   hostdb   = local.hostdb
@@ -61,6 +62,7 @@ module "cloudinit" {
 module "kubemasters" {
   source    = "./knodes"
   for_each  = var.plexhosts
+
   project   = var.project
   nodemap   = local.plexctlmap[each.key] #
   profiles  = local.plexhocmaps_profiles
@@ -72,14 +74,16 @@ module "kubemasters" {
 module "kubeslaves" {
   source     = "./knodes"
   for_each   = var.plexhosts
+
   project    = var.project
   nodemap    = local.plexwrkmap[each.key] #
   profiles   = local.plexhocmaps_profiles
   imgdata    = module.imgdata[each.key]
   userdata   = module.cloudinit.userdata
   netconfig  = module.cloudinit.netconfig
-  depends_on = [module.kubemasters]  # forces ordering only
   master     = module.kubemasters[each.key].master  # slaves
+
+  depends_on = [module.kubemasters]  # forces ordering only
 }
 
 ###
