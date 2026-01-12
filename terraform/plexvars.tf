@@ -77,6 +77,7 @@ locals {
               fimg = "${base}_${type}" # modules.typeimgs key
               virt = endswith(base, "v") ? "virtual-machine" : "container"
               name = format("%s%d", replace(host, "/us$/", "plex"), nodenum)
+              kctl = "${local.gatebyplex[host]}1" # todo arbitrary multi-master
               num  = nodenum
             }
           ]
@@ -127,12 +128,6 @@ locals {
   plexhocmaps_is_kwrk = {
     for node in local.plexhocnodes : node.name =>
       local.plexhocmaps_is_knode[node.name] && node.num != 1
-  }
-
-  #
-  plexhocmaps_kubemasters = {
-    for node in local.plexhocnodes : node.name =>
-      "${local.gatebyplex[node.plex]}1"
   }
 
   #
