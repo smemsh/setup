@@ -33,3 +33,9 @@ ocidepots:
   - gcr
   - registry.k8s
   - quay
+
+# assert version when we bootstrap the data plane
+flux_version: 2.7.3
+
+# this is where we'll develop flux stuff for the moment TODO
+flux_branch: fluxtest

@@ -1,0 +1,80 @@
+#
+# fluxstrap
+#   once a cluster has slaves, bootstrap flux from ~setup/clusters/<plexname>
+#
+# desc:
+#   - runs from module.kubeslaves[<plexhost>].terraform_data.ready provisioner
+#   - provisioner runs only when at least two worker nodes (data plane ready)
+#   - does kubectl apply flux install manifests (gotk-components.yaml)
+#   - configures git repo polling for workload manifests (gotk-sync.yaml)
+#   - entirely local actions: 'nodename' used only to get plex (vars/kube.yml)
+
+- name: prepare_flux
+  hosts: '{{nodename}}'
+  vars_files:
+    - vars/networks.yml
+    - vars/pysetup.yml
+    - vars/kube.yml
+    - vars/main.yml
+  tasks:
+
+    - name: bootstrap_fluxcd
+      delegate_to: localhost
+      vars:
+        ansible_python_interpreter: "{{py3bin_setup}}"
+      block:
+
+        - name: check_installed_flux_version
+          shell:
+            cmd: '[[ "$(type -p flux)" ]] && : $(flux --version) && echo $_'
+            executable: /bin/bash
+          register: r
+          failed_when: (r.rc != 0) or (r.stdout.strip() != flux_version)
+          changed_when: false
+
+        # this will generate with whatever version 'flux' binary is
+        # installed in PATH (we gated the version value earlier).
+        #
+        - name: get_flux_install_components_yaml
+          command: flux install --export
+          register: r
+          failed_when: r.rc != 0
+          changed_when: false
+
+        # gotk-components.yaml
+        - name: kubectl_apply_flux_components
+          kubernetes.core.k8s:
+            definition: '{{r.stdout | from_yaml_all}}'
+            kubeconfig: '{{kubeconfig}}'
+
+        # gotk-sync.yaml
+        - name: kubectl_apply_flux_sync
+          kubernetes.core.k8s:
+            kubeconfig: '{{kubeconfig}}'
+            definition:
+
+              - apiVersion: source.toolkit.fluxcd.io/v1
+                kind: GitRepository
+                metadata:
+                  name: flux-system
+                  namespace: flux-system
+                spec:
+                  # we will only trigger gitrepo reconciliation manually
+                  suspend: true
+                  interval: 1024h
+                  url: https://github.com/{{setup_prefix}}/{{setup_username}}
+                  ref:
+                    branch: '{{flux_branch}}'
+
+              - apiVersion: kustomize.toolkit.fluxcd.io/v1
+                kind: Kustomization
+                metadata:
+                  name: flux-system
+                  namespace: flux-system
+                spec:
+                  interval: 24h
+                  prune: true
+                  path: ./clusters/{{plexname}}
+                  sourceRef:
+                    kind: GitRepository
+                    name: flux-system

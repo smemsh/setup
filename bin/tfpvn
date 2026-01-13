@@ -10,6 +10,7 @@
 case ${1:?} in
 (create) play=kubestrap;;
 (destroy) play=kubedel;;
+(fluxinit) play=fluxstrap;;
 esac
 
 ansible-playbook -e nodename=${2:?} ~/${play:?}.yml
