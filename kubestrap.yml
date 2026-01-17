@@ -57,6 +57,14 @@
           failed_when: (r.rc != 0) or (r.stdout.strip() != version_helm)
           changed_when: false
 
+        - name: check_installed_cilium_version
+          shell:
+            cmd: 'varr=($(cilium version --client)); echo ${varr[1]}'
+            executable: /bin/bash
+          register: r
+          failed_when: (r.rc != 0) or (r.stdout.strip() != version_cilium)
+          changed_when: false
+
         # make symlinks to ~setup/.kube/*.yml work for setup group
         - name: make_kubeconfig_group_readwrite
           file:
