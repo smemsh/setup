@@ -7,6 +7,8 @@
 #   opentofu/opentofu/issues/1258
 #
 
+args=(${TFPVN_DEBUG:+-vvv})
+
 case ${1:?} in
 (create) play=kubestrap args=(-e init=true);;
 (update) play=kubestrap;;
