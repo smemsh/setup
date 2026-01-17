@@ -10,6 +10,11 @@
 #   "call" with different arguments
 #
 
+locals {
+  is_slave  = nonsensitive(var.master) != null
+  is_master = !local.is_slave
+}
+
 resource "incus_instance" "knode" {
   for_each    = var.nodemap
   name        = each.key
@@ -40,11 +45,6 @@ resource "incus_instance" "knode" {
     "cloud-init.network-config" = var.netconfig[each.key]
     "cloud-init.user-data"      = var.userdata[each.key]
   }
-}
-
-locals {
-  is_slave  = nonsensitive(var.master) != null
-  is_master = !local.is_slave
 }
 
 # for slaves, the indirect dependency on master node allows an evaluative
