@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #
-# tfplan
+# tfpvn
 #   work around terraform not supporting locals in destroy-time provisioner
 #
 # apparently is an accepted proposal but not implemented yet:
