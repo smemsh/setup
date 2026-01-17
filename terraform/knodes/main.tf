@@ -13,6 +13,7 @@
 locals {
   is_slave  = nonsensitive(var.master) != null
   is_master = !local.is_slave
+  kmaster   = try(var.nodemap[keys(var.nodemap)[0]].kctl, "")
 }
 
 resource "incus_instance" "knode" {
@@ -74,9 +75,7 @@ resource "terraform_data" "master" {
 resource "terraform_data" "ready" {
   input      = length(var.nodemap) >= 2
   depends_on = [incus_instance.knode]
-  provisioner "local-exec" {
-    command = "tfpvn fluxinit ${var.nodemap[keys(var.nodemap)[0]].kctl}"
-  }
+  provisioner "local-exec" { command = "tfpvn fluxinit ${local.kmaster}" }
   lifecycle {
     replace_triggered_by = [terraform_data.master]
     enabled              = local.is_slave ? true: false
