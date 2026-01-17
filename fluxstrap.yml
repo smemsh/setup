@@ -29,7 +29,7 @@
             cmd: '[[ "$(type -p flux)" ]] && : $(flux --version) && echo $_'
             executable: /bin/bash
           register: r
-          failed_when: (r.rc != 0) or (r.stdout.strip() != flux_version)
+          failed_when: (r.rc != 0) or (r.stdout.strip() != version_flux)
           changed_when: false
 
         # this will generate with whatever version 'flux' binary is
