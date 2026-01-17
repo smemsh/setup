@@ -49,6 +49,14 @@
         ansible_python_interpreter: "{{py3bin_setup}}"
       block:
 
+        - name: check_installed_helm_version
+          shell:
+            cmd: '[[ "$(type -p helm)" ]] && : $(helm version --short) && echo $_'
+            executable: /bin/bash
+          register: r
+          failed_when: (r.rc != 0) or (r.stdout.strip() != version_helm)
+          changed_when: false
+
         # make symlinks to ~setup/.kube/*.yml work for setup group
         - name: make_kubeconfig_group_readwrite
           file:

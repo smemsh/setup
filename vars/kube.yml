@@ -34,7 +34,8 @@ ocidepots:
   - registry.k8s
   - quay
 
-# assert version when we bootstrap the data plane
+# assert versions of exes used to initialize the data plane
+version_helm: v3.19.3+g0707f56
 version_flux: 2.7.3
 
 # this is where we'll develop flux stuff for the moment TODO
