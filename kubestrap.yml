@@ -1,14 +1,20 @@
 #
 # kubestrap
-#   prepare newly-provisioned knode for service before returning to terraform
+#   provision or upgrade bootstrap components of kube nodes
+#
+# args:
+#   init=true [kube bootstrap]: bootstrap, more limited set of compoments
+#   init=<unset> [data plane up]: idempotent, for full features/upgrades
 #
 # desc:
 #   - called as provisioner on all knodes module instances
 #   - works on kubemasters, kubeslaves, plexnons (noop)
 #   - waits for cloudinit completion
-#   - if has kube-apiserver process:
-#       - copy kubeconfig to controller (todo: masters > 1)
-#       - install and wait for CNI
+#   - if has kube-apiserver process ([*]: done only during bootstrap)
+#       - copy kubeconfig to controller (todo: masters > 1) [*]
+#       - helm install cilium with limited feature set [*]
+#       - helm upgrade cilium and enable full feature set
+#       - wait for CNI
 #   - else if has kubelet process:
 #       - wait for kubectl node-ready status
 #   - else noop (ie, non-kubenode)
@@ -21,10 +27,14 @@
     - vars/networks.yml
     - vars/pysetup.yml
     - vars/kube.yml
+  vars:
+    bootstrap: "{{init | default(false) | bool}}"
+    bootstrapped: "{{not bootstrap}}"
   tasks:
 
     # allow kubeadm init/join to finish
     - name: wait_for_cloudinit_completion
+      when: bootstrap
       command: timeout {{init_join_timeout}} cloud-init status --wait
       timeout: 9999
       changed_when: false
@@ -40,7 +50,7 @@
         src: /etc/kubernetes/admin.conf
         use_ssh_args: true
       become: true
-      when: is_kctl
+      when: is_kctl and bootstrap
 
     - name: kubemaster_tasks
       when: is_kctl
@@ -65,11 +75,19 @@
           failed_when: (r.rc != 0) or (r.stdout.strip() != version_cilium)
           changed_when: false
 
+        - name: ensure_helm_diff_plugin
+          when: bootstrap
+          kubernetes.core.helm_plugin:
+            kubeconfig: "{{kubeconfig}}"
+            plugin_path: https://github.com/databus23/helm-diff
+            plugin_version: "{{version_helmdiff}}"
+
         # make symlinks to ~setup/.kube/*.yml work for setup group
         - name: make_kubeconfig_group_readwrite
           file:
             mode: '0660' # keep as string to avoid bugs
             path: "{{kubeconfig}}"
+          when: bootstrap
 
         - name: helm_install_cilium_repo
           kubernetes.core.helm_repository:
@@ -77,6 +95,7 @@
             name: cilium
             repo_url: https://helm.cilium.io/
             kubeconfig: "{{kubeconfig}}"
+          when: bootstrap
 
         - name: helm_install_cilium
           kubernetes.core.helm:
@@ -85,6 +104,8 @@
             release_name: cilium
             chart_ref: cilium/cilium
             release_namespace: kube-system
+            reset_values: "{{bootstrap}}"
+            reuse_values: "{{bootstrapped}}"
             release_values:
 
               # in future, we might use clustermesh, so these should be unique
@@ -145,15 +166,33 @@
               #
               l2announcements: {enabled: true}
 
+              # https://docs.cilium.io/en/stable/observability/hubble/hubble-ui/
               # during bootstrap, disable hubble, it requires dataplane pods
               # to be online, which they are not during bootstrap.  we'll
               # helm-upgrade later.  we could also add a toleration to let it
               # run on control-plane tainted nodes.  without one of these,
               # cilium status --wait would hang indefinitely.
               #
+              #hubble:
+              #  relay: {enabled: false}
+              #  ui: {enabled: false}
+
               hubble:
-                relay: {enabled: false}
-                ui: {enabled: false}
+                relay:
+                  enabled: '{{bootstrapped}}'
+                ui:
+                  enabled: '{{bootstrapped}}'
+                  standalone:
+                    # already have to manage other cilium values outside flux
+                    enabled: false
+                  frontend:
+                    server:
+                      ipv4:
+                        enabled: '{{bootstrapped}}'
+                      ipv6:
+                        enabled: false
+                prometheus:
+                  enabled: '{{bootstrapped}}'
               #
               #hubble:
               #  relay: {enabled: true}

@@ -8,9 +8,10 @@
 #
 
 case ${1:?} in
-(create) play=kubestrap;;
+(create) play=kubestrap args=(-e init=true);;
+(update) play=kubestrap;;
 (destroy) play=kubedel;;
 (fluxinit) play=fluxstrap;;
 esac
 
-ansible-playbook -e nodename=${2:?} ~/${play:?}.yml
+ansible-playbook "${args[@]}" -e nodename=${2:?} ~/${play:?}.yml

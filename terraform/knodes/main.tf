@@ -75,6 +75,7 @@ resource "terraform_data" "master" {
 resource "terraform_data" "ready" {
   input      = length(var.nodemap) >= 2
   depends_on = [incus_instance.knode]
+  provisioner "local-exec" { command = "tfpvn update ${local.kmaster}" }
   provisioner "local-exec" { command = "tfpvn fluxinit ${local.kmaster}" }
   lifecycle {
     replace_triggered_by = [terraform_data.master]
