@@ -67,6 +67,10 @@ resource "terraform_data" "master" {
   # count = local.is_slave ? 1 : 0
   # lifecycle { enabled = local.is_slave ? true: false }
   # lifecycle { enabled = length(var.nodemap) > 1 }
+  # lifecycle { enabled = local.is_slave && length(var.nodemap) >= 2 }
+  # lifecycle { replace_triggered_by = [terraform_data.master] }
+  # lifecycle { enabled = local.is_slave }
+  # depends_on = [terraform_data.master]
 }
 
 # so we don't bootstrap a workload until least two slaves.  see notes on
