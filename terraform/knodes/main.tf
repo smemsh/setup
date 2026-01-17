@@ -78,6 +78,6 @@ resource "terraform_data" "ready" {
   provisioner "local-exec" { command = "tfpvn fluxinit ${local.kmaster}" }
   lifecycle {
     replace_triggered_by = [terraform_data.master]
-    enabled              = local.is_slave ? true: false
+    enabled              = local.is_slave && length(var.nodemap) >= 2
   }
 }
