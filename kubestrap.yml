@@ -209,6 +209,7 @@
 
         # TODO is there a way we could use k8s.wait for this? Node=Ready does
         # not work, tried it... gets mostly there, but cilium not fully up
+        # UPDATE: try kubernetes.core.helm.wait parameter?
         #
         - name: wait_for_cni_up
           command: cilium --kubeconfig {{kubeconfig}} status --wait
