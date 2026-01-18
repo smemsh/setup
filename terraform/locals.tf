@@ -40,7 +40,13 @@ locals {
     http    = { address = "0.0.0.0", port = 5000, compat = ["docker2s2"] }
     storage = { rootDirectory = "/var/lib/registry", gc = false }
     extensions = {
-      sync = {
+      metrics = { enable = true }
+      search  = { enable = true }
+      scrub   = { enable = false }
+      lint    = { enable = false }
+      trust   = { enable = false }
+      ui      = { enable = false }
+      sync    = {
         enable     = true
         registries = [
           for d in local.oci_domains : {
