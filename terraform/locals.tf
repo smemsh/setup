@@ -31,4 +31,27 @@ locals {
   # todo: this is currently duplicated in vars/kube.yml
   #
   oci_domains = ["ghcr", "docker", "gcr", "registry.k8s", "quay"]
+
+  # read-through oci image cache for all the common registries, so testing
+  # bootstraps goes a lot faster.  it can also be store local build artifacts
+  #
+  zotrc_json = {
+    log     = { level = "debug" }
+    http    = { address = "0.0.0.0", port = 5000, compat = ["docker2s2"] }
+    storage = { rootDirectory = "/var/lib/registry", gc = false }
+    extensions = {
+      sync = {
+        enable     = true
+        registries = [
+          for d in local.oci_domains : {
+            urls           = ["https://${d}.io"]
+            content        = [{ prefix = "**", destination = "/${d}" }]
+            onDemand       = true
+            tlsVerify      = false
+            preserveDigest = true
+          }
+        ]
+      }
+    }
+  }
 }
