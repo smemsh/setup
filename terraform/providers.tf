@@ -20,8 +20,8 @@ provider "incus" {
 
   remote {
     name     = "ghcr"
-    #address  = "https://ghcr.io"
-    #protocol = "oci"
-    #public   = true
+    address  = "https://ghcr.io"
+    protocol = "oci"
+    public   = true
   }
 }
