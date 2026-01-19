@@ -42,6 +42,7 @@ locals {
     extensions = {
       metrics = { enable = true }
       search  = { enable = true }
+      events  = { enable = false }
       scrub   = { enable = false }
       lint    = { enable = false }
       trust   = { enable = false }
