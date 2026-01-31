@@ -1,0 +1,183 @@
+#
+# changes the name, bridge and backing device of 'host' to those
+# of 'target'
+#
+---
+
+- name: emumerate_existing_vms
+  virt:
+    command: list_vms
+  register: r
+
+- name: verify_assumptions
+  assert:
+    that:
+      - host is defined
+      - target is defined
+      - host in r.list_vms
+      - target not in r.list_vms
+    quiet: true
+
+- add_host: { hostname: '{{target}}' }
+
+###
+
+# determine the mac address of plumbed interface of $host
+#
+# NOTE: this needs to be done prior to shutdown, because it
+# connects to the guest to make the determination.  in future we
+# should maybe generate mac addrs and insert them into the
+# virsh define templates, have them configured in host
+# inventory, and made along with keys and such when a new host
+# is added.  that way we don't have to determine it at
+# runtime...
+#
+- name: slurp_current_macaddr
+  shell:
+    virsh domifaddr --source=agent {{host}}
+    | grep {{ip_address}}/{{ip_prefix}}
+    | awk '{print $2}'
+  register: r
+
+- name: verify_clean_macaddr
+  assert:
+    that:
+      - r.stdout |
+        regex_search('^([0-9a-f]{2}:){5}[0-9a-f]{2}$') |
+        length
+
+- name: capture_macaddr_template_var
+  set_fact:
+    macaddr: '{{r.stdout}}'
+
+###
+
+- name: slurp_current_backingdev
+  shell:
+    virsh domblklist {{host}}
+    | egrep '^{{guest_root}}\b'
+    | awk '{print $2}'
+  register: r
+
+- name: stash_backingdev_path
+  set_fact:
+    backpath: '{{r.stdout | trim}}'
+
+- name: get_backingdev_vglv
+  command:
+    lvs
+      --separator ':'
+      --no-headings
+      -o vg_name,lv_name
+    {{backpath}}
+  register: r
+
+- name: stash_backingdev_vglv
+  set_fact:
+    backvglv: '{{r.stdout | trim}}'
+
+- name: assign_backingdev_vars
+  set_fact:
+    backvg: "{{backvglv.split(':') | first}}"
+    backlv: "{{backvglv.split(':') | last}}"
+
+###
+
+- name: initiate_vm_shutdown
+  virt:
+    name: '{{host}}'
+    state: shutdown
+
+- name: wait_for_vm_shutdown
+  virt:
+    command: status
+    name: '{{host}}'
+  register: r
+  retries: 5
+  delay: 3
+  until: r.status == 'shutdown'
+
+###
+
+- name: rename_backing_device
+  command:
+    lvrename {{backvg}}/{{backlv}} {{lvname_target}}
+
+###
+
+# in case the define fails, we will have undefined it, meaning lost xml
+- name: create_xml_backup_tmpfile
+  tempfile:
+    state: file
+    suffix: .xml
+  register: stash
+
+- name: capture_vm_definition_xml
+  command:
+    virsh dumpxml {{host}}
+  register: r
+
+- name: stash_xml_to_backup
+  copy:
+    content: '{{r.stdout}}'
+    dest: '{{stash.path}}'
+
+# note: requires python lxml to be installed on controller
+- name: replace_sda_device_xml
+  local_action:
+    module: xml
+    xpath: /domain/devices/disk[target/@dev='{{guest_root}}']/source
+    attribute: dev
+    value: '{{lvpath_target}}'
+    xmlstring: '{{r.stdout}}'
+  become: false
+  register: r
+
+- name: undefine_old_domain
+  virt:
+    command: undefine
+    name: '{{host}}'
+
+- name: redefine_replaced_domain
+  virt:
+    command: define
+    xml: '{{r.xmlstring}}'
+
+###
+
+- name: determine_if_cidata_attached
+  shell:
+    virsh domblklist {{host}}
+    | egrep '^{{guest_cidata}}\b.*{{lvpath_cidata}}$'
+  register: r
+  failed_when: false
+
+- name: remove_vm_cidata_device
+  command:
+    virsh detach-disk --config {{host}} {{guest_cidata}}
+  when: r.rc == 0
+
+###
+
+- name: create_xml_tmpfile
+  tempfile:
+  register: xmltmp
+
+- name: generate_libvirt_bridge_xmltmp
+  template:
+    src: tmpl/change-bridge.xml.j2
+    dest: '{{xmltmp.path}}'
+
+- name: change_bridge_connection
+  command:
+    virsh update-device --config {{host}} {{xmltmp.path}}
+
+# keep last so {{host}} has the right meaning
+#
+- name: rename_virtual_machine
+  command: virsh domrename {{host}} {{target}}
+
+# not doing this yet, not sure if we need to but it's in my notes
+# for some reason?
+#
+#- name: rootfs_label

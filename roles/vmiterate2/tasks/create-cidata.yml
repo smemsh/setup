@@ -1,0 +1,59 @@
+#
+# creates cidata volume for cloud-config to provision newly instantiated vm:
+#
+#   - creates a small thin volume in configured pool
+#   - makes vfat filesystem thereon, mounts to temporary mount point
+#   - templates user-data and meta-data files needed by cloud-init
+#   - unmounts and deletes temporary mount point
+#
+---
+
+# cannot do this way until is #2216 pulled
+#   or until #2478 (mine) is addressed
+#
+# name: create_cloud_init_config_drive
+# lvol:
+#   lv: '{{lvname_cidata}}'
+#   vg: '{{vmiterate_vgname}}'
+#   opts: '-V 4M --thin-pool {{vmiterate_thinpool}}'
+#
+- name: create_cloud_init_config_drive
+  command: >
+    lvcreate
+      -n {{lvname_cidata}}
+      -V {{vmiterate_cidata_size}}
+      --thinpool {{vmiterate_vgname}}/{{vmiterate_thinpool}}
+
+- name: create_cloud_init_config_fs
+  command: 'mkfs -t vfat -n cidata {{lvpath_cidata}}'
+
+- name: create_temp_mount
+  command: mktemp -d
+  register: r
+
+- name: get_mountpoint
+  set_fact:
+    lvpath_cimnt: '{{r.stdout}}'
+
+- name: mount_cloud_init_config_drive
+  command: 'mount {{lvpath_cidata}} {{lvpath_cimnt}}'
+  args:
+    warn: false # until #2571
+
+- name: load_inventory_variables
+  add_host:
+    host: '{{vm_name}}'
+
+- name: template_cloud_init_metadata
+  include_role:
+    name: cloudinit
+  vars:
+    cloudinit_destdir: '{{lvpath_cimnt}}'
+
+- name: unmount_cloud_init_config_drive
+  command: 'umount {{lvpath_cidata}}'
+
+- name: delete_temp_mount
+  file:
+    path: '{{lvpath_cimnt}}'
+    state: absent

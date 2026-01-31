@@ -1,0 +1,12 @@
+#
+# destroys:
+#   - any external mounts of the cidata or vm fs (halts if in use)
+#   - previously created virtual machine, if it exists
+#   - vm filesystem and volume
+#   - cidata filesystem and volume
+---
+
+- import_tasks: destroy-vm.yml
+- import_tasks: unmount-cidata.yml
+- import_tasks: unmount-vmroot.yml
+- import_tasks: remove-lvols.yml

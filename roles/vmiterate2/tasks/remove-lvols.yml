@@ -1,0 +1,22 @@
+#
+# remove logical volumes that comprise the iteration:
+# - cidata (for cloud-config, thin volume)
+# - vmroot (the kvm image itself, thin snapshot)
+#
+# (only if they exist)
+#
+---
+
+- name: remove_cloud_image_snap
+  lvol:
+    lv: '{{lvname_snap}}'
+    vg: '{{vmiterate_vgname}}'
+    state: absent
+    force: yes
+
+- name: delete_cidata_volume
+  lvol:
+    lv: '{{lvname_cidata}}'
+    vg: '{{vmiterate_vgname}}'
+    state: absent
+    force: yes

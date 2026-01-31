@@ -33,7 +33,7 @@
       set_fact:
         dnsroutecmd: >-
           {{postfix_dnsroute_bindir}}/{{postfix_dnsroute_name}}
-          {{postfix_dnsroute_line}}
+          {{postfix_dnsroute_line}} >/dev/null
 
     - name: install_gmail_relay_route_cron
       register: ret_cron

@@ -1,0 +1,36 @@
+#
+# creates ephemeral virtual machine
+#   - create thin snapshot of base image as defined in config
+#   - define vm using templatized libvirt xml
+#   - includes cidata drive for cloud-config
+#   - defines the domain using libvirt
+#   - now ready to run (with configured name and at hostname)
+---
+
+- name: create_cloud_image_thin_snapshot
+  lvol:
+    lv: '{{lvname_origin}}'
+    vg: '{{vmiterate_vgname}}'
+    snapshot: '{{lvname_snap}}'
+    state: present
+    active: true
+    opts: --setactivationskip n
+
+- local_action:
+    module: tempfile
+  become: false
+  register: r
+
+- local_action:
+    module: template
+    src: tmpl/virtimg.xml.j2
+    dest: '{{r.path}}'
+  become: false
+
+- name: define_virtual_machine
+  virt:
+    command: define
+    xml: "{{lookup('file', r.path)}}"
+    #
+    # restore this and remove local_actions, once #63940 fixed (new with 2.9)
+    #xml: "{{lookup('template', 'tmpl/virtimg.xml.j2')}}"

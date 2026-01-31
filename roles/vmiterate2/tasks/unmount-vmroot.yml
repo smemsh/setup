@@ -1,0 +1,43 @@
+#
+# unmounts the virtual machine root filesystem
+# removes any kpartx device mapping used to mount it
+# (only done if actually mounted and device exists)
+# (aborts on errors, ie filesystem in use)
+#
+---
+
+- name: test_vmroot_mounted
+  command: 'findmnt --source {{lvpath_fspart}}'
+  failed_when: false
+  changed_when: false
+  register: r
+
+- name: unmount_vmroot
+  command: 'umount {{lvpath_fspart}}'
+  when: r.rc == 0
+
+- name: get_lsblk_snapdata
+# TODO: get this from ansible_devices maybe instead?
+  command: 'lsblk -J {{lvpath_snap}}'
+  failed_when: false
+  changed_when: false
+  register: r
+
+- name: parse_lsblk_snapdata
+  set_fact:
+    lsblk_snap_data: '{{r.stdout | from_json()}}'
+  when: r.rc == 0
+
+- name: test_device_kpartx_mapped
+  set_fact:
+    rootfs_mounted: "{{(
+      (lsblk_snap_data.blockdevices.0.children is defined) and (
+        (lsblk_snap_data.blockdevices.0.children.0.name) ==
+        (lvpath_fspart | basename())
+      )
+    )}}"
+  when: r.rc == 0
+
+- name: delete_device_mappings
+  command: 'kpartx -dv {{lvpath_snap}}'
+  when: rootfs_mounted | default(false)

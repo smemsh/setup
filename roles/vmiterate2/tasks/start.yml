@@ -1,0 +1,16 @@
+#
+
+- name: start_virtual_machine
+  virt:
+    name: '{{vm_name}}'
+    command: start
+
+- name: wait_for_ssh_availability
+  wait_for:
+    host: '{{ip_fqdn}}'
+    delay: 20
+    sleep: 10
+    port: 22
+    search_regex: OpenSSH
+    state: started
+    timeout: 90

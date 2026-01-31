@@ -1,0 +1,14 @@
+<!--
+- switch bridge for the given macaddr
+- which we captured from domifaddr
+- this gets given to 'virsh update-device'
+- think of this really as "replace device" not update
+-  (todo: check if this is true in a later libvirt)
+-->
+
+<interface type='bridge'>
+    <mac address='{{macaddr}}'/>
+    <source bridge='{{hostvars[target].bridge}}'/>
+    <!-- if not it in the update xml, remakes with eg rtl8139 -->
+    <model type='virtio'/>
+</interface>

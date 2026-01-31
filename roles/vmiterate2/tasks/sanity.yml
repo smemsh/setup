@@ -1,0 +1,15 @@
+#
+# sanity checks
+#
+---
+
+- name: verify_host_extra
+  fail: ~
+  when: host is undefined
+
+# note: host_vars/foo has to be picked up manually via
+# add_hosts, it's lazy-loaded; this check revealed that fact
+#
+- name: verify_host_in_hostvars
+  fail: ~
+  when: hostvars[host] is undefined

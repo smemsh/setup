@@ -1,0 +1,6 @@
+
+#- name: pause_before_create
+#  pause: ~
+
+- import_tasks: create-cidata.yml
+- import_tasks: create-vm.yml

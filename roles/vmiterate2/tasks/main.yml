@@ -1,0 +1,78 @@
+#
+# vmiterate
+#   vm iteration: automates destroy, create, provision cycle
+#
+# desc:
+#   - provision $bakenode vm on terraform incus provider remote $bakehost
+#   - sets baketime=true, which provisions tf imgbake[$bakehost] resource
+#   - roles defined for $target are applied onto $bakenode
+#   
+#   - creates cloud-init cidata volume with meta-data and user-data
+#   - provisions vm using cloud-init to bootstrap for ansible
+#   - (complete the system configuration via ssh using another role)
+#
+# tested:
+#   - ubuntu22
+#
+# steps:
+#   - thin volume
+#   - virtual machine
+#   - reboots once (todo why? learned of it watching console)
+#   
+#   - network bootstrap
+#   - system locale
+#   - rsa hostkey
+#   - config superuser
+#   - ssh authkey
+#   - runlevel
+#   - host initialize
+#   - reboot
+#
+# todo:
+#   - split create and destroy (or, tags?)
+#   - enumerate assumptions / prerequisites
+#   - store second stage image for its own descendants
+#   - merge with imgbake, some of these are done there already
+#
+---
+
+# force loading of the host_vars for our target VM, normally
+# lazy loaded during setup module run, but this is not actually
+# a real host yet (that's our job) and setup won't have been run
+#
+- add_host: { hostname: '{{vm_name}}' }
+
+- import_tasks: sanity.yml
+
+#
+
+- include_tasks: destroy.yml
+  when:
+    (phase is not defined) or
+    (phase == 'destroy')
+
+- include_tasks: create.yml
+  when:
+    (phase is not defined) or
+    (phase == 'create')
+
+- include_tasks: start.yml
+  when:
+    (phase is not defined) or
+    (phase == 'start')
+
+#
+
+- include_tasks: deploy.yml
+  when: "((phase | default) == 'deploy')"
+
+#- include_role: host
+#    host_method: init
+#  when:
+#    (phase is not defined) or
+#    (phase == 'init')
+#
+#- include_tasks: reboot.yml
+#  when:
+#    (phase is not defined) or
+#    (phase == 'reboot')
