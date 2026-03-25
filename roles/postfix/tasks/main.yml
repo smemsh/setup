@@ -44,7 +44,7 @@
         minute: '*/{{postfix_dnsroute_interval | string}}'
         cron_file: '{{setup_prefix}}-smtproute'
 
-    - name: do_initial_dnsroute_run
+    - name: execute_dnsroute
       when: (ret_copy.changed | bool) or (ret_cron.changed | bool)
       command: '{{dnsroutecmd}}'
 
