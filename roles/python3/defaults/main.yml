@@ -2,22 +2,22 @@
 ---
 
 python3_major: 3
-python3_minor: 13
-python3_patch: 7
+python3_minor: 14
+python3_patch: 3
 python3_version: '{{python3_major}}.{{python3_minor}}.{{python3_patch}}'
 
-python3_sslver: 3.0.17
+python3_sslver: 3.0.19
 
 python3_dist_map:
-  14: [u22, static]   # trusty
-  16: [u22, static]
-  18: [u22, static]
-  20: [u22, static]
-  22: [u22, dynamic]
-  24: [u22, dynamic]
+  14: [u24, static]   # trusty
+  16: [u24, static]
+  18: [u24, static]
+  20: [u24, static]
+  22: [u24, dynamic]
+  24: [u24, dynamic]
 
-  7:  [u22, static]   # centos7
-  12: [u22, dynamic]  # debian bookworm
+  7:  [u24, static]   # centos7
+  12: [u24, dynamic]  # debian bookworm
 
 python3_distn: '{{python3_dist_map[ansible_distribution_major_version | int]}}'
 python3_osrel: '{{python3_distn[0]}}'
