@@ -26,7 +26,8 @@
   include_tasks:
     file: venv.yml
     apply:
-      become: false
+      # needed when run as root, as normally with 'init' but not 'update'
+      become_user: '{{cfgnode_username}}'
   vars:
     ansible_python_interpreter: '{{cfgnode_interpreter_bootstrap}}'
   when: cfgnode_mode in ['init', 'update']
