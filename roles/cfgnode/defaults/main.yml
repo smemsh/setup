@@ -30,4 +30,9 @@ cfgnode_pkglist:
   #
   - python3-apt
 
+  # we're now packaging our python using zstd, which isn't in a minimal image
+  # on u24, and just checked, not on early u26 candidates either (only gz/xz)
+  #
+  - zstd
+
 cfgnode_interpreter_bootstrap: /usr/local/bin/python3
