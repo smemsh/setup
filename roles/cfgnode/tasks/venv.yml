@@ -11,6 +11,21 @@
     name: '{{cfgnode_venv_root}}'
     state: directory
 
+- name: get_controller_pip_installed
+  delegate_to: localhost
+  connection: local
+  become: false
+  vars:
+    ansible_python_interpreter: "{{py3bin_setup}}"
+  pip_package_info:
+    #clients: '{{cfgnode_venv_root}}/bin/pip3'
+  register: ppkgs
+
+- name: set_pip_version_template_vars
+  set_fact:
+    ver_wheel: "{{ppkgs['packages']['pip']['wheel'][0]['version']}}"
+    ver_setuptools: "{{ppkgs['packages']['pip']['setuptools'][0]['version']}}"
+
 - name: template_requirements
   template:
     src: tmpl/requirements.txt.j2
