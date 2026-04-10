@@ -47,7 +47,7 @@
     # want to do that); see
     # https://docs.ansible.com/ansible/latest/user_guide/become.html#becoming-an-unprivileged-user
     #
-    - name: verify_setacl_invokable
+    - name: verify_setfacl_invokable
       command: which setfacl
       changed_when: false
 
