@@ -55,6 +55,10 @@
       command: which git
       changed_when: false
 
+    - name: verify_gpg_invokable
+      command: which gpg
+      changed_when: false
+
     - include_role:
         name: sysadmin
         public: true
