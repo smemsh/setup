@@ -3,10 +3,10 @@
 
 python3_major: 3
 python3_minor: 14
-python3_patch: 3
+python3_patch: 4
 python3_version: '{{python3_major}}.{{python3_minor}}.{{python3_patch}}'
 
-python3_sslver: 3.0.19
+python3_sslver: 3.5.5
 
 python3_dist_map:
   14: [u24, static]   # trusty
