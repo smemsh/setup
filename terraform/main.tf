@@ -228,6 +228,37 @@ resource "incus_profile" "nestpriv" {
   }
 }
 
+resource "incus_profile" "loopdevs" {
+  name        = "loopdevs"
+  for_each    = var.plexhosts
+  remote      = each.value
+  description = "has-loopdevs"
+
+  config = {
+    "security.syscalls.intercept.mount" = true
+    "security.syscalls.intercept.mount.allowed" = "ext4"
+  }
+
+  device {
+    name = "loopctl"
+    type = "unix-char"
+    properties = {
+      path = "/dev/loop-control"
+    }
+  }
+
+  dynamic "device" {
+    for_each = range(2)
+    content {
+      name = "loop${device.value}"
+      type = "unix-block"
+      properties = {
+        path = "/dev/loop${device.value}"
+      }
+    }
+  }
+}
+
 resource "incus_profile" "knode" {
   name        = "knode"
   for_each    = var.plexhosts
@@ -295,7 +326,7 @@ resource "incus_instance" "scytus" {
 resource "incus_instance" "tekius" {
   name        = "tekius"
   remote      = "vernius"
-  profiles    = ["default", "nestpriv", "protected"]
+  profiles    = ["default", "nestpriv", "protected", "loopdevs"]
   description = "distrobuild-host"
 
   device {
