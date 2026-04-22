@@ -35,7 +35,8 @@ ocidepots:
   - quay
 
 # assert versions of exes used to initialize the data plane
-version_helm: v3.19.3+g0707f56
+#version_helm: v3.19.3+g0707f56
+version_helm: v3.20.0+gb2e4314
 version_flux: 2.7.3
 version_cilium: v0.18.7
 version_helmdiff: v3.14.1
