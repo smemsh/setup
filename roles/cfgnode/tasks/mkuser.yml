@@ -3,7 +3,7 @@
 
 - name: install_cfmgmt_superuser_privs
   copy:
-    content: '%{{cfgnode_username}} ALL = (ALL:ALL) NOPASSWD: ALL'
+    content: "%{{cfgnode_username}} ALL = (ALL:ALL) NOPASSWD: ALL\n"
     dest: /etc/sudoers.d/10-sudoers-{{cfgnode_username}}
 
 # normally already done by cloud-init, but harmless to re-run
