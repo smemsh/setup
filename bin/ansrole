@@ -7,7 +7,7 @@
 #   ansrole [-n | --nofacts] [--syntax] [--step] \
 #           [-U | --unbecome] [[-B | --buser][=]<become-user>]
 #           [-C | --check] [-D | --diff] [-p | --prefix] \
-#           [-v | --verbose] ... \
+#           [-v | --verbose] \
 #           [[-k | --key][=]<ssh_keyfile>] \
 #           [[-u | --user][=]<remote_user>] \
 #           [[-f | --forks][=]<fork_limit>] \
