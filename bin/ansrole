@@ -8,6 +8,7 @@
 #           [-U | --unbecome] [[-B | --buser][=]<become-user>]
 #           [-C | --check] [-D | --diff] [-p | --prefix] \
 #           [-v | --verbose] \
+#           [[-l | --lxd][[=]<project>|default]] \
 #           [[-k | --key][=]<ssh_keyfile>] \
 #           [[-u | --user][=]<remote_user>] \
 #           [[-f | --forks][=]<fork_limit>] \
@@ -79,15 +80,20 @@ process_args ()
 	local ours mods flags opts invs exts helps
 	local chars longs
 	local name val
+
+	local lxd=community.general.incus
+	local prjvar=ansible_incus_project
+	local prjdflt=default
+
 	local -a pats=(); local i
 
 	# 1/3 header
 
 	# 2/3
-	ours=pnU mods=k:B:s: flags=DCv opts=u:f:c: invs=i: exts=e: helps=h
+	ours=l::pnU mods=k:B:s: flags=DCv opts=u:f:c: invs=i: exts=e: helps=h
 	chars=${ours}${mods}${flags}${opts}${invs}${exts}${helps}
 	longs=(
-	-l prefix,nofacts                           # ours
+	-l prefix,nofacts,lxd::                     # ours
 	-l syntax,key:,buser:,start:                # mods
 	-l step,diff,check,verbose                  # flags
 	-l user:,forks:,connection:                 # opts
@@ -100,6 +106,7 @@ process_args ()
 	while true; do case $1 in
 
 	# ours
+	(-l|--lxd) playopts+=(-c $lxd -e $prjvar=${2:-$prjdflt}); shift 2;;
 	(-p|--prefix) let prefix++; shift;;
 	(-n|--nofacts) dofacts=false; shift;;
 	(-U|--unbecome) become=false; shift;;
