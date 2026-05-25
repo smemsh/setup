@@ -124,3 +124,71 @@
       r_brtables.changed or
       false
     )
+
+- name: configure_kyber_on_plexhosts
+  when: systune_plex
+  block:
+
+    - name: persist_kyber_iosched_kmod
+      copy:
+        content: |
+          # {{ansible_managed}}
+          kyber-iosched
+        dest: /etc/modules-load.d/kyber.conf
+        # todo: this will not actually be permanent until initramfs update
+
+    - name: load_kyber_iosched_kmod
+      when: systune_now | bool
+      command: modprobe -v kyber-iosched
+      register: r
+      changed_when: >
+        (systune_now | bool)
+        and r.rc == 0
+        and (r.stdout_lines | length) > 0
+
+    - name: configure_kyber_on_nvme
+      copy:
+        content: "\
+          # {{ansible_managed}}\n\
+          ACTION==\"add|change\", \
+          KERNEL==\"nvme[0-9]*\", \
+          ENV{DEVTYPE}==\"disk\", \
+          ATTR{queue/rotational}==\"0\", \
+          ATTR{queue/scheduler}=\"kyber\"\n\
+        "
+        dest: /etc/udev/rules.d/10-nvme-kyber.rules
+      register: r
+
+    - name: maybe_reload_udev_rules
+      when: >
+        (systune_now | bool)
+        and r.changed
+      command: udevadm control --reload
+
+    - name: glob_existing_nvmes
+      when: systune_now | bool
+      shell: find /sys/block/ -maxdepth 1 -name 'nvme*' 2>/dev/null
+      register: r
+      changed_when: false
+      failed_when: false
+
+    - name: extract_nvme_device_names
+      when: systune_now | bool
+      set_fact:
+        nvmesysfiles: "{{
+          ((r.stdout_lines | length) == 0) |
+          ternary([], r.stdout | split | map('basename'))
+        }}"
+
+    - name: apply_to_existing_nvmes
+      when: (systune_now | bool) and ((nvmesysfiles | length) > 0)
+      shell: >-
+        sysfile={{'/sys/block/%s/queue/scheduler' | format(item)}};
+        grep -q kyber $sysfile || exit 1;
+        grep -Fq '[kyber]' $sysfile && exit 2;
+        echo kyber > $sysfile || exit 1;
+        grep -Fq '[kyber]' $sysfile && exit 0 || exit 1;
+      register: r
+      changed_when: r.rc == 0
+      failed_when: r.rc == 1
+      loop: "{{nvmesysfiles}}"

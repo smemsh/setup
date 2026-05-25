@@ -3,12 +3,18 @@
 # set the tunables after configuring them
 systune_now: false
 
+#
+systune_plex: "{{
+  ('plexhost' in group_names) or
+  false
+}}"
+
 # configure as bridge-router (pass L2 packets to iptables and forward L3)
 # (needed if hosting kubernetes nodes or pods)
 #
 systune_brouter: "{{
+  (systune_plex | bool) or
   ('brouter' in group_names) or
-  ('plexhost' in group_names) or
   false
 }}"
 
