@@ -15,7 +15,8 @@ systune_brouter: "{{
 # configure as a router (forward L3 packets)
 systune_router: "{{
   (systune_brouter | bool) or
-  ('router' in group_names)
+  ('router' in group_names) or
+  false
 }}"
 
 # we set some tunables in /sys, except for machines in this group
