@@ -38,4 +38,8 @@ cfgnode_pkglist:
   # needed to deposit files with copy module and become_user
   - acl
 
+  # needed to perform and verify git checkouts
+  - git
+  - gpg
+
 cfgnode_interpreter_bootstrap: /usr/local/bin/python3
