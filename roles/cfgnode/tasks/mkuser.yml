@@ -53,5 +53,4 @@
   include_role:
     name: skelfiles
   vars:
-    skelfiles_install_rsync: true
     skelfiles_user: '{{cfgnode_username}}'

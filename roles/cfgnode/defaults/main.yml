@@ -35,4 +35,7 @@ cfgnode_pkglist:
   #
   - zstd
 
+  # needed to deposit files with copy module and become_user
+  - acl
+
 cfgnode_interpreter_bootstrap: /usr/local/bin/python3
