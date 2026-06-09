@@ -38,8 +38,12 @@ ocidepots:
 #version_helm: v3.19.3+g0707f56
 version_helm: v3.20.0+gb2e4314
 version_flux: 2.7.3
+version_kine: v0.16.2
 version_cilium: v0.18.7
 version_helmdiff: v3.14.1
+
+# hashes of stuff we download by url
+checksum_kine: 'md5:cdc54423d70cf6cfc0c14eb8caacda05'
 
 # this is where we'll develop flux stuff for the moment TODO
 flux_branch: fluxtest

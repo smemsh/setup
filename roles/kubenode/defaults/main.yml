@@ -8,6 +8,9 @@ knode_repos:
   crio: download.opensuse.org/repositories/isv:/cri-o:/stable
   kubernetes: pkgs.k8s.io/core:/stable
 
+kine_url: |-
+  https://github.com/k3s-io/kine/releases/download/{{version_kine}}/kine-amd64
+
 knode_packages:
   - kubeadm
   - kubectl

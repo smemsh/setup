@@ -42,6 +42,13 @@
       dict(knode_packages | zip([none] * (knode_packages | length)))
     }}"
 
+- name: install_pegged_kine_release
+  get_url:
+    url: "{{kine_url}}"
+    dest: /usr/local/bin/kine
+    mode: '0755' # keep as string to avoid bugs
+    checksum: "{{checksum_kine}}"
+
 - name: run_systune_role_as_brouter
   include_role:
     name: systune
@@ -76,6 +83,33 @@
       [Install]
       WantedBy=sysinit.target
     dest: /etc/systemd/system/sysfs-headless.service
+    owner: root
+    mode: '0644' # keep as string to avoid bugs
+
+- name: systemd_kine_service_unit_file
+  copy:
+    content: |
+      #
+
+      [Unit]
+      Description=systemd-kine-etcd-sqlite-bridge
+      After=network.target
+      Before=kubelet.service
+      ConditionPathExists=/etc/kubernetes/admin.conf
+
+      [Service]
+      Type=simple
+      StateDirectory=kine
+      ExecStart=/usr/local/bin/kine \
+        --endpoint="sqlite:///var/lib/kine/kine.db" \
+        --listen-address="127.0.0.1:2379"
+      Restart=always
+      RestartSec=5
+      LimitNOFILE=infinity
+
+      [Install]
+      WantedBy=kubelet.service
+    dest: /etc/systemd/system/kine.service
     owner: root
     mode: '0644' # keep as string to avoid bugs
 

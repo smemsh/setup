@@ -42,6 +42,12 @@ write_files:
       ---
       ${tmpl_kubeattrs.apiver}
       kind: ClusterConfiguration
+      etcd:
+        # use this with kine
+        external:
+          endpoints:
+            - "http://127.0.0.1:2379"
+
       networking:
         podSubnet: ${format("10.%d.0.0/%d",
           split(".", tmpl_hostdata[tmpl_plexname])[2],

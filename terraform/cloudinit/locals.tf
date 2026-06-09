@@ -13,10 +13,10 @@ locals {
   kubeadms = {
     for node in var.nodemap : node.name =>
       var.is_knode[node.name] ? join(" ", [
-          "kubeadm",
-          var.is_kctl[node.name] ? "init" : "join",
-          "--config",
-          local.kubeattrs.admrc,
+          "kubeadm --config ${local.kubeattrs.admrc}",
+          var.is_kctl[node.name]
+            ? "init --ignore-preflight-errors=Port-2379,ExternalEtcdVersion"
+            : "join",
       ]) : null
   }
 }
