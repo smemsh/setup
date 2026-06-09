@@ -136,14 +136,18 @@
               #operator: {replicas: 2}
               operator: {replicas: 1}
 
+              # egress routing to masquerade cluster-originated traffic
+              egressGateway: {enabled: true}
+
               # enable full Layer 7 feature set
-              envoy: {enabled: true}
-              loadBalancer: {l7: {backend: envoy}}
+              #envoy: {enabled: true}  # TODO PERF commented out
+              envoy: {enabled: false}  # TODO PERF made false
+              ##loadBalancer: {l7: {backend: envoy}}  # TODO PERF commented out
 
               # features that use layer 7 functionality (envoy)
-              gatewayAPI: {enabled: true}
-              egressGateway: {enabled: true}
-              ingressController:  # pending status until MetalLB is active
+              #gatewayAPI: {enabled: true}
+              gatewayAPI: {enabled: false}  # TODO PERF
+              ingressController:
                 enabled: true
                 default: true
                 loadbalancerMode: dedicated
@@ -176,23 +180,31 @@
               #hubble:
               #  relay: {enabled: false}
               #  ui: {enabled: false}
-
               hubble:
+                enabled: false  # TODO PERF testing disabled for idle load
                 relay:
-                  enabled: '{{bootstrapped}}'
+                  enabled: '{{bootstrapped and false}}'  # TODO PERF
                 ui:
-                  enabled: '{{bootstrapped}}'
+                  enabled: '{{bootstrapped and false}}'  # TODO PERF
                   standalone:
                     # already have to manage other cilium values outside flux
                     enabled: false
                   frontend:
                     server:
                       ipv4:
-                        enabled: '{{bootstrapped}}'
+                        enabled: '{{bootstrapped and false}}'  # TODO PERF
                       ipv6:
                         enabled: false
                 prometheus:
-                  enabled: '{{bootstrapped}}'
+                  enabled: '{{bootstrapped and false}}'  # TODO PERF
+
+              # TODO PERF unnecessary on single host with virtual nodes (as in
+              # our lab environment), and generates a lot of overhead, but we
+              # should consider the real consequences...
+              #
+              endpointHealthChecking: {enabled: false}
+              healthChecking: false
+
               #
               #hubble:
               #  relay: {enabled: true}
