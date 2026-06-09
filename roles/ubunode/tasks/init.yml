@@ -33,6 +33,8 @@
     masked: true
     enabled: false
   with_items:
+    - systemd-rfkill.service
+    - systemd-rfkill.socket
     - systemd-timesyncd.service  # note: this means we need to setup ntpd
     - sys-subsystem-net-devices-eth0.device  # when ifupdown used, 90s hang
 
