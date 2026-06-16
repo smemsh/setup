@@ -196,8 +196,8 @@
     #  )
     #}}"
     path: /etc/apt/sources.list
-    regexp: http://.*\.ubuntu\.com/
-    replace: http://{{aptmirror}}/
+    regexp: https?://.*\.ubuntu\.com/
+    replace: https://{{aptmirror}}/
   when: aptmirror is defined and is_debdist
 
 # if we don't do this step, it only works if the image is recent,
