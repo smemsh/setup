@@ -30,7 +30,7 @@ sshport   = 22022
 
 # module.osimgs
 osvers = [
-  ["ubuntu", 22],
+  #["ubuntu", 22],
   ["ubuntu", 24],
 ]
 

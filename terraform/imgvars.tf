@@ -2,7 +2,8 @@
 
 locals {
 
-  virtypes = ["virtual-machine", "container"]
+  #virtypes = ["virtual-machine", "container"]
+  virtypes = ["container"]
   allimgs  = setproduct(var.osvers, local.virtypes)
 
   osimgstrs = {
