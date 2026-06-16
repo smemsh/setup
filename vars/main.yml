@@ -25,6 +25,6 @@ gcsurl_base:              https://storage.googleapis.com/pvn.files.smemsh.net
 
 ssh_port:                 22022
 
-aptmirror:                mirrors.xtom.com
+aptmirror:                mirror.tzulo.com
 
 ansible_managed:          ansible-managed
