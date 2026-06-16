@@ -16,6 +16,7 @@
     name: pkginst
   vars:
     pkginst_packages: '{{ubunode_packages}}'
+    pkginst_update: true
 
 - name: configure_timezone
   timezone:
