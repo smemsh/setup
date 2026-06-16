@@ -62,7 +62,7 @@
                   # we will only trigger gitrepo reconciliation manually
                   suspend: true
                   interval: 1024h
-                  url: https://github.com/{{setup_prefix}}/{{setup_username}}
+                  url: https://github.com/{{setup_prefix}}/{{setup_reponame}}
                   ref:
                     branch: '{{flux_branch}}'
 
