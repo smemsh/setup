@@ -17,11 +17,6 @@
       - pkginst_packages is defined
     quiet: true
 
-- name: update_apt_package_cache
-  apt:
-    update_cache: true
-  when: pkginst_update
-
 # todo: 2.6 has a dict2items, but could not figure out how to
 # use reject() or rejectattr() to filter on values in a dict.
 # using j2 to template the dict works ok (and is fast), but
@@ -47,7 +42,7 @@
 
 - name: install_packages
   apt:
-    update_cache: false
-    install_recommends: false
     name: '{{installs}}'
     policy_rc_d: '{{pkginst_onlypkgs | bool | ternary(101, omit)}}'
+    update_cache: '{{pkginst_update}}'
+    install_recommends: false
