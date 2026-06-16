@@ -54,6 +54,13 @@ write_files:
          #      value: "1000"  # default 100ms
          #    - name: election-timeout
          #      value: "5000"  # default 1000ms
+         #
+         # use this with etcd but then no longer crash-proof, since all our
+         # nodes are on a single host, this should be ok
+         #local:
+         #  extraArgs:
+         #    - name: "unsafe-no-fsync"
+         #      value: "true"
 
       networking:
         podSubnet: ${format("10.%d.0.0/%d",
