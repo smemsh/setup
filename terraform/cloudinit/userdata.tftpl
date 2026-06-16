@@ -47,7 +47,7 @@ write_files:
         external:
           endpoints:
             - "http://127.0.0.1:2379"
-         # use this for etcd
+         # reduce etcd write frequency and sync activity
          #local:
          #  extraArgs:
          #    - name: heartbeat-interval
