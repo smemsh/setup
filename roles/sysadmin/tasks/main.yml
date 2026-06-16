@@ -25,10 +25,11 @@
 - name: verify_sudoers_dir_include
   lineinfile:
     name: /etc/sudoers
-    line: '@includedir {{sudoers_dir}}'
+    state: absent
+    regexp: '^.includedir {{sudoers_dir | regex_escape}}'
   check_mode: true
   register: r
-  failed_when: (r is changed) or (r is failed)
+  failed_when: (r is not changed) or (r is failed)
 
 - name: verify_sudoers_dir_exists
   stat:
