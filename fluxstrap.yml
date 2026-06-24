@@ -59,9 +59,14 @@
                   name: flux-system
                   namespace: flux-system
                 spec:
-                  # we will only trigger gitrepo reconciliation manually
-                  suspend: true
-                  interval: 1024h
+                  # we only want to trigger reconciliation manually.  while
+                  # unsuspend triggers reconciliation, it's async, and thus
+                  # returns right away.  we would need unsuspend, reconcile,
+                  # suspend each time.  if instead we use an extreme timeout,
+                  # reconcile alone is both sufficient and synchronous.
+                  #
+                  suspend: false
+                  interval: 86400h
                   url: https://github.com/{{setup_prefix}}/{{setup_reponame}}
                   ref:
                     branch: '{{flux_branch}}'
@@ -72,7 +77,9 @@
                   name: flux-system
                   namespace: flux-system
                 spec:
-                  interval: 24h
+                  # for drift only; GitRepository change already triggers
+                  suspend: false
+                  interval: 86400h
                   prune: true
                   path: ./clusters/{{plexname}}
                   sourceRef:
