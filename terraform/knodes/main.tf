@@ -58,7 +58,8 @@ resource "incus_instance" "knode" {
 resource "terraform_data" "master" {
 
   # todo: for volatile.id, resubmit issue 326
-  input = local.is_slave ? var.master.mac_address : null
+  #input = local.is_slave ? var.master.mac_address : null
+  input = local.is_slave ? var.master : null
 
   # after deleting a slave node, using either of these expressions results in:
   # no change found for terraform_data.master in module.kubemasters[<plexhost>]

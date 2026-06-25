@@ -9,5 +9,6 @@ output "master" {
   # works with one() because of behavior of splat operator on an object:
   # https://developer.hashicorp.com/terraform/language/expressions/splat#single-values-as-lists
   #
-  value = var.master == null ? one(values(one(incus_instance.knode[*]))) : null
+  #value = var.master == null ? one(values(one(incus_instance.knode[*]))) : null
+  value = var.master == null ? terraform_data.master.id : null
 }
