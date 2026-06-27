@@ -24,6 +24,17 @@
         ansible_python_interpreter: "{{py3bin_setup}}"
       block:
 
+        - name: check_installed_sops_version
+          shell:
+            cmd: >
+              [[ "$(type -p sops)" ]]
+              && : $(sops --version |& head -1 | awk '{print $2}')
+              && echo $_
+            executable: /bin/bash
+          register: r
+          failed_when: (r.rc != 0) or (r.stdout.strip() != version_sops)
+          changed_when: false
+
         - name: check_installed_flux_version
           shell:
             cmd: '[[ "$(type -p flux)" ]] && : $(flux --version) && echo $_'
@@ -31,6 +42,61 @@
           register: r
           failed_when: (r.rc != 0) or (r.stdout.strip() != version_flux)
           changed_when: false
+
+        # flux secret needs to pre-exist flux, but must be in flux-system
+        - name: precreate_flux_namespace
+          kubernetes.core.k8s:
+            kubeconfig: '{{kubeconfig}}'
+            definition:
+              - apiVersion: v1
+                kind: Namespace
+                metadata:
+                  name: flux-system
+
+        # todo: pass an arg that runs this and stashes keys anew rather than
+        # echos the keydir.  maybe we don't need to stash it in git at all,
+        # just make each one essentially random at cluster create-time.  until
+        # we do that, in the meantime, we put the private key in crypt/ with
+        # symlink, and pubkey in keys/, so each iteration of the clusters will
+        # have the same key.  but here is how to do it:
+        #
+        - name: todo_reinstantiate_sops
+          when: false  # todo
+          shell:
+            cmd: >
+              :
+              && homedir=`mktemp -d`
+              && email=sops@omniplex.smemsh.net
+              && fpropts="--list-options show-only-fpr-mbox --list-keys"
+              && gcmd () { gpg --quiet --homedir=$homedir "$@"; }
+              && gsfpr () { gcmd $fpropts $email "$@" | awk '{print $1}'; }
+              && gsops () { gcmd --batch --passphrase '' $1 $(gsfpr) ${@:2}; }
+              && gsops --quick-generate-key $email rsa4096 default never
+              && gsops --quick-add-key rsa4096 encrypt never
+              && gcmd --export --armor > $homedir/sops-public.asc
+              && gcmd --export-secret-keys --armor > $homedir/sops-private.asc
+              && tmpdir=`mktemp -d`
+              && mv $homedir/sops-* $tmpdir/
+              && rm -rf $homedir
+              && echo $tmpdir
+            executable: /bin/bash
+
+        - name: bootstrap_flux_sops_secret
+          kubernetes.core.k8s:
+            kubeconfig: '{{kubeconfig}}'
+            definition:
+              - apiVersion: v1
+                kind: Secret
+                metadata:
+                  name: sops-gpg
+                  namespace: flux-system
+                type: Opaque
+                stringData:
+                  sops.asc: "{{
+                    lookup(
+                      'file',
+                      '%s/keys/kube/sops@%s.%s-private.asc' % (
+                        playbook_dir, plexname, domain))}}"
 
         # this will generate with whatever version 'flux' binary is
         # installed in PATH (we gated the version value earlier).

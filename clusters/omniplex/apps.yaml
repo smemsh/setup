@@ -15,3 +15,8 @@ spec:
   prune: true
   dependsOn:
     - name: infra
+  postBuild:
+    substituteFrom:
+      - kind: Secret
+        name: cluster-secrets-decrypted
+        optional: true

@@ -39,6 +39,7 @@ ocidepots:
 version_helm: v3.20.0+gb2e4314
 version_flux: 2.7.3
 version_kine: v0.16.2
+version_sops: 3.13.1
 version_cilium: v0.18.7
 version_helmdiff: v3.14.1
 
