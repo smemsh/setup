@@ -1,0 +1,11 @@
+#
+---
+
+apiVersion: cilium.io/v2alpha1
+kind: CiliumLoadBalancerIPPool
+metadata:
+  name: omniplex-lb-pool
+spec:
+  allowFirstLastIPs: Yes
+  blocks:
+    - cidr: ${LBPOOL:=127.0.0.0/8}
