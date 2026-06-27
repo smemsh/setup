@@ -15,6 +15,7 @@
 /.terminfo
 /.rnd
 /.kube
+/.local
 
 tags
 
