@@ -8,4 +8,4 @@ metadata:
 spec:
   allowFirstLastIPs: Yes
   blocks:
-    - cidr: ${LBPOOL:=127.0.0.0/8}
+    - cidr: ${LBPOOL}
