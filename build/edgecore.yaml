@@ -1,0 +1,21 @@
+#
+---
+
+apiVersion: edgecore.config.kubeedge.io/v1alpha2
+kind: EdgeCore
+modules:
+  edgeHub:
+    httpServer: https://10.20.30.1:10002
+    websocket:
+      enable: true
+      server: 10.20.30.1:10000
+    token: "7f4e087d6b1e8162ccd09b226cc08ccc435f5524efb765a9fd86f304e652d1f7.eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3ODIxNzIzMzV9.0VENQ6Xy-o-B0TIZ9smL6AwZ2R018VRCdJohrTO5IGY"
+  edged:
+    enable: true
+    tailoredKubeletConfig:
+      containerRuntimeEndpoint: unix:///run/crio/crio.sock
+      imageServiceEndpoint: unix:///run/crio/crio.sock
+  eventBus:
+    enable: false
+  deviceTwin:
+    enable: false

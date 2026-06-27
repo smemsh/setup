@@ -1,0 +1,13 @@
+# kubeedge systemd
+
+[Unit]
+Description=edgecore.service
+After=network.target
+
+[Service]
+ExecStart=/opt/edgecore/bin/edgecore
+Restart=always
+RestartSec=10s
+
+[Install]
+WantedBy=multi-user.target
