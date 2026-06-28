@@ -395,25 +395,53 @@ resource "incus_instance" "plexocireg" {
   project  = incus_project.default[each.key].name
   remote   = each.key
   image    = incus_image.zot_oci[each.key].fingerprint
+
+  device {
+    name = "eth0"
+    type = "nic"
+    properties = {
+      name    = "eth0"
+      network = "br0"
+      "ipv4.gateway" = local.hostdb[local.gatebyplex[each.key]]
+      "ipv4.address" = format(
+        "%s/%d", local.hostdb["${local.gatebyplex[each.key]}-oci"], var.masklen)
+    }
+  }
+
   config = {
+    "oci.dns.nameservers" = join(",", var.resolvers)
+    "oci.dns.domain" = var.domain
+
+    # prior to incus 7.2 we did it like the below, now it's natively
+    # implemented in device.properties.network.ipv4.{address,gateway} and
+    # config.oci.dns.{nameservers,domain}.  tradeoff being that we now need a
+    # device override (and all the knowledge that requires, like the bridge
+    # name "br0" which we hardcode here but shouldn't, and even the device
+    # type, it means we couldn't change it at the network level without
+    # changing it here) in the config here, possibly that's a bad deal, still
+    # thinking about it... below clearly a hack, but also works and requires
+    # no knowledge about network interfaces or names
+    #
+    #"raw.lxc" = <<-HERE
+    #  lxc.log.level = 1
+    #  lxc.net.0.ipv4.gateway = ${local.hostdb[local.gatebyplex[each.key]]}
+    #  lxc.net.0.ipv4.address = ${format("%s/%d",
+    #    local.hostdb["${local.gatebyplex[each.key]}-oci"], var.masklen
+    #  )}
+    #  #
+    #  # lxc.mount.entry has no way to subtract.
+    #  # todo: /var/lib/incus/containers/*/network/ files should not mount.
+    #  # this has something to do with incus forknet.
+    #  #
+    #  lxc.hook.mount = /bin/sh -c '${join("; ", concat(
+    #    ["root=$LXC_ROOTFS_MOUNT"],
+    #    ["umount -l $root/etc/resolv.conf"],
+    #    [for ns in var.resolvers :
+    #      "echo nameserver ${ns} >> $root/tmp/resolv.conf"],
+    #    ["mv $root/tmp/resolv.conf $root/etc/"],
+    #  ))}'
+
     "raw.lxc" = <<-HERE
-      lxc.log.level = 1
-      lxc.net.0.ipv4.gateway = ${local.hostdb[local.gatebyplex[each.key]]}
-      lxc.net.0.ipv4.address = ${format("%s/%d",
-        local.hostdb["${local.gatebyplex[each.key]}-oci"], var.masklen
-      )}
-      #
-      # lxc.mount.entry has no way to subtract.
-      # todo: /var/lib/incus/containers/*/network/ files should not mount.
-      # this has something to do with incus forknet.
-      #
-      lxc.hook.mount = /bin/sh -c '${join("; ", concat(
-        ["root=$LXC_ROOTFS_MOUNT"],
-        ["umount -l $root/etc/resolv.conf"],
-        [for ns in var.resolvers :
-          "echo nameserver ${ns} >> $root/tmp/resolv.conf"],
-        ["mv $root/tmp/resolv.conf $root/etc/"],
-      ))}'
       #
       # have to write the rcfile, upload into container is too late
       # (entrypoint already run), start hook has no shell tools,
