@@ -158,6 +158,7 @@ pkgtool:
 
   bsdextrautils:
   bc:
+  busybox-static:
   bzip2:
   curl:
   diffstat:
