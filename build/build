@@ -1,0 +1,37 @@
+#!/usr/bin/env bash
+
+set -ex
+buildname=${1:?}
+[[ ${PWD##*/} == build ]]
+
+# build in our generic /etc/kairos/config.yaml into the image
+podman build \
+	-t omniplex-oci:5000/$buildname:latest \
+	-f Containerfile.$buildname \
+;
+
+# publish to our local registry
+podman push omniplex-oci:5000/$buildname:latest
+
+# most development iterations don't need installer, just kairos-agent upgrade
+((BUILDISO)) || { true; exit; }
+
+# site-specific+persistent oem.yaml merged into installer /oem/90_custom.yaml
+# right now we are using to inject wifi creds from these ignored files which
+# will exist when the installer is run, they will get baked into installer
+#
+test -f ssid
+test -f psk
+export WIFI_PSK="$(<psk)"
+export WIFI_SSID="$(<ssid)"
+oemconfig=`mktemp --suffix=.yaml`
+envsubst < oem.yaml > $oemconfig
+podman run --network host --rm --privileged \
+	-v ~/src/setup/build:/build \
+	-v $oemconfig:/oem.yaml \
+	quay.io/kairos/auroraboot:latest \
+		build-iso \
+			--cloud-config /oem.yaml \
+			--output /build/out \
+			localhost:5000/$buildname:latest \
+;

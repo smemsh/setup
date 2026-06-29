@@ -1,0 +1,43 @@
+#cloud-config
+
+hostname: kairos-{{ trunc 8 .MachineID }}
+
+install:
+  device: /dev/sda
+  auto: true
+  force: true
+  reboot: true
+  no-format: false
+  grub_options:
+    extra_cmdline: net.ifnames=0 rd.cos.debugrw
+    #extra_cmdline: rd.neednet=1  # if needed in initramfs
+
+upgrade:
+  auto: true
+  force: false
+  reboot: true
+  no-format: true
+  grub_options:
+    extra_cmdline: net.ifnames=0 rd.cos.debugrw
+
+users:
+  - name: kairos
+    passwd: kairos
+    groups: [admin]
+
+stages:
+
+  #initramfs:
+
+  boot:
+    - systemctl:
+        enable:
+          - systemd-networkd.service
+          - systemd-resolved.service
+        start:
+          - systemd-networkd.service
+          - systemd-resolved.service
+
+  #network:
+  #rootfs:
+  #fs:

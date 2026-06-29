@@ -1,0 +1,37 @@
+#cloud-config
+
+stages:
+
+  initramfs:
+    - files:
+
+        - path: /etc/systemd/network/20-wlan0.network
+          permissions: 0644
+          owner: 0
+          group: 0
+          content: |
+            [Match]
+            Name=wlan0
+            [Network]
+            DHCP=ipv4
+            [DHCPv4]
+            RouteMetric=2048
+
+        - path: /etc/wpa_supplicant/wpa_supplicant-wlan0.conf
+          permissions: 0600
+          owner: 0
+          group: 0
+          content: |
+            ctrl_interface=DIR=/run/wpa_supplicant GROUP=netdev
+            update_config=1
+            network={
+                ssid="${WIFI_SSID}"
+                psk="${WIFI_PSK}"
+                priority=70
+            }
+
+    - systemctl:
+        enable:
+          - wpa_supplicant@wlan0.service
+        start:
+          - wpa_supplicant@wlan0.service

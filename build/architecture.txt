@@ -1,0 +1,61 @@
+from https://kairos.io/docs/architecture/cloud-init/#boot-stages
+
+	- bootloader (grub)
+	- kernel
+	+ rootfs ?
+	+ fs ?
+	- initrd
+	+ initramfs
+	+ boot
+	+ fs ?
+	- active (container image)
+	+ network
+	+ reconcile (5m after boot, then every hour)
+
+from https://kairos.io/docs/architecture/cloud-init/#stages-during-kairos-agent-operations-in-detail
+
+	- install
+		+ kairos-install.pre
+			- format device and create partitions
+			- mount partitions
+		+ before-install
+			- deploy active image
+		+ after-install-chroot
+			- install grub
+			- unmount active image
+			- deploy recovery image
+			- deploy passive image
+			- encrypt partitions
+		+ after-install
+			- reboot or poweroff
+		+ kairos-install.after
+
+	- upgrade
+			- mount state partition rw
+			- mount persistent partition rw
+			- format oem partition
+		+ before-reset
+			- deploy active/recovery image
+		+ after-upgrade-chroot
+			- install grub
+			- unmount active/recovery image
+			- A/B transition
+		+ after-upgrade
+			- reboot or poweroff
+		+ kairos-upgrade.after
+
+	- reset
+		+ kairos-reset.pre
+			- format state partition
+			- format persistent partition
+			- format oem partition
+		+ before-reset
+			- deploy active image
+			- install grub
+		+ after-reset-chroot
+			- unmount active image
+			- deploy recovery image
+			- deploy passive image
+		+ after-reset
+			- reboot or poweroff
+			- kairos-reset.after
