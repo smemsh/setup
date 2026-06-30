@@ -6,6 +6,7 @@ buildname=${1:?}
 
 # build in our generic /etc/kairos/config.yaml into the image
 podman build \
+	-v $PWD/../keys/kube/sops@omniplex.smemsh.net-private.asc:/sops-gpg.asc \
 	-t omniplex-oci:5000/$buildname:latest \
 	-f Containerfile.$buildname \
 ;
@@ -27,7 +28,7 @@ export WIFI_SSID="$(<ssid)"
 oemconfig=`mktemp --suffix=.yaml`
 envsubst < oem.yaml > $oemconfig
 podman run --network host --rm --privileged \
-	-v ~/src/setup/build:/build \
+	-v .:/build \
 	-v $oemconfig:/oem.yaml \
 	quay.io/kairos/auroraboot:latest \
 		build-iso \
