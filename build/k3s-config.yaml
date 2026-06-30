@@ -1,0 +1,19 @@
+#
+---
+
+# run with cri-o
+container-runtime-endpoint: "unix:///run/crio/crio.sock"
+
+# we use a fixed cni0 bridge
+disable-network-policy: true
+flannel-backend: none
+cluster-cidr: 10.85.0.0/16
+
+# let locally launched programs on the k3s node read kubeconfig
+write-kubeconfig-mode: "0644"
+
+# don't need any bells or whistles
+disable:
+  - traefik
+  - servicelb
+  - local-storage

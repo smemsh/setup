@@ -19,5 +19,3 @@ spec:
     substituteFrom:
       - kind: Secret
         name: lb-secrets
-      - kind: Secret
-        name: kubeedge-secrets

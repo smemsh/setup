@@ -8,6 +8,7 @@ install:
   force: true
   reboot: true
   no-format: false
+  state_size: 32768
   grub_options:
     extra_cmdline: net.ifnames=0 rd.cos.debugrw
     #extra_cmdline: rd.neednet=1  # if needed in initramfs

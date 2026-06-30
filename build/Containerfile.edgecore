@@ -1,0 +1,86 @@
+#
+
+FROM quay.io/kairos/kairos-init:latest AS kairos-init
+FROM ubuntu:24.04
+
+ARG VERSION=1.0.39
+
+ARG KE_VER=v1.23.0
+ARG KE_NAME=kubeedge-${KE_VER}-linux-amd64
+ARG KE_GITHUB=https://github.com/kubeedge/kubeedge
+ARG KE_DLPATH=${KE_GITHUB}/releases/download/${KE_VER}/${KE_NAME}.tar.gz
+
+ARG KVERSION=1.34
+ARG KEYDIR=/etc/apt/keyrings
+
+ARG HOST_K8S=pkgs.k8s.io
+ARG REPO_K8S=${HOST_K8S}/core:/stable
+ARG REPO_CRIO=download.opensuse.org/repositories/isv:/cri-o:/stable
+
+ARG PKG_ADM="telnet curl gpg locales language-pack-en bsdextrautils tmux"
+ARG PKG_WIFI="iw firmware-b43-installer wpasupplicant"
+ARG PKG_KNODE="kubeadm kubectl kubernetes-cni cri-o fuse-overlayfs skopeo"
+ARG PKG_MBRBOOT="grub-pc grub-pc-bin"
+
+# kairos-specific overlay handling is required
+COPY storage.conf /etc/containers/storage.conf
+
+# kairos cloud-config
+COPY config.yaml /etc/kairos/config.yaml
+
+# edge nodes will all use the same static cni0 10.85.0.0/16 bridge config
+COPY cnibridge.conf /etc/cni/net.d/100-crio-bridge.conf
+
+# merged with defaultconfig and rewritten in-place by edgecore once it starts
+COPY edgecore.yaml /etc/kubeedge/config/edgecore.yaml
+
+#
+COPY edgecore.service /etc/systemd/system/edgecore.service
+
+# uncomment only to override original -c from installer (which came from same
+# file, but with the version at installer creation time)
+#COPY oem.yaml /oem/95_wifi.yaml
+
+# pre-install packages to get and verify other packages
+RUN apt-get update \
+&& DEBIAN_FRONTEND=noninteractive apt-get install -qq -y ${PKG_ADM}
+
+# kubernetes repo and priority
+RUN /bin/bash -c "\
+mkdir -p /etc/apt/preferences.d \
+&& echo -e 'Package: *\nPin: origin ${HOST_K8S}\nPin-Priority: 1000' \
+   > /etc/apt/preferences.d/kubernetes \
+&& mkdir -p ${KEYDIR} \
+&& declare -A krepos=([crio]=${REPO_CRIO} [kubernetes]=${REPO_K8S}) \
+&& for item in \"\${!krepos[@]}\"; do \
+    url=\${krepos[\$item]}; \
+    curl -fsSL https://\$url:/v${KVERSION}/deb/Release.key \
+    | gpg --dearmor -o ${KEYDIR}/\${item}.gpg; \
+    echo deb \"[arch=amd64 signed-by=${KEYDIR}/\${item}.gpg]\" \
+        https://\$url:/v${KVERSION}/deb/ / \
+    > /etc/apt/sources.list.d/\${item}.list; \
+done"
+
+# operating system and kube package installations
+RUN apt-get update \
+&& DEBIAN_FRONTEND=noninteractive apt-get install -qq -y \
+   ${PKG_MBRBOOT} ${PKG_WIFI} ${PKG_KNODE} \
+&& rm -rf /var/lib/apt/lists/*
+
+# let there be containers
+RUN systemctl enable crio.service
+
+# kubeedge fetch + install
+RUN curl -L -o edgecore.tar.gz ${KE_DLPATH} \
+&& tar -zxvf edgecore.tar.gz \
+&& mkdir -p /opt/edgecore/bin \
+&& mv ${KE_NAME}/edge/edgecore /opt/edgecore/bin/ \
+&& chmod +x /opt/edgecore/bin/edgecore \
+&& rm -rf kubeedge* edgecore*
+
+# let there be workloads
+RUN systemctl enable edgecore.service
+
+# kairosify
+RUN --mount=type=bind,from=kairos-init,src=/kairos-init,dst=/kairos-init \
+/kairos-init --version "${VERSION}"
