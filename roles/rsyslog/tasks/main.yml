@@ -11,7 +11,7 @@
     ))}}"
   loop_control:
     loop_var: rcfile
-  with_fileglob: 'files/*'
+  with_fileglob: 'files/??-*'
   notify: rsyslog_handler_reload
 
 # we placed this here during cloudinit to make sure /var/log/messages has all
