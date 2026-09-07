@@ -38,6 +38,15 @@
     - systemd-timesyncd.service  # note: this means we need to setup ntpd
     - sys-subsystem-net-devices-eth0.device  # when ifupdown used, 90s hang
 
+# statically compiled glibc progs crash even with the nsswitch .sofiles
+# if systemd listed, see https://github.com/htop-dev/htop/issues/503
+#
+- name: stop_crashes_systemd_nsswitch
+  replace:
+    path: /etc/nsswitch.conf
+    regexp: "^(.*)\\s+systemd$"
+    replace: '\1'
+
 # irritating that so many services ship enabled to start, but maybe it
 # has to be that way for some considerations, better to get it
 # bootstrapped in some places that are hard like iscsi booting, people
