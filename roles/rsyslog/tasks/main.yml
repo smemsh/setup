@@ -14,6 +14,11 @@
   with_fileglob: 'files/??-*'
   notify: rsyslog_handler_reload
 
+- name: copy_logrotate_messages_cleanup
+  copy:
+    src: files/logrotate-messages.conf
+    dest: /etc/logrotate.d/messages
+
 # we placed this here during cloudinit to make sure /var/log/messages has all
 # messages written to it, but we'll replace that file with one from here that
 # doesn't call fdatasync(2)
