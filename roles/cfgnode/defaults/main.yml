@@ -12,7 +12,11 @@ cfgnode_shell:      /bin/bash
 cfgnode_comment:    ansible-{{cfmgmt_username}}-user
 cfgnode_venv_root:  /home/{{cfmgmt_username}}/venv
 
+# default mode of operation when not supplied
 cfgnode_mode:       update
+
+# whether we should NOT run the python3 role
+cfgnode_nopython:   false
 
 cfgnode_users:
   - '{{cfmgmt_username}}'

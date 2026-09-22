@@ -14,7 +14,8 @@
   include_tasks: py3inst.yml
   vars:
     ansible_python_interpreter: auto_silent
-  when: cfgnode_mode in ['init', 'update']
+  when:
+    cfgnode_mode in ['init', 'update'] and not (cfgnode_nopython | bool)
 
 - name: make_cfmgmt_user
   include_tasks: mkuser.yml
