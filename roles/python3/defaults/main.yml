@@ -15,6 +15,7 @@ python3_dist_map:
   20: [u24, static]
   22: [u24, dynamic]
   24: [u24, dynamic]
+  26: [u26, dynamic]
 
   7:  [u24, static]   # centos7
   12: [u24, dynamic]  # debian bookworm
