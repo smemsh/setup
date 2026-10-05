@@ -4,26 +4,28 @@
 
 Defaults                                                \
         ignore_dot,                                     \
-        shell_noargs,                                   \
-        mail_no_host,                                   \
-        mail_no_perms,                                  \
-        tty_tickets,                                    \
         !lecture,                                       \
-        !authenticate,                                  \
         !insults,                                       \
         !secure_path,                                   \
         !env_editor,                                    \
         !env_reset,                                     \
         !env_delete,                                    \
         !always_set_home,                               \
-        setenv,                                         \
-        umask=0022,                                     \
-        mailsub="[sudo][%h]",                           \
-        passprompt="password: ",                        \
-        verifypw=always,                                \
-        listpw=never,                                   \
-        logfile=/dev/null,                              \
-        root_sudo,                                      \
-        !stay_setuid                                    \
+
+# from sudo.ws but sudo.rs doesn't like
+#       !authenticate,                                  \
+#       setenv,                                         \
+#       root_sudo,                                      \
+#       !stay_setuid                                    \
+#       mail_no_host,                                   \
+#       mail_no_perms,                                  \
+#       tty_tickets,                                    \
+#       shell_noargs,                                   \
+#       umask=0022,                                     \
+#       mailsub="[sudo][%h]",                           \
+#       passprompt="password: ",                        \
+#       verifypw=always,                                \
+#       listpw=never,                                   \
+#       logfile=/dev/null,                              \
 
 root ALL = (ALL:ALL) NOPASSWD: ALL
