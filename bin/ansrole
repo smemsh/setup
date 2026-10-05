@@ -8,6 +8,7 @@
 #           [-U | --unbecome] [[-B | --buser][=]<become-user>] \
 #           [-C | --check] [-D | --diff] [-p | --prefix] \
 #           [-v | --verbose] \
+#           [[-P | --port][=]<portnum>] \
 #           [[-l | --lxd][[=]<project>|default]] \
 #           [[-k | --key][=]<ssh_keyfile>] \
 #           [[-u | --user][=]<remote_user>] \
@@ -90,13 +91,13 @@ process_args ()
 	# 1/3 header
 
 	# 2/3
-	ours=l::pnU mods=k:B:s: flags=DCv opts=u:f:c: invs=i: exts=e: helps=h
+	ours=l::pnU mods=k:B:s: flags=DCv opts=u:f:c:P: invs=i: exts=e: helps=h
 	chars=${ours}${mods}${flags}${opts}${invs}${exts}${helps}
 	longs=(
 	-l prefix,nofacts,lxd::                     # ours
 	-l syntax,key:,buser:,start:                # mods
 	-l step,diff,check,verbose                  # flags
-	-l user:,forks:,connection:                 # opts
+	-l user:,forks:,connection:,port:           # opts
 	-l inventory:                               # invs
 	-l extra:,extra-vars:                       # exts
 	-l help                                     # helps
@@ -127,6 +128,7 @@ process_args ()
 	(-u|--user) ;&
 	(-f|--forks) ;&
 	(-c|--connection) playopts+=($1 $2); shift 2;;
+	(-P|--port) extras+=(-e ansible_ssh_port=$2); shift 2;;
 
 	# invs: if user supplies the inventory, don't unselect pdsh_all_skip
 	(-i|--inventory) allnodes=all; playopts+=($1 $2); shift 2;;
