@@ -7,6 +7,8 @@ unset -f $(compgen -A function)
 unset $(compgen -A variable _)
 shopt -s cmdhist lithist extglob globstar histappend
 
+unset PS0 PROMPT_COMMAND
+
 export HISTFILE=~/.bash_history
 export HISTFILESIZE=
 export HISTSIZE=$HISTFILESIZE

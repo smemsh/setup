@@ -8,6 +8,8 @@ unset $(compgen -A variable _)
 shopt -s cmdhist lithist extglob globstar histappend
 set -o noclobber
 
+unset PS0 PROMPT_COMMAND
+
 export PS1='\n \$ '
 export LANG=en_US.UTF-8
 export MAILCHECK=
